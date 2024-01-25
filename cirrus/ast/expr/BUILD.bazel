@@ -1,0 +1,30 @@
+cc_library(
+    name = "expr",
+    srcs = [
+        "binary_operator.cpp",
+        "block.cpp",
+        "call.cpp",
+        "expression.cpp",
+        "identifier.cpp",
+        "if.cpp",
+        "integer.cpp",
+        "parenthesis.cpp",
+    ],
+    hdrs = [
+        "all.hpp",
+        "binary_operator.hpp",
+        "block.hpp",
+        "call.hpp",
+        "expression.hpp",
+        "identifier.hpp",
+        "if.hpp",
+        "integer.hpp",
+        "parenthesis.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/util",
+    ],
+)

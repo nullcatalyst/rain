@@ -1,0 +1,55 @@
+common                  --enable_platform_specific_config
+build                   --enable_runfiles=yes
+run                     --enable_runfiles=yes
+test                    --test_output=all
+
+# Windows
+build:windows           --define platform=windows
+build:windows           --cxxopt=/std:c++20
+build:windows           --action_env=BAZEL_CXXOPTS=/std:c++20
+build:windows           --cxxopt=/GL        # Whole program optimization
+build:windows           --linkopt=/LTCG     # Link-time code generation
+
+build:host_windows      --host_cxxopt=/std:c++20
+
+# MacOS
+build:macos             --define platform=macos
+build:macos             --config=posix
+
+build:host_macos        --config=host_posix
+
+# iOS
+build:ios               --define platform=ios
+build:ios               --config=posix
+
+# Linux
+build:linux             --define platform=linux
+build:linux             --config=posix
+
+# WebAssembly
+build:wasm              --define platform=wasm
+build:wasm              --crosstool_top=@wasm_toolchain//:toolchain
+build:wasm              --cpu=wasm32
+build:wasm              --define embed=all
+build:wasm              --define gpu_backend=web
+build:wasm              --config=posix
+
+# POSIX
+build:posix             --cxxopt=-std=c++20
+build:posix             --cxxopt=-fno-rtti
+build:posix             --cxxopt=-fno-exceptions
+build:posix             --action_env=BAZEL_CXXOPTS=-std=c++20
+build:posix             --linkopt=-flto     # Link-time optimizations
+
+build:host_posix        --host_cxxopt=-std=c++20
+
+# Turn off legacy external runfiles on all platforms except Windows
+# This prevents accidentally dependening on this feature, which Bazel will remove
+# Skylib's diff_test implementation for Windows depends on legacy external
+# runfiles so we cannot disable it fully
+build:posix             --nolegacy_external_runfiles
+
+# Import a user-specific bazel config file
+# This can be used to automatically use configurations --config=host_posix or
+# --config=host_windows
+try-import              .bazelrc.user

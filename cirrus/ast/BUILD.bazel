@@ -1,0 +1,11 @@
+cc_library(
+    name = "ast",
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/ast/expr",
+        "//cirrus/ast/type",
+        "//cirrus/util",
+    ],
+)

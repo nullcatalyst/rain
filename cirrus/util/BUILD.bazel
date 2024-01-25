@@ -1,0 +1,14 @@
+cc_library(
+    name = "util",
+    srcs = [
+        "retain.cpp",
+    ],
+    hdrs = [
+        "ptr.hpp",
+        "result.hpp",
+        "retain.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+)

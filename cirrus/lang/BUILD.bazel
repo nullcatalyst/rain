@@ -1,0 +1,32 @@
+cc_library(
+    name = "lang",
+    srcs = [
+        "lexer.cpp",
+        "parser.cpp",
+    ],
+    hdrs = [
+        "lexer.hpp",
+        "lexer_util.hpp",
+        "location.hpp",
+        "parser.hpp",
+        "token.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/ast",
+    ],
+)
+
+cc_test(
+    name = "lang-test",
+    srcs = [
+        "lexer.test.cpp",
+        "parser.test.cpp",
+    ],
+    deps = [
+        ":lang",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

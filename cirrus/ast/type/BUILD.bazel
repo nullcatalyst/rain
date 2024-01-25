@@ -1,0 +1,20 @@
+cc_library(
+    name = "type",
+    srcs = [
+        "struct.cpp",
+        "type.cpp",
+        "unresolved.cpp",
+    ],
+    hdrs = [
+        "all.hpp",
+        "struct.hpp",
+        "type.hpp",
+        "unresolved.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/util",
+    ],
+)

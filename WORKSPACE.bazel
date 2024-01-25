@@ -1,0 +1,54 @@
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+################################
+####       Utilities        ####
+################################
+
+#### Skylib ####
+# Skylib needs to be first, ahead of other dependencies that might try to include their own version
+# This forces those dependencies to use the version that we supply instead
+_SKYLIB_VERSION = "1.5.0"
+
+http_archive(
+    name = "bazel_skylib",
+    # sha256 = "710c2ca4b4d46250cdce2bf8f5aa76ea1f0cba514ab368f2988f70e864cfaf51",
+    strip_prefix = "bazel-skylib-{version}".format(version = _SKYLIB_VERSION),
+    url = "https://github.com/bazelbuild/bazel-skylib/archive/refs/tags/{version}.tar.gz".format(version = _SKYLIB_VERSION),
+)
+
+################################
+####       Libraries        ####
+################################
+
+#### Abseil ####
+
+_ABSEIL_VERSION = "20230802.1"
+
+http_archive(
+    name = "com_google_absl",
+    # sha256 = "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4",
+    strip_prefix = "abseil-cpp-{version}".format(version = _ABSEIL_VERSION),
+    url = "https://github.com/abseil/abseil-cpp/archive/refs/tags/{version}.tar.gz".format(version = _ABSEIL_VERSION),
+)
+
+#### RE2 #####
+
+_RE2_VERSION = "2023-11-01"
+
+http_archive(
+    name = "com_googlesource_code_re2",
+    # sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
+    strip_prefix = "re2-{version}".format(version = _RE2_VERSION),
+    url = "https://github.com/google/re2/archive/refs/tags/{version}.tar.gz".format(version = _RE2_VERSION),
+)
+
+#### Google Test ####
+
+_GTEST_VERSION = "1.14.0"
+
+http_archive(
+    name = "com_google_googletest",
+    sha256 = "8ad598c73ad796e0d8280b082cebd82a630d73e73cd3c70057938a6501bba5d7",
+    strip_prefix = "googletest-{version}".format(version = _GTEST_VERSION),
+    url = "https://github.com/google/googletest/archive/refs/tags/v{version}.tar.gz".format(version = _GTEST_VERSION),
+)
