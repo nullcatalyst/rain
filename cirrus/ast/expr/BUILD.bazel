@@ -5,9 +5,11 @@ cc_library(
         "block.cpp",
         "call.cpp",
         "expression.cpp",
+        "function.cpp",
         "identifier.cpp",
         "if.cpp",
         "integer.cpp",
+        "member.cpp",
         "parenthesis.cpp",
     ],
     hdrs = [
@@ -16,15 +18,19 @@ cc_library(
         "block.hpp",
         "call.hpp",
         "expression.hpp",
+        "function.hpp",
         "identifier.hpp",
         "if.hpp",
         "integer.hpp",
+        "member.hpp",
         "parenthesis.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",
     ],
     deps = [
+        "//cirrus/ast:node",
+        "//cirrus/ast/type",
         "//cirrus/util",
     ],
 )

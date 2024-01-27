@@ -8,16 +8,13 @@
 using namespace cirrus;
 using namespace cirrus::lang;
 
-TEST(Parser, parse_struct) {
+TEST(Parser, parse_struct_good) {
     {
         // Empty struct
         Lexer      lexer("struct Foo { }");
         Parser     parser;
         const auto result = parser.parse_type(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto type = result.unwrap();
         ASSERT_EQ(ast::StructType::is(type), true);
@@ -32,10 +29,7 @@ TEST(Parser, parse_struct) {
         Lexer      lexer("struct { }");
         Parser     parser;
         const auto result = parser.parse_type(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto type = result.unwrap();
         ASSERT_EQ(ast::StructType::is(result.unwrap()), true);
@@ -50,10 +44,7 @@ TEST(Parser, parse_struct) {
         Lexer      lexer("struct Foo {\n    bar: i32;\n}\n");
         Parser     parser;
         const auto result = parser.parse_type(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto type = result.unwrap();
         ASSERT_EQ(ast::StructType::is(type), true);
@@ -67,14 +58,53 @@ TEST(Parser, parse_struct) {
     }
 }
 
-TEST(Parser, parse_integer) {
+TEST(Parser, parse_struct_bad) {
+    {
+        // Missing closing brace
+        Lexer      lexer("struct Foo {");
+        Parser     parser;
+        const auto result = parser.parse_type(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+
+    {
+        // Missing field ending semicolon
+        Lexer      lexer("struct Foo { x: I32 }");
+        Parser     parser;
+        const auto result = parser.parse_type(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+
+    {
+        // Missing field ending semicolon
+        Lexer      lexer("struct Foo { x:; }");
+        Parser     parser;
+        const auto result = parser.parse_type(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+
+    {
+        // Missing field separating colon
+        Lexer      lexer("struct Foo { x I32; }");
+        Parser     parser;
+        const auto result = parser.parse_type(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+
+    {
+        // Only field name
+        Lexer      lexer("struct Foo { x }");
+        Parser     parser;
+        const auto result = parser.parse_type(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+}
+
+TEST(Parser, parse_integer_good) {
     Lexer      lexer("123");
     Parser     parser;
     const auto result = parser.parse_expression(lexer);
-    if (result.is_error()) {
-        std::cerr << result.unwrap_error()->message() << std::endl;
-        ASSERT_EQ(result.is_ok(), true);
-    }
+    ASSERT_NOT_ERROR(result);
 
     const auto expr = result.unwrap();
     ASSERT_EQ(ast::IntegerExpression::is(expr), true);
@@ -83,14 +113,11 @@ TEST(Parser, parse_integer) {
     EXPECT_EQ(int_expr.value(), 123);
 }
 
-TEST(Parser, parse_identifier) {
+TEST(Parser, parse_identifier_good) {
     Lexer      lexer("hello");
     Parser     parser;
     const auto result = parser.parse_expression(lexer);
-    if (result.is_error()) {
-        std::cerr << result.unwrap_error()->message() << std::endl;
-        ASSERT_EQ(result.is_ok(), true);
-    }
+    ASSERT_NOT_ERROR(result);
 
     const auto expr = result.unwrap();
     ASSERT_EQ(ast::IdentifierExpression::is(expr), true);
@@ -99,14 +126,11 @@ TEST(Parser, parse_identifier) {
     EXPECT_EQ(iden_expr.name(), "hello");
 }
 
-TEST(Parser, parse_parenthesis) {
+TEST(Parser, parse_parenthesis_good) {
     Lexer      lexer("(hello)");
     Parser     parser;
     const auto result = parser.parse_expression(lexer);
-    if (result.is_error()) {
-        std::cerr << result.unwrap_error()->message() << std::endl;
-        ASSERT_EQ(result.is_ok(), true);
-    }
+    ASSERT_NOT_ERROR(result);
 
     const auto expr = result.unwrap();
     ASSERT_EQ(ast::ParenthesisExpression::is(expr), true);
@@ -115,14 +139,46 @@ TEST(Parser, parse_parenthesis) {
     // EXPECT_EQ(paren_expr.name(), "hello");
 }
 
-TEST(Parser, parse_binary_operator) {
+TEST(Parser, parse_member_good) {
+    {
+        // Single member
+        Lexer      lexer("hello.world");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::MemberExpression::is(expr), true);
+    }
+
+    {
+        // Nested member
+        Lexer      lexer("hello.world.foo");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::MemberExpression::is(expr), true);
+    }
+
+    {
+        // Member with arguments
+        Lexer      lexer("hello(4).world");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::MemberExpression::is(expr), true);
+    }
+}
+
+TEST(Parser, parse_binary_operator_good) {
     Lexer      lexer("1 + 1");
     Parser     parser;
     const auto result = parser.parse_expression(lexer);
-    if (result.is_error()) {
-        std::cerr << result.unwrap_error()->message() << std::endl;
-        ASSERT_EQ(result.is_ok(), true);
-    }
+    ASSERT_NOT_ERROR(result);
 
     const auto expr = result.unwrap();
     ASSERT_EQ(ast::BinaryOperatorExpression::is(expr), true);
@@ -131,16 +187,13 @@ TEST(Parser, parse_binary_operator) {
     // EXPECT_EQ(paren_expr.name(), "hello");
 }
 
-TEST(Parser, parse_call) {
+TEST(Parser, parse_call_good) {
     {
         // No arguments
         Lexer      lexer("callMe()");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::CallExpression::is(expr), true);
@@ -154,10 +207,7 @@ TEST(Parser, parse_call) {
         Lexer      lexer("callMe(1)");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::CallExpression::is(expr), true);
@@ -171,10 +221,7 @@ TEST(Parser, parse_call) {
         Lexer      lexer("callMe(1, 2, 3)");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::CallExpression::is(expr), true);
@@ -188,10 +235,7 @@ TEST(Parser, parse_call) {
         Lexer      lexer("callMe(1, 2, 3, )");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::CallExpression::is(expr), true);
@@ -200,6 +244,22 @@ TEST(Parser, parse_call) {
         EXPECT_EQ(call_expr.arguments().size(), 3);
     }
 
+    {
+        // Call a member function
+        Lexer      lexer("hello.callMe(1, 2, 3)");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::CallExpression::is(expr), true);
+
+        const auto call_expr = ast::CallExpression::from(expr);
+        EXPECT_EQ(call_expr.arguments().size(), 3);
+    }
+}
+
+TEST(Parser, parse_call_bad) {
     {
         // Missing closing parenthesis
         Lexer      lexer("callMe(1, 2, 3");
@@ -215,6 +275,22 @@ TEST(Parser, parse_call) {
         const auto result = parser.parse_expression(lexer);
         ASSERT_EQ(result.is_error(), true);
     }
+
+    {
+        // Missing separating comma
+        Lexer      lexer("callMe(1 2)");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
+
+    {
+        // Duplicated comma
+        Lexer      lexer("callMe(1,, 2)");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_EQ(result.is_error(), true);
+    }
 }
 
 TEST(Parser, parse_block) {
@@ -223,10 +299,7 @@ TEST(Parser, parse_block) {
         Lexer      lexer("{ }");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::BlockExpression::is(expr), true);
@@ -240,10 +313,7 @@ TEST(Parser, parse_block) {
         Lexer      lexer("{ 1 }");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::BlockExpression::is(expr), true);
@@ -257,10 +327,7 @@ TEST(Parser, parse_block) {
         Lexer      lexer("{ 1 2 3 }");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::BlockExpression::is(expr), true);
@@ -278,16 +345,13 @@ TEST(Parser, parse_block) {
     }
 }
 
-TEST(Parser, parse_if) {
+TEST(Parser, parse_if_good) {
     {
         // Without else
         Lexer      lexer("if 0 { 1 }");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::IfExpression::is(expr), true);
@@ -301,15 +365,84 @@ TEST(Parser, parse_if) {
         Lexer      lexer("if 0 { 1 } else { 2 }");
         Parser     parser;
         const auto result = parser.parse_expression(lexer);
-        if (result.is_error()) {
-            std::cerr << result.unwrap_error()->message() << std::endl;
-            ASSERT_EQ(result.is_ok(), true);
-        }
+        ASSERT_NOT_ERROR(result);
 
         const auto expr = result.unwrap();
         ASSERT_EQ(ast::IfExpression::is(expr), true);
 
         const auto if_expr = ast::IfExpression::from(expr);
         // EXPECT_EQ(if_expr.expressions().size(), 1);
+    }
+}
+
+TEST(Parser, parse_function_good) {
+    {
+        // No name, no arguments, no return type, no body
+        Lexer      lexer("fn() {}");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::FunctionExpression::is(expr), true);
+
+        const auto fn_expr = ast::FunctionExpression::from(expr);
+        EXPECT_EQ(fn_expr.expressions().size(), 0);
+    }
+
+    {
+        // No name, no arguments, no return type, with body
+        Lexer      lexer("fn() { 1 }");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::FunctionExpression::is(expr), true);
+
+        const auto fn_expr = ast::FunctionExpression::from(expr);
+        EXPECT_EQ(fn_expr.expressions().size(), 1);
+    }
+
+    {
+        // No name, no arguments, with return type, with body
+        Lexer      lexer("fn() -> i32 { 1 }");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::FunctionExpression::is(expr), true);
+
+        const auto fn_expr = ast::FunctionExpression::from(expr);
+        EXPECT_EQ(fn_expr.expressions().size(), 1);
+    }
+
+    {
+        // No name, with arguments, with return type, with body
+        Lexer      lexer("fn(x: i32, y: i32) -> i32 { 1 }");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::FunctionExpression::is(expr), true);
+
+        const auto fn_expr = ast::FunctionExpression::from(expr);
+        EXPECT_EQ(fn_expr.expressions().size(), 1);
+    }
+
+    {
+        // With name, with arguments, with return type, with body
+        Lexer      lexer("fn foo(x: i32, y: i32) -> i32 { 1 }");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::FunctionExpression::is(expr), true);
+
+        const auto fn_expr = ast::FunctionExpression::from(expr);
+        EXPECT_EQ(fn_expr.expressions().size(), 1);
     }
 }

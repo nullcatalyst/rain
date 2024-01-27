@@ -3,3 +3,6 @@
 
 # macOS
 .DS_Store
+
+# Third Party
+/third_party/llvm

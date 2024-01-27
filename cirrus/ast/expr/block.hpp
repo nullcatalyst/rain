@@ -21,6 +21,9 @@ struct BlockExpression : public IExpression<BlockExpression, ExpressionVtbl, Blo
     [[nodiscard]] constexpr const std::vector<Expression>& expressions() const noexcept {
         return _data->expressions;
     }
+    [[nodiscard]] constexpr std::vector<Expression>& expressions() noexcept {
+        return _data->expressions;
+    }
 };
 
 }  // namespace cirrus::ast

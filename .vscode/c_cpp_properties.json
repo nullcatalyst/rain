@@ -4,6 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}",
+                "${workspaceFolder}/third_party/llvm/include",
+                "${workspaceFolder}/external/com_google_absl",
                 "${workspaceFolder}/external/com_google_googletest/googletest/include",
             ],
             "defines": [],

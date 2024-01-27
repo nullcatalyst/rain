@@ -1,5 +1,9 @@
-struct Vec3 {
-    x: F32;
-    y: F32;
-    z: F32;
+export struct Vec3 {
+    x: f32;
+    y: f32;
+    z: f32;
+}
+
+export fn Vec3.dot(this, other: Vec3) -> f32 {
+    return this.x * other.x + this.y * other.y + this.z * other.z;
 }

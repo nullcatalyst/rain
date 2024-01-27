@@ -7,7 +7,7 @@
 
 namespace cirrus::lang {
 
-enum TokenKind : uint8_t {
+enum TokenKind : uint32_t {
     Undefined,
     Eof,
 
@@ -25,6 +25,7 @@ enum TokenKind : uint8_t {
     While,
     For,
     Struct,
+    Fn,
 
     // Operators
     Hash,
@@ -32,19 +33,28 @@ enum TokenKind : uint8_t {
     Comma,
     Colon,
     Semicolon,
+    RArrow,
 
+    At,
+    Exclaim,
+    Ampersand,
+    Pipe,
+    Caret,
     Plus,
     Minus,
     Star,
     Slash,
     Percent,
+    LessThanLessThan,
+    GreaterThanGreaterThan,
 
-    // Equal,
-    // NotEqual,
-    // LessThan,
-    // LessThanOrEqual,
-    // GreaterThan,
-    // GreaterThanOrEqual,
+    Equal,
+    EqualEqual,
+    ExclaimEqual,
+    LessThan,
+    LessThanEqual,
+    GreaterThan,
+    GreaterThanEqual,
 
     LRoundBracket,
     RRoundBracket,

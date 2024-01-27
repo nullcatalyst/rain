@@ -74,8 +74,8 @@ struct Ptr {
     template <typename This2, typename Vtbl2, typename Data2>
     constexpr Ptr(const Ptr<This2, Vtbl2, Data2, MemMgr>& other) noexcept {
         // Allow implicitly casting to a base type, but not to an unrelated type
-        static_assert(std::is_base_of_v<Vtbl, Vtbl2>, "Cannot cast to unrelated Vtbl type");
-        static_assert(std::is_base_of_v<Data, Data2>, "Cannot cast to unrelated Data type");
+        static_assert(std::is_base_of_v<Vtbl, Vtbl2>, "cannot cast to unrelated vtbl type");
+        static_assert(std::is_base_of_v<Data, Data2>, "cannot cast to unrelated data type");
 
         _vtbl = static_cast<const Vtbl*>(other._vtbl);
         _data = static_cast<Data*>(other._data);
@@ -85,8 +85,8 @@ struct Ptr {
     template <typename This2, typename Vtbl2, typename Data2>
     constexpr Ptr(Ptr<This2, Vtbl2, Data2, MemMgr>&& other) noexcept {
         // Allow implicitly casting to a base type, but not to an unrelated type
-        static_assert(std::is_base_of_v<Vtbl, Vtbl2>, "Cannot cast to unrelated Vtbl type");
-        static_assert(std::is_base_of_v<Data, Data2>, "Cannot cast to unrelated Data type");
+        static_assert(std::is_base_of_v<Vtbl, Vtbl2>, "cannot cast to unrelated vtbl type");
+        static_assert(std::is_base_of_v<Data, Data2>, "cannot cast to unrelated data type");
 
         _vtbl       = static_cast<const Vtbl*>(other._vtbl);
         _data       = static_cast<Data*>(other._data);
@@ -104,8 +104,8 @@ struct Ptr {
     template <typename This2, typename Vtbl2, typename Data2, typename MemMgr2>
     static constexpr This from(const Ptr<This2, Vtbl2, Data2, MemMgr2>& other) noexcept {
         // Allow implicitly casting to a base type, but not to an unrelated type
-        static_assert(std::is_base_of_v<Vtbl2, Vtbl>, "Cannot cast to unrelated type");
-        static_assert(std::is_base_of_v<Data2, Data>, "Cannot cast to unrelated type");
+        static_assert(std::is_base_of_v<Vtbl2, Vtbl>, "cannot cast to unrelated type");
+        static_assert(std::is_base_of_v<Data2, Data>, "cannot cast to unrelated type");
 
         const auto vtbl = static_cast<const Vtbl*>(other._vtbl);
         const auto data = static_cast<Data*>(other._data);

@@ -11,7 +11,7 @@ _SKYLIB_VERSION = "1.5.0"
 
 http_archive(
     name = "bazel_skylib",
-    # sha256 = "710c2ca4b4d46250cdce2bf8f5aa76ea1f0cba514ab368f2988f70e864cfaf51",
+    sha256 = "118e313990135890ee4cc8504e32929844f9578804a1b2f571d69b1dd080cfb8",
     strip_prefix = "bazel-skylib-{version}".format(version = _SKYLIB_VERSION),
     url = "https://github.com/bazelbuild/bazel-skylib/archive/refs/tags/{version}.tar.gz".format(version = _SKYLIB_VERSION),
 )
@@ -26,7 +26,7 @@ _ABSEIL_VERSION = "20230802.1"
 
 http_archive(
     name = "com_google_absl",
-    # sha256 = "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4",
+    sha256 = "987ce98f02eefbaf930d6e38ab16aa05737234d7afbab2d5c4ea7adbe50c28ed",
     strip_prefix = "abseil-cpp-{version}".format(version = _ABSEIL_VERSION),
     url = "https://github.com/abseil/abseil-cpp/archive/refs/tags/{version}.tar.gz".format(version = _ABSEIL_VERSION),
 )

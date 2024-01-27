@@ -10,14 +10,16 @@ namespace cirrus::lang {
 
 namespace {
 
-constexpr std::array<std::tuple<std::string_view, TokenKind>, 5> KEYWORDS{
-    // Keep this sorted alphabetically
+constexpr std::array<std::tuple<std::string_view, TokenKind>, 6> KEYWORDS{
     // clang-format off
+    // <keep-sorted>
     std::make_tuple("else", TokenKind::Else),
     std::make_tuple("false", TokenKind::False),
+    std::make_tuple("fn", TokenKind::Fn),
     std::make_tuple("if", TokenKind::If),
     std::make_tuple("struct", TokenKind::Struct),
     std::make_tuple("true", TokenKind::True),
+    // </keep-sorted>
     // clang-format on
 };
 
@@ -42,11 +44,20 @@ constexpr std::array<TokenKind, 128> OPERATORS = []() {
     operators[':'] = TokenKind::Colon;
     operators[';'] = TokenKind::Semicolon;
 
+    operators['@'] = TokenKind::At;
+    operators['!'] = TokenKind::Exclaim;
+    operators['&'] = TokenKind::Ampersand;
+    operators['|'] = TokenKind::Pipe;
+    operators['^'] = TokenKind::Caret;
     operators['+'] = TokenKind::Plus;
     operators['-'] = TokenKind::Minus;
     operators['*'] = TokenKind::Star;
     operators['/'] = TokenKind::Slash;
     operators['%'] = TokenKind::Percent;
+
+    operators['='] = TokenKind::Equal;
+    operators['<'] = TokenKind::LessThan;
+    operators['>'] = TokenKind::GreaterThan;
 
     operators['('] = TokenKind::LRoundBracket;
     operators[')'] = TokenKind::RRoundBracket;
@@ -58,11 +69,63 @@ constexpr std::array<TokenKind, 128> OPERATORS = []() {
     return operators;
 }();
 
-TokenKind find_operator(const char* index) {
+std::tuple<TokenKind, int> find_operator(const char* index) {
     if (index == nullptr || *index < 0) [[unlikely]] {
-        return TokenKind::Undefined;
+        return std::tuple(TokenKind::Undefined, 0);
     }
-    return OPERATORS[static_cast<uint8_t>(*index)];
+
+    const auto op = OPERATORS[static_cast<uint8_t>(*index)];
+    switch (op) {
+        case TokenKind::Minus:
+            switch (*(index + 1)) {
+                case '>':
+                    return std::tuple(TokenKind::RArrow, 2);
+                default:
+                    break;
+            }
+            break;
+
+        case TokenKind::Equal:
+            switch (*(index + 1)) {
+                case '=':
+                    return std::tuple(TokenKind::EqualEqual, 2);
+                default:
+                    break;
+            }
+            break;
+
+        case TokenKind::Exclaim:
+            switch (*(index + 1)) {
+                case '=':
+                    return std::tuple(TokenKind::ExclaimEqual, 2);
+                default:
+                    break;
+            }
+
+        case TokenKind::LessThan:
+            switch (*(index + 1)) {
+                case '=':
+                    return std::tuple(TokenKind::LessThanEqual, 2);
+                case '<':
+                    return std::tuple(TokenKind::LessThanLessThan, 2);
+                default:
+                    break;
+            }
+
+        case TokenKind::GreaterThan:
+            switch (*(index + 1)) {
+                case '=':
+                    return std::tuple(TokenKind::GreaterThanEqual, 2);
+                case '>':
+                    return std::tuple(TokenKind::GreaterThanGreaterThan, 2);
+                default:
+                    break;
+            }
+
+        default:
+            break;
+    }
+    return std::tuple(op, 1);
 }
 
 std::tuple<const char* /*index*/, int /*line*/, int /*column*/> skip_whitespace(const char* index,

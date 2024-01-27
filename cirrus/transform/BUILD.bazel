@@ -1,0 +1,18 @@
+cc_library(
+    name = "codegen",
+    srcs = [
+        "codegen.cpp",
+    ],
+    hdrs = [
+        "codegen.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/ast",
+        "//cirrus/lang",
+        "//third_party/llvm",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)

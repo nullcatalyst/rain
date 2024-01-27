@@ -71,6 +71,16 @@
         "set": "cpp",
         "thread": "cpp",
         "unordered_set": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "*.inc": "cpp",
+        "future": "cpp",
+        "queue": "cpp",
+        "shared_mutex": "cpp",
+        "stack": "cpp",
+        "cfenv": "cpp",
+        "csignal": "cpp",
+        "scoped_allocator": "cpp",
+        "typeindex": "cpp",
+        "valarray": "cpp"
     }
 }

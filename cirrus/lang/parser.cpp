@@ -5,144 +5,36 @@
 
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
+#include "cirrus/err/all.hpp"
+#include "cirrus/util/colors.hpp"
 #include "cirrus/util/result.hpp"
 
 namespace cirrus::lang {
 
 namespace {
 
-#if 1
-constexpr std::string_view ANSI_RESET = "\033[0m";
-constexpr std::string_view ANSI_RED   = "\033[31m";
-constexpr std::string_view ANSI_GREEN = "\033[32m";
-constexpr std::string_view ANSI_BLUE  = "\033[34m";
-constexpr std::string_view ANSI_BOLD  = "\033[1m";
-#else
-constexpr std::string_view ANSI_RESET = "";
-constexpr std::string_view ANSI_RED   = "";
-constexpr std::string_view ANSI_GREEN = "";
-constexpr std::string_view ANSI_BLUE  = "";
-constexpr std::string_view ANSI_BOLD  = "";
-#endif
-
-class SyntaxError : public util::Error {
-    const Lexer& _lexer;
-    Location     _location;
-    std::string  _msg;
-
-  public:
-    SyntaxError(const Lexer& lexer, Location location, std::string msg)
-        : _lexer(lexer), _location(location), _msg(std::move(msg)) {}
-    ~SyntaxError() override = default;
-
-    [[nodiscard]] std::string message() const noexcept override {
-        std::stringstream ss;
-
-        ss << ANSI_BOLD << _lexer.file_name() << ':' << _location.line << ':' << _location.column
-           << ": " << ANSI_RED << "error: " << ANSI_RESET << ANSI_BOLD << _msg << ANSI_RESET
-           << '\n';
-        ss << _lexer.get_whole_line(_location).source << '\n';
-
-        for (int i = 0; i < _location.column - 1; ++i) {
-            ss << ' ';
-        }
-        ss << ANSI_GREEN << '^';
-        for (int i = 0; i < _location.source.size() - 1; ++i) {
-            ss << '~';
-        }
-        ss << ANSI_RESET << '\n';
-
-        return ss.str();
-    }
-};
-
-class BinaryOperatorError : public util::Error {
-    const Lexer& _lexer;
-    Location     _lhs_location;
-    Location     _rhs_location;
-    Location     _op_location;
-    std::string  _msg;
-
-  public:
-    BinaryOperatorError(const Lexer& lexer, Location lhs_location, Location rhs_location,
-                        Location op_location, std::string msg)
-        : _lexer(lexer),
-          _lhs_location(lhs_location),
-          _rhs_location(rhs_location),
-          _op_location(op_location),
-          _msg(std::move(msg)) {}
-    ~BinaryOperatorError() override = default;
-
-    [[nodiscard]] std::string message() const noexcept override {
-        std::stringstream ss;
-
-        ss << ANSI_BOLD << _lexer.file_name() << ":" << _op_location.line << ":"
-           << _op_location.column << ": " << ANSI_RED << "error: " << ANSI_RESET << ANSI_BOLD
-           << _msg << ANSI_RESET << "\n";
-        ss << _lexer.get_whole_line(_op_location).source << "\n";
-
-        int column = 1;
-        if (_lhs_location.line == _op_location.line) {
-            // Underline the LHS expression
-            for (; column < _lhs_location.column; ++column) {
-                ss << ' ';
-            }
-
-            ss << ANSI_GREEN;
-            for (int i = 0; i < _lhs_location.source.size() - 1; ++i, ++column) {
-                ss << '~';
-            }
-            ss << ANSI_RESET;
-        }
-
-        {
-            // Mark the operator with a caret
-            for (; column < _op_location.column; ++column) {
-                ss << ' ';
-            }
-            ss << ANSI_GREEN << '^' << ANSI_RESET;
-            ++column;
-        }
-
-        if (_rhs_location.line == _op_location.line) {
-            // Underline the RHS expression
-            for (; column < _rhs_location.column; ++column) {
-                ss << ' ';
-            }
-
-            ss << ANSI_GREEN;
-            for (int i = 0; i < _rhs_location.source.size() - 1; ++i, ++column) {
-                ss << '~';
-            }
-            ss << ANSI_RESET << '\n';
-        }
-
-        return ss.str();
-    }
-};
-
 // Some macros to shorten the error creation
 
-#define CREATE_OK(ResultType, ...) util::Result<ResultType>::ok(ResultType::alloc(__VA_ARGS__))
+// #define CREATE_OK(ResultType, ...) util::Result<ResultType>::ok(ResultType::alloc(__VA_ARGS__))
 
-#define CREATE_ERROR(ResultType, ErrorType, ...) \
-    util::Result<ResultType>::error(std::make_unique<ErrorType>(__VA_ARGS__))
+// #define CREATE_ERROR(ResultType, ErrorType, ...) \
+//     util::Result<ResultType>::error(std::make_unique<ErrorType>(__VA_ARGS__))
 
-#define CREATE_SYNTAX_ERROR(ResultType, lexer, location, msg) \
-    CREATE_ERROR(ResultType, SyntaxError, lexer, location, msg)
+// #define CREATE_SYNTAX_ERROR(ResultType, lexer, location, msg) \
+//     CREATE_ERROR(ResultType, SyntaxError, lexer, location, msg)
 
-#define CREATE_BINARY_OPERATOR_ERROR(ResultType, lexer, lhs_location, rhs_location, op_location,  \
-                                     msg)                                                         \
-    CREATE_ERROR(ResultType, BinaryOperatorError, lexer, lhs_location, rhs_location, op_location, \
-                 msg)
+// #define CREATE_BINARY_OPERATOR_ERROR(ResultType, lexer, lhs_location, rhs_location, op_location,  \
+//                                      msg)                                                         \
+//     CREATE_ERROR(ResultType, BinaryOperatorError, lexer, lhs_location, rhs_location, op_location, \
+//                  msg)
 
 util::Result<ast::Type> parse_whole_type(Lexer& lexer);
 
 util::Result<ast::StructType> parse_struct(Lexer& lexer) {
     const auto struct_token = lexer.next();
     if (struct_token.kind != TokenKind::Struct) {
-        return CREATE_SYNTAX_ERROR(ast::StructType, lexer, struct_token.location,
-                                   "expected keyword 'struct'");
+        return ERR_PTR(ast::StructType, err::SyntaxError, lexer, struct_token.location,
+                       "expected keyword 'struct'");
     }
 
     std::optional<std::string_view> struct_name;
@@ -155,8 +47,8 @@ util::Result<ast::StructType> parse_struct(Lexer& lexer) {
     }
 
     if (next_token.kind != TokenKind::LCurlyBracket) {
-        return CREATE_SYNTAX_ERROR(ast::StructType, lexer, next_token.location,
-                                   "expected '{' after struct identifier");
+        return ERR_PTR(ast::StructType, err::SyntaxError, lexer, next_token.location,
+                       "expected '{' after struct identifier");
     }
 
     std::vector<ast::StructTypeFieldData> struct_fields;
@@ -166,29 +58,27 @@ util::Result<ast::StructType> parse_struct(Lexer& lexer) {
 
         switch (next_token.kind) {
             case TokenKind::RCurlyBracket:
-                return CREATE_OK(ast::StructType, std::move(struct_name), std::move(struct_fields));
+                return OK_ALLOC(ast::StructType, std::move(struct_name), std::move(struct_fields));
 
             case TokenKind::Identifier:
                 // Found a field name
                 break;
 
             default:
-                return CREATE_SYNTAX_ERROR(ast::StructType, lexer, next_token.location,
-                                           "expected identifier for struct field name");
+                return ERR_PTR(ast::StructType, err::SyntaxError, lexer, next_token.location,
+                               "expected identifier for struct field name");
         }
 
         const auto field_name = next_token.location.source;
 
         next_token = lexer.next();
         if (next_token.kind != TokenKind::Colon) {
-            return CREATE_SYNTAX_ERROR(ast::StructType, lexer, next_token.location,
-                                       "expected ':' after struct field name");
+            return ERR_PTR(ast::StructType, err::SyntaxError, lexer, next_token.location,
+                           "expected ':' after struct field name");
         }
 
         auto field_type = parse_whole_type(lexer);
-        if (field_type.is_error()) {
-            return util::Result<ast::StructType>::error(std::move(field_type.unwrap_error()));
-        }
+        FORWARD_ERROR_WITH_TYPE(ast::StructType, field_type);
 
         struct_fields.emplace_back(ast::StructTypeFieldData{
             .name = field_name,
@@ -197,8 +87,8 @@ util::Result<ast::StructType> parse_struct(Lexer& lexer) {
 
         next_token = lexer.next();
         if (next_token.kind != TokenKind::Semicolon) {
-            return CREATE_SYNTAX_ERROR(ast::StructType, lexer, next_token.location,
-                                       "expected ';' after struct field definition");
+            return ERR_PTR(ast::StructType, err::SyntaxError, lexer, next_token.location,
+                           "expected ';' after struct field definition");
         }
     }
 
@@ -213,10 +103,10 @@ util::Result<ast::Type> parse_whole_type(Lexer& lexer) {
 
         case TokenKind::Identifier:
             lexer.next();  // Consume the identifier token
-            return CREATE_OK(ast::UnresolvedType, token.location.source);
+            return OK_ALLOC(ast::UnresolvedType, token.location.source);
 
         default:
-            return CREATE_SYNTAX_ERROR(ast::Type, lexer, token.location, "unexpected token");
+            return ERR_PTR(ast::Type, err::SyntaxError, lexer, token.location, "unexpected token");
     }
 }
 
@@ -225,8 +115,8 @@ util::Result<ast::Expression> parse_whole_expression(Lexer& lexer);
 util::Result<ast::IntegerExpression> parse_integer(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Integer) {
-        return CREATE_SYNTAX_ERROR(ast::IntegerExpression, lexer, token.location,
-                                   "expected integer literal");
+        return ERR_PTR(ast::IntegerExpression, err::SyntaxError, lexer, token.location,
+                       "expected integer literal");
     }
 
     constexpr uint64_t MAX   = std::numeric_limits<uint64_t>::max() / 10;
@@ -234,58 +124,72 @@ util::Result<ast::IntegerExpression> parse_integer(Lexer& lexer) {
     for (char c : token.location.source) {
         if (value > MAX) {
             // Multiplying by 10 will overflow
-            return CREATE_SYNTAX_ERROR(ast::IntegerExpression, lexer, token.location,
-                                       "integer literal is too large");
+            return ERR_PTR(ast::IntegerExpression, err::SyntaxError, lexer, token.location,
+                           "integer literal is too large");
         }
         value *= 10;
 
         if (value > std::numeric_limits<uint64_t>::max() - (c - '0')) {
             // Adding the next digit will overflow
-            return CREATE_SYNTAX_ERROR(ast::IntegerExpression, lexer, token.location,
-                                       "integer literal is too large");
+            return ERR_PTR(ast::IntegerExpression, err::SyntaxError, lexer, token.location,
+                           "integer literal is too large");
         }
         value += c - '0';
     }
 
-    return CREATE_OK(ast::IntegerExpression, value);
+    return OK_ALLOC(ast::IntegerExpression, value);
 }
 
 util::Result<ast::IdentifierExpression> parse_identifier(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Identifier) {
-        return CREATE_SYNTAX_ERROR(ast::IdentifierExpression, lexer, token.location,
-                                   "expected identifier");
+        return ERR_PTR(ast::IdentifierExpression, err::SyntaxError, lexer, token.location,
+                       "expected identifier");
     }
 
-    return CREATE_OK(ast::IdentifierExpression, token.location.source);
+    return OK_ALLOC(ast::IdentifierExpression, token.location.source);
 }
 
 util::Result<ast::ParenthesisExpression> parse_parenthesis(Lexer& lexer) {
     const auto lround_token = lexer.next();
     if (lround_token.kind != TokenKind::LRoundBracket) {
-        return CREATE_SYNTAX_ERROR(ast::ParenthesisExpression, lexer, lround_token.location,
-                                   "expected '('");
+        return ERR_PTR(ast::ParenthesisExpression, err::SyntaxError, lexer, lround_token.location,
+                       "expected '('");
     }
 
-    auto expr_result = parse_whole_expression(lexer);
-    if (expr_result.is_error()) {
-        return util::Result<ast::ParenthesisExpression>::error(
-            std::move(expr_result.unwrap_error()));
-    }
+    auto expr = parse_whole_expression(lexer);
+    FORWARD_ERROR_WITH_TYPE(ast::ParenthesisExpression, expr);
 
     const auto rround_token = lexer.next();
     if (rround_token.kind != TokenKind::RRoundBracket) {
-        return CREATE_SYNTAX_ERROR(ast::ParenthesisExpression, lexer, rround_token.location,
-                                   "expected ')'");
+        return ERR_PTR(ast::ParenthesisExpression, err::SyntaxError, lexer, rround_token.location,
+                       "expected ')'");
     }
 
-    return CREATE_OK(ast::ParenthesisExpression, expr_result.unwrap());
+    return OK_ALLOC(ast::ParenthesisExpression, expr.unwrap());
 }
 
-util::Result<ast::Expression> parse_call(Lexer& lexer, ast::Expression callee) {
+util::Result<ast::MemberExpression> parse_member(Lexer& lexer, ast::Expression owner) {
+    const auto period_token = lexer.next();
+    if (period_token.kind != TokenKind::Period) {
+        return ERR_PTR(ast::MemberExpression, err::SyntaxError, lexer, period_token.location,
+                       "expected '.'");
+    }
+
+    const auto member_token = lexer.next();
+    if (member_token.kind != TokenKind::Identifier) {
+        return ERR_PTR(ast::MemberExpression, err::SyntaxError, lexer, member_token.location,
+                       "expected identifier after '.'");
+    }
+
+    return OK_ALLOC(ast::MemberExpression, std::move(owner), member_token.location.source);
+}
+
+util::Result<ast::CallExpression> parse_call(Lexer& lexer, ast::Expression callee) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != TokenKind::LRoundBracket) {
-        return CREATE_SYNTAX_ERROR(ast::Expression, lexer, lbracket_token.location, "expected '('");
+        return ERR_PTR(ast::CallExpression, err::SyntaxError, lexer, lbracket_token.location,
+                       "expected '('");
     }
 
     std::vector<ast::Expression> arguments;
@@ -294,13 +198,11 @@ util::Result<ast::Expression> parse_call(Lexer& lexer, ast::Expression callee) {
         const auto next_token = lexer.peek();
         if (next_token.kind == TokenKind::RRoundBracket) {
             lexer.next();  // Consume the ')' token
-            return CREATE_OK(ast::CallExpression, std::move(callee), std::move(arguments));
+            return OK_ALLOC(ast::CallExpression, std::move(callee), std::move(arguments));
         }
 
         auto argument = parse_whole_expression(lexer);
-        if (argument.is_error()) {
-            return argument;
-        }
+        FORWARD_ERROR_WITH_TYPE(ast::CallExpression, argument);
 
         arguments.emplace_back(std::move(argument.unwrap()));
     }
@@ -314,23 +216,21 @@ util::Result<ast::Expression> parse_call(Lexer& lexer, ast::Expression callee) {
 
                 if (lexer.peek().kind == TokenKind::RRoundBracket) {
                     lexer.next();  // Consume the ')' token
-                    return CREATE_OK(ast::CallExpression, std::move(callee), std::move(arguments));
+                    return OK_ALLOC(ast::CallExpression, std::move(callee), std::move(arguments));
                 }
                 break;
 
             case TokenKind::RRoundBracket:
                 lexer.next();  // Consume the ')' token
-                return CREATE_OK(ast::CallExpression, std::move(callee), std::move(arguments));
+                return OK_ALLOC(ast::CallExpression, std::move(callee), std::move(arguments));
 
             default:
-                return CREATE_SYNTAX_ERROR(ast::Expression, lexer, next_token.location,
-                                           "expected ',' or ')'");
+                return ERR_PTR(ast::CallExpression, err::SyntaxError, lexer, next_token.location,
+                               "expected ',' or ')'");
         }
 
         auto argument = parse_whole_expression(lexer);
-        if (argument.is_error()) {
-            return argument;
-        }
+        FORWARD_ERROR_WITH_TYPE(ast::CallExpression, argument);
 
         arguments.emplace_back(std::move(argument.unwrap()));
     }
@@ -338,10 +238,11 @@ util::Result<ast::Expression> parse_call(Lexer& lexer, ast::Expression callee) {
     __builtin_unreachable();
 }
 
-util::Result<ast::Expression> parse_block(Lexer& lexer) {
+util::Result<ast::BlockExpression> parse_block(Lexer& lexer) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != TokenKind::LCurlyBracket) {
-        return CREATE_SYNTAX_ERROR(ast::Expression, lexer, lbracket_token.location, "expected '{'");
+        return ERR_PTR(ast::BlockExpression, err::SyntaxError, lexer, lbracket_token.location,
+                       "expected '{'");
     }
 
     std::vector<ast::Expression> expressions;
@@ -352,49 +253,121 @@ util::Result<ast::Expression> parse_block(Lexer& lexer) {
             break;
         }
 
-        auto expr_result = parse_whole_expression(lexer);
-        if (expr_result.is_error()) {
-            return expr_result;
-        }
+        auto expr = parse_whole_expression(lexer);
+        FORWARD_ERROR_WITH_TYPE(ast::BlockExpression, expr);
 
-        expressions.emplace_back(std::move(expr_result.unwrap()));
+        expressions.emplace_back(std::move(expr.unwrap()));
     }
 
-    return CREATE_OK(ast::BlockExpression, std::move(expressions));
+    return OK_ALLOC(ast::BlockExpression, std::move(expressions));
 }
 
-util::Result<ast::Expression> parse_if(Lexer& lexer) {
+util::Result<ast::IfExpression> parse_if(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::If) {
-        return CREATE_SYNTAX_ERROR(ast::Expression, lexer, token.location, "expected keyword 'if'");
+        return ERR_PTR(ast::IfExpression, err::SyntaxError, lexer, token.location,
+                       "expected keyword 'if'");
     }
 
     auto condition = parse_whole_expression(lexer);
-    if (condition.is_error()) {
-        return condition;
-    }
+    FORWARD_ERROR_WITH_TYPE(ast::IfExpression, condition);
 
     auto then = parse_block(lexer);
-    if (then.is_error()) {
-        return then;
-    }
+    FORWARD_ERROR_WITH_TYPE(ast::IfExpression, then);
 
-    std::optional<ast::Expression> else_ = std::nullopt;
+    std::optional<ast::Expression> opt_else_ = std::nullopt;
 
     const auto else_token = lexer.peek();
     if (else_token.kind == TokenKind::Else) {
         lexer.next();  // Consume the 'else' token
 
-        auto else_result = parse_block(lexer);
-        if (else_result.is_error()) {
-            return else_result;
-        }
+        auto else_ = parse_block(lexer);
+        FORWARD_ERROR_WITH_TYPE(ast::IfExpression, else_);
 
-        else_ = std::move(else_result.unwrap());
+        opt_else_ = std::move(else_.unwrap());
     }
 
-    return CREATE_OK(ast::IfExpression, std::move(condition.unwrap()), std::move(then.unwrap()),
-                     std::move(else_));
+    return OK_ALLOC(ast::IfExpression, std::move(condition.unwrap()), std::move(then.unwrap()),
+                    std::move(opt_else_));
+}
+
+util::Result<ast::FunctionExpression> parse_function(Lexer& lexer) {
+    const auto token = lexer.next();
+    if (token.kind != TokenKind::Fn) {
+        return ERR_PTR(ast::FunctionExpression, err::SyntaxError, lexer, token.location,
+                       "expected keyword 'fn'");
+    }
+
+    std::optional<std::string_view> fn_name;
+    auto                            next_token = lexer.next();
+
+    // The struct name is optional
+    if (next_token.kind == TokenKind::Identifier) {
+        fn_name    = next_token.location.source;
+        next_token = lexer.next();
+    }
+
+    if (next_token.kind != TokenKind::LRoundBracket) {
+        return ERR_PTR(ast::FunctionExpression, err::SyntaxError, lexer, next_token.location,
+                       "expected '(' before function arguments");
+    }
+
+    std::vector<ast::FunctionArgumentData> arguments;
+    for (;;) {
+        // Handle the function arguments
+        auto next_token = lexer.next();
+        if (next_token.kind == TokenKind::RRoundBracket) {
+            break;
+        }
+
+        if (next_token.kind != TokenKind::Identifier) {
+            return ERR_PTR(ast::FunctionExpression, err::SyntaxError, lexer, next_token.location,
+                           "expected identifier for function argument name");
+        }
+
+        const auto argument_name = next_token.location.source;
+
+        next_token = lexer.next();
+        if (next_token.kind != TokenKind::Colon) {
+            return ERR_PTR(ast::FunctionExpression, err::SyntaxError, lexer, next_token.location,
+                           "expected ':' after function argument name");
+        }
+
+        auto argument_type = parse_whole_type(lexer);
+        FORWARD_ERROR_WITH_TYPE(ast::FunctionExpression, argument_type);
+
+        arguments.emplace_back(ast::FunctionArgumentData{
+            .name = argument_name,
+            .type = std::move(argument_type.unwrap()),
+        });
+
+        next_token = lexer.next();
+        if (next_token.kind == TokenKind::RRoundBracket) {
+            break;
+        }
+
+        if (next_token.kind != TokenKind::Comma) {
+            return ERR_PTR(ast::FunctionExpression, err::SyntaxError, lexer, next_token.location,
+                           "expected ',' or ')' after function argument definition");
+        }
+    }
+
+    std::optional<ast::Type> return_type;
+    next_token = lexer.peek();
+    if (next_token.kind == TokenKind::RArrow) {
+        lexer.next();  // Consume the '->' token
+
+        auto return_type_result = parse_whole_type(lexer);
+        FORWARD_ERROR_WITH_TYPE(ast::FunctionExpression, return_type_result);
+
+        return_type = std::move(return_type_result.unwrap());
+    }
+
+    auto body = parse_block(lexer);
+    FORWARD_ERROR_WITH_TYPE(ast::FunctionExpression, body);
+
+    return OK_ALLOC(ast::FunctionExpression, std::move(fn_name), std::move(return_type),
+                    std::move(arguments), std::move(body.unwrap().expressions()));
 }
 
 enum Precendence : int {
@@ -437,12 +410,12 @@ ast::BinaryOperator get_operator_for_token(Token token) {
             return ast::BinaryOperator::Divide;
         case TokenKind::Percent:
             return ast::BinaryOperator::Modulo;
-        // case TokenKind::Ampersand:
-        //     return ast::BinaryOperator::And;
-        // case TokenKind::Pipe:
-        //     return ast::BinaryOperator::Or;
-        // case TokenKind::Caret:
-        //     return ast::BinaryOperator::Xor;
+        case TokenKind::Ampersand:
+            return ast::BinaryOperator::And;
+        case TokenKind::Pipe:
+            return ast::BinaryOperator::Or;
+        case TokenKind::Caret:
+            return ast::BinaryOperator::Xor;
         default:
             return ast::BinaryOperator::Unknown;
     }
@@ -473,16 +446,33 @@ util::Result<ast::Expression> parse_lhs(Lexer& lexer) {
             expression = parse_if(lexer);
             break;
 
+        case TokenKind::Fn:
+            expression = parse_function(lexer);
+            break;
+
         default:
-            return CREATE_SYNTAX_ERROR(ast::Expression, lexer, token.location, "unexpected token");
+            return ERR_PTR(ast::Expression, err::SyntaxError, lexer, token.location,
+                           "unexpected token");
     }
+    FORWARD_ERROR(expression);
 
-    if (expression.is_error()) {
-        return expression;
-    }
+    auto next_token = lexer.peek();
+    while (next_token.kind == TokenKind::Period || next_token.kind == TokenKind::LRoundBracket) {
+        if (next_token.kind == TokenKind::Period) {
+            expression = parse_member(lexer, expression.unwrap());
+            FORWARD_ERROR(expression);
 
-    if (lexer.peek().kind == TokenKind::LRoundBracket) {
-        expression = parse_call(lexer, expression.unwrap());
+            next_token = lexer.peek();
+            continue;
+        }
+
+        if (next_token.kind == TokenKind::LRoundBracket) {
+            expression = parse_call(lexer, expression.unwrap());
+            FORWARD_ERROR(expression);
+
+            next_token = lexer.peek();
+            continue;
+        }
     }
 
     return expression;
@@ -503,33 +493,28 @@ util::Result<ast::Expression> parse_rhs(Lexer& lexer, ast::Expression lhs_expres
         }
         lexer.next();  // Consume the operator
 
-        auto rhs_result = parse_lhs(lexer);
-        if (rhs_result.is_error()) {
-            return rhs_result;
-        }
+        auto rhs_expression = parse_lhs(lexer);
+        FORWARD_ERROR(rhs_expression);
 
         const auto next_token = lexer.peek();
         const auto next_binop = get_operator_for_token(next_token);
         if (next_binop != ast::BinaryOperator::Unknown) {
             const auto rhs_precedence = BINARY_OPERATOR_PRECEDENCE[static_cast<int>(next_binop)];
             if (binop_precedence < rhs_precedence) {
-                rhs_result = parse_rhs(lexer, rhs_result.unwrap(), binop_precedence);
-                if (rhs_result.is_error()) {
-                    return rhs_result;
-                }
+                rhs_expression =
+                    parse_rhs(lexer, std::move(rhs_expression.unwrap()), binop_precedence);
+                FORWARD_ERROR(rhs_expression);
             }
         }
 
-        lhs_expression = ast::BinaryOperatorExpression::alloc(std::move(lhs_expression),
-                                                              rhs_result.unwrap(), binop);
+        lhs_expression = ast::BinaryOperatorExpression::alloc(
+            std::move(lhs_expression), std::move(rhs_expression.unwrap()), binop);
     }
 }
 
 util::Result<ast::Expression> parse_whole_expression(Lexer& lexer) {
     auto lhs = parse_lhs(lexer);
-    if (lhs.is_error()) {
-        return lhs;
-    }
+    FORWARD_ERROR(lhs);
 
     return parse_rhs(lexer, lhs.unwrap(), Precendence::Unknown);
 }
@@ -540,6 +525,32 @@ util::Result<ast::Type> Parser::parse_type(Lexer& lexer) { return parse_whole_ty
 
 util::Result<ast::Expression> Parser::parse_expression(Lexer& lexer) {
     return parse_whole_expression(lexer);
+}
+
+util::Result<Module> Parser::parse(Lexer& lexer) {
+    std::vector<ast::Node> nodes;
+
+    for (;;) {
+        const auto token = lexer.peek();
+        switch (token.kind) {
+            case TokenKind::Struct: {
+                auto result = parse_type(lexer);
+                FORWARD_ERROR_WITH_TYPE(Module, result);
+                nodes.emplace_back(std::move(result.unwrap()));
+            }
+
+            case TokenKind::Eof:
+                return util::Result<Module>::ok(Module(std::move(nodes)));
+
+            default: {
+                auto result = parse_expression(lexer);
+                FORWARD_ERROR_WITH_TYPE(Module, result);
+                nodes.emplace_back(std::move(result.unwrap()));
+            }
+        }
+    }
+
+    __builtin_unreachable();
 }
 
 }  // namespace cirrus::lang

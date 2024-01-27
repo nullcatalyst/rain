@@ -1,0 +1,16 @@
+cc_library(
+    name = "err",
+    hdrs = [
+        "all.hpp",
+        "binary_operator.hpp",
+        "simple.hpp",
+        "syntax.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/lang:hdrs",
+        "//cirrus/util",
+    ],
+)

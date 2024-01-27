@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "cirrus/lang/lexer_util.hpp"
+#include "cirrus/lang/lexer+util.hpp"
 
 using namespace cirrus::lang;
 
@@ -28,13 +28,13 @@ TEST(Lexer, get_line) {
         const auto location = Location{
             .line   = 4,
             .column = 2,
-            // ou from four
+            // "ou" from "four"
             .source = source.substr(15, 2),
         };
         const auto result = lexer.get_whole_line(location);
         EXPECT_EQ(result.line, 4);
         EXPECT_EQ(result.column, 1);
-        EXPECT_EQ(result.source, source.substr(14, 4));
+        EXPECT_EQ(result.source, "four");
     }
 }
 
@@ -98,4 +98,51 @@ TEST(Lexer, next) {
         // Check that the end of file token is sticky, and is returned repeatedly
         EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
     }
+}
+
+TEST(Lexer, single_char_operators) {
+    {
+        Lexer lexer("# . , : ;");
+        EXPECT_EQ(lexer.next().kind, TokenKind::Hash);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Period);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Comma);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Colon);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Semicolon);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
+    }
+
+    {
+        Lexer lexer("@ ! + - * / %");
+        EXPECT_EQ(lexer.next().kind, TokenKind::At);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Exclaim);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Plus);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Minus);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Star);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Slash);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Percent);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
+    }
+
+    {
+        Lexer lexer("( ) [ ] { }");
+        EXPECT_EQ(lexer.next().kind, TokenKind::LRoundBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::RRoundBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::LSquareBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::RSquareBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::LCurlyBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::RCurlyBracket);
+        EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
+    }
+}
+
+TEST(Lexer, multi_char_operators) {
+    Lexer lexer("-> << >> == != <= >=");
+    EXPECT_EQ(lexer.next().kind, TokenKind::RArrow);
+    EXPECT_EQ(lexer.next().kind, TokenKind::LessThanLessThan);
+    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterThanGreaterThan);
+    EXPECT_EQ(lexer.next().kind, TokenKind::EqualEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::ExclaimEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::LessThanEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterThanEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
 }

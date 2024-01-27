@@ -3,14 +3,18 @@
 namespace cirrus::ast {
 
 const ExpressionVtbl CallExpression::_vtbl{
-    /* util::RetainableVtbl */ {
-        .retain  = util::_Retainable_vtbl.retain,
-        .release = util::_Retainable_vtbl.release,
-        .drop =
-            [](const util::RetainableVtbl* const vtbl, util::RetainableData* const data) noexcept {
-                CallExpressionData* _data = static_cast<CallExpressionData*>(data);
-                delete _data;
-            },
+    /* Node */ {
+        /* util::RetainableVtbl */ {
+            .retain  = util::_Retainable_vtbl.retain,
+            .release = util::_Retainable_vtbl.release,
+            .drop =
+                [](const util::RetainableVtbl* const vtbl,
+                   util::RetainableData* const       data) noexcept {
+                    CallExpressionData* _data = static_cast<CallExpressionData*>(data);
+                    delete _data;
+                },
+        },
+        .kind = NodeKind::CallExpression,
     },
 };
 

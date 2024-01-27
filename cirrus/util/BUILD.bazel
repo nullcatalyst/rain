@@ -4,6 +4,7 @@ cc_library(
         "retain.cpp",
     ],
     hdrs = [
+        "colors.hpp",
         "ptr.hpp",
         "result.hpp",
         "retain.hpp",

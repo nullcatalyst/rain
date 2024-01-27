@@ -1,16 +1,16 @@
 #pragma once
 
-#include "cirrus/util/retain.hpp"
+#include "cirrus/ast/node.hpp"
 
 namespace cirrus::ast {
 
-struct ExpressionVtbl : public util::RetainableVtbl {};
+struct ExpressionVtbl : public NodeVtbl {};
 
-struct ExpressionData : public util::RetainableData {};
+struct ExpressionData : public NodeData {};
 
 template <typename This, typename Vtbl, typename Data>
-struct IExpression : public util::Retainable<This, Vtbl, Data> {
-    using util::Retainable<This, Vtbl, Data>::Retainable;
+struct IExpression : public INode<This, Vtbl, Data> {
+    using INode<This, Vtbl, Data>::INode;
 };
 
 struct Expression : public IExpression<Expression, ExpressionVtbl, ExpressionData> {

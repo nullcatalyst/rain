@@ -4,8 +4,22 @@ cc_library(
         "//cirrus:__subpackages__",
     ],
     deps = [
+        ":node",
         "//cirrus/ast/expr",
         "//cirrus/ast/type",
+        "//cirrus/util",
+    ],
+)
+
+cc_library(
+    name = "node",
+    hdrs = [
+        "node.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
         "//cirrus/util",
     ],
 )
