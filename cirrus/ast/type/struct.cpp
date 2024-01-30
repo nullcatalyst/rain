@@ -14,7 +14,7 @@ const TypeVtbl StructType::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::StructType,
+        /*.kind = */ NodeKind::StructType,
     },
 };
 

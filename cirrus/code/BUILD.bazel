@@ -1,0 +1,35 @@
+cc_library(
+    name = "code",
+    srcs = [
+        "builder.cpp",
+        "module.cpp",
+        "scope.cpp",
+    ],
+    hdrs = [
+        "builder.hpp",
+        "module.hpp",
+        "scope.hpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "//cirrus/ast",
+        "//cirrus/lang",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings:str_format",
+        "@llvm-project//llvm:CodeGen",
+        "@llvm-project//llvm:Linker",
+        "@llvm-project//llvm:WebAssemblyCodeGen",
+        "@llvm-project//llvm:WebAssemblyInfo",
+        "@llvm-project//llvm:WebAssemblyAsmParser",
+        "@llvm-project//llvm:common_transforms",
+
+        # "@llvm-project//llvm:AArch64CodeGen",
+        # "@llvm-project//llvm:AArch64Info",
+        # "@llvm-project//llvm:AArch64AsmParser",
+        # "@llvm-project//llvm:X86CodeGen",
+        # "@llvm-project//llvm:X86Info",
+        # "@llvm-project//llvm:X86AsmParser",
+    ],
+)

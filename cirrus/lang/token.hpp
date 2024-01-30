@@ -26,6 +26,7 @@ enum TokenKind : uint32_t {
     For,
     Struct,
     Fn,
+    Return,
 
     // Operators
     Hash,

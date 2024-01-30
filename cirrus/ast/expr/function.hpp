@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string_view>
+#include <vector>
+
 #include "cirrus/ast/expr/expression.hpp"
 #include "cirrus/ast/type/type.hpp"
 

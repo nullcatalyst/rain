@@ -20,6 +20,7 @@ cc_library(
         "//cirrus:__subpackages__",
     ],
     deps = [
+        "//cirrus/lang:hdrs",
         "//cirrus/util",
     ],
 )

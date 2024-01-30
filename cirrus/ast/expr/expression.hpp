@@ -15,6 +15,8 @@ struct IExpression : public INode<This, Vtbl, Data> {
 
 struct Expression : public IExpression<Expression, ExpressionVtbl, ExpressionData> {
     using IExpression<Expression, ExpressionVtbl, ExpressionData>::IExpression;
+
+    [[nodiscard]] constexpr lang::Location location() const noexcept { return _data->location; }
 };
 
 }  // namespace cirrus::ast

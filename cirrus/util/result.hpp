@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -20,6 +21,8 @@ namespace cirrus::util {
 
 #define FORWARD_ERROR_WITH_TYPE(ResultType, result)                               \
     if (result.is_error()) {                                                      \
+        static_assert(!std::is_const_v<decltype(result)>,                         \
+                      "cannot forward an error with a const result type");        \
         return util::Result<ResultType>::error(std::move(result.unwrap_error())); \
     }
 

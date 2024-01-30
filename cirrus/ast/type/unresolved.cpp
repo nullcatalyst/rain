@@ -14,7 +14,7 @@ const TypeVtbl UnresolvedType::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::UnresolvedType,
+        /*.kind = */ NodeKind::UnresolvedType,
     },
 };
 

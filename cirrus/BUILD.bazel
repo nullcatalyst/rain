@@ -1,14 +1,28 @@
+load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
+
 cc_library(
     name = "lib",
-    srcs = ["lib.cpp"],
+    srcs = [
+        "lib.cpp",
+    ],
+    hdrs = [
+        "cirrus.h",
+        "cirrus.hpp",
+    ],
+    deps = [
+        "//cirrus/code",
+        "//cirrus/lang",
+    ],
 )
 
 cc_binary(
     name = "main",
     srcs = ["main.cpp"],
-    deps = [
-        # ":lib",
-        "//cirrus/lang",
-        "//cirrus/transform:codegen",
-    ],
+    deps = [":lib"],
+)
+
+wasm_cc_binary(
+    name = "main_wasm",
+    cc_target = ":main",
+    simd = True,
 )

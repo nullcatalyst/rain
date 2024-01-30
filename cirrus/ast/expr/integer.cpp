@@ -14,7 +14,7 @@ const ExpressionVtbl IntegerExpression::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::IntegerExpression,
+        /*.kind = */ NodeKind::IntegerExpression,
     },
 };
 

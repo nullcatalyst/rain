@@ -4,10 +4,12 @@ cc_library(
         "retain.cpp",
     ],
     hdrs = [
+        "before_return.hpp",
         "colors.hpp",
         "ptr.hpp",
         "result.hpp",
         "retain.hpp",
+        "wasm.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",

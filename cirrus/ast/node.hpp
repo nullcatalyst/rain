@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cirrus/lang/location.hpp"
 #include "cirrus/util/result.hpp"
 #include "cirrus/util/retain.hpp"
 
@@ -33,6 +34,7 @@ enum class NodeKind {
     IntegerExpression,
     MemberExpression,
     ParenthesisExpression,
+    ReturnExpression,
     UnaryOperatorExpression,
     // </keep-sorted>
 };
@@ -41,7 +43,9 @@ struct NodeVtbl : public util::RetainableVtbl {
     NodeKind kind;
 };
 
-struct NodeData : public util::RetainableData {};
+struct NodeData : public util::RetainableData {
+    lang::Location location;
+};
 
 template <typename This, typename Vtbl, typename Data>
 struct INode : public util::Retainable<This, Vtbl, Data> {
@@ -52,6 +56,8 @@ struct INode : public util::Retainable<This, Vtbl, Data> {
 
 struct Node : public INode<Node, NodeVtbl, NodeData> {
     using INode<Node, NodeVtbl, NodeData>::INode;
+
+    [[nodiscard]] constexpr lang::Location location() const noexcept { return _data->location; }
 };
 
 }  // namespace cirrus::ast

@@ -10,13 +10,14 @@ namespace cirrus::lang {
 
 namespace {
 
-constexpr std::array<std::tuple<std::string_view, TokenKind>, 6> KEYWORDS{
+constexpr std::array<std::tuple<std::string_view, TokenKind>, 7> KEYWORDS{
     // clang-format off
     // <keep-sorted>
     std::make_tuple("else", TokenKind::Else),
     std::make_tuple("false", TokenKind::False),
     std::make_tuple("fn", TokenKind::Fn),
     std::make_tuple("if", TokenKind::If),
+    std::make_tuple("return", TokenKind::Return),
     std::make_tuple("struct", TokenKind::Struct),
     std::make_tuple("true", TokenKind::True),
     // </keep-sorted>

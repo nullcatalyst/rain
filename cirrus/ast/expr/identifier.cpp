@@ -14,7 +14,7 @@ const ExpressionVtbl IdentifierExpression::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::IdentifierExpression,
+        /*.kind = */ NodeKind::IdentifierExpression,
     },
 };
 

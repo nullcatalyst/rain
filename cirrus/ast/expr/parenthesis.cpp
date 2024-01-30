@@ -15,7 +15,7 @@ const ExpressionVtbl ParenthesisExpression::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::ParenthesisExpression,
+        /*.kind = */ NodeKind::ParenthesisExpression,
     },
 };
 

@@ -15,7 +15,7 @@ const ExpressionVtbl BinaryOperatorExpression::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::BinaryOperatorExpression,
+        /*.kind = */ NodeKind::BinaryOperatorExpression,
     },
 };
 

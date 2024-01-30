@@ -1,5 +1,6 @@
 #include "cirrus/lang/parser.hpp"
 
+#include <array>
 #include <iostream>
 #include <sstream>
 
@@ -12,21 +13,6 @@
 namespace cirrus::lang {
 
 namespace {
-
-// Some macros to shorten the error creation
-
-// #define CREATE_OK(ResultType, ...) util::Result<ResultType>::ok(ResultType::alloc(__VA_ARGS__))
-
-// #define CREATE_ERROR(ResultType, ErrorType, ...) \
-//     util::Result<ResultType>::error(std::make_unique<ErrorType>(__VA_ARGS__))
-
-// #define CREATE_SYNTAX_ERROR(ResultType, lexer, location, msg) \
-//     CREATE_ERROR(ResultType, SyntaxError, lexer, location, msg)
-
-// #define CREATE_BINARY_OPERATOR_ERROR(ResultType, lexer, lhs_location, rhs_location, op_location,  \
-//                                      msg)                                                         \
-//     CREATE_ERROR(ResultType, BinaryOperatorError, lexer, lhs_location, rhs_location, op_location, \
-//                  msg)
 
 util::Result<ast::Type> parse_whole_type(Lexer& lexer);
 
@@ -370,6 +356,19 @@ util::Result<ast::FunctionExpression> parse_function(Lexer& lexer) {
                     std::move(arguments), std::move(body.unwrap().expressions()));
 }
 
+util::Result<ast::ReturnExpression> parse_return(Lexer& lexer) {
+    const auto token = lexer.next();
+    if (token.kind != TokenKind::Return) {
+        return ERR_PTR(ast::ReturnExpression, err::SyntaxError, lexer, token.location,
+                       "expected keyword 'return'");
+    }
+
+    auto expr = parse_whole_expression(lexer);
+    FORWARD_ERROR_WITH_TYPE(ast::ReturnExpression, expr);
+
+    return OK_ALLOC(ast::ReturnExpression, std::move(expr.unwrap()));
+}
+
 enum Precendence : int {
     Unknown        = 0,
     Logical        = 10,  // And, Or
@@ -448,6 +447,10 @@ util::Result<ast::Expression> parse_lhs(Lexer& lexer) {
 
         case TokenKind::Fn:
             expression = parse_function(lexer);
+            break;
+
+        case TokenKind::Return:
+            expression = parse_return(lexer);
             break;
 
         default:

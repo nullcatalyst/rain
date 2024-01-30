@@ -11,6 +11,7 @@ cc_library(
         "integer.cpp",
         "member.cpp",
         "parenthesis.cpp",
+        "return.cpp",
     ],
     hdrs = [
         "all.hpp",
@@ -24,6 +25,7 @@ cc_library(
         "integer.hpp",
         "member.hpp",
         "parenthesis.hpp",
+        "return.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",

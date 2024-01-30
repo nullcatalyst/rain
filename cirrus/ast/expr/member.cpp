@@ -14,7 +14,7 @@ const ExpressionVtbl MemberExpression::_vtbl{
                     delete _data;
                 },
         },
-        .kind = NodeKind::MemberExpression,
+        /*.kind = */ NodeKind::MemberExpression,
     },
 };
 

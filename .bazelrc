@@ -1,55 +1,44 @@
-common                  --enable_platform_specific_config
-build                   --enable_runfiles=yes
-run                     --enable_runfiles=yes
-test                    --test_output=all
+# Automatically use a flag like --config=windows, --config=linux, etc.
+common --enable_platform_specific_config
 
-# Windows
-build:windows           --define platform=windows
-build:windows           --cxxopt=/std:c++20
-build:windows           --action_env=BAZEL_CXXOPTS=/std:c++20
-build:windows           --cxxopt=/GL        # Whole program optimization
-build:windows           --linkopt=/LTCG     # Link-time code generation
+# Enable runfiles support for all targets. This is off by default on Windows.
+build --enable_runfiles=yes
+run --enable_runfiles=yes
 
-build:host_windows      --host_cxxopt=/std:c++20
+# Print the output of tests. This can make it easier to debug test failures.
+test --test_output=all
 
-# MacOS
-build:macos             --define platform=macos
-build:macos             --config=posix
+# Prevent invalid caching if input files are modified during a build.
+# build --experimental_guard_against_concurrent_changes
 
-build:host_macos        --config=host_posix
+# In opt mode, bazel by default builds both PIC and non-PIC object files for tests vs binaries. We
+# don't need this feature and it slows down opt builds considerably.
+build --force_pic
 
-# iOS
-build:ios               --define platform=ios
-build:ios               --config=posix
+# Shared objects take up more space. With fast linkers and binaries that aren't super large, the
+# benefits of shared objects are minimal.
+build --dynamic_mode=off
 
-# Linux
-build:linux             --define platform=linux
-build:linux             --config=posix
+# C++20 standard version is required.
+build:posix --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+build:windows --cxxopt=/std:c++20 --host_cxxopt=/std:c++20
 
-# WebAssembly
-build:wasm              --define platform=wasm
-build:wasm              --crosstool_top=@wasm_toolchain//:toolchain
-build:wasm              --cpu=wasm32
-build:wasm              --define embed=all
-build:wasm              --define gpu_backend=web
-build:wasm              --config=posix
+# Treat all warnings as errors.
+build:posix --copt=-Wall --host_copt=-Wall
+build:windows --copt=/WX --host_copt=/WX
 
-# POSIX
-build:posix             --cxxopt=-std=c++20
-build:posix             --cxxopt=-fno-rtti
-build:posix             --cxxopt=-fno-exceptions
-build:posix             --action_env=BAZEL_CXXOPTS=-std=c++20
-build:posix             --linkopt=-flto     # Link-time optimizations
+# The Clang available on MacOS has a warning that isn't clean on MLIR code. The warning doesn't show
+# up with more recent Clangs, so just disable for now.
+build:macos --cxxopt=-Wno-range-loop-analysis --host_cxxopt=-Wno-range-loop-analysis
 
-build:host_posix        --host_cxxopt=-std=c++20
+# Other generic dialect flags on Windows.
+build:windows --copt=/Zc:strictStrings --host_copt=/Zc:strictStrings
+build:windows --copt=/Oi --host_copt=/Oi
+build:windows --cxxopt=/Zc:rvalueCast --host_cxxopt=/Zc:rvalueCast
 
-# Turn off legacy external runfiles on all platforms except Windows
-# This prevents accidentally dependening on this feature, which Bazel will remove
-# Skylib's diff_test implementation for Windows depends on legacy external
-# runfiles so we cannot disable it fully
-build:posix             --nolegacy_external_runfiles
+# Use the more flexible bigobj format for C++ files that have lots of symbols.
+build:windows --cxxopt=/bigobj --host_cxxopt=/bigobj
 
-# Import a user-specific bazel config file
-# This can be used to automatically use configurations --config=host_posix or
-# --config=host_windows
-try-import              .bazelrc.user
+# Reuse the posix config, since most platforms (not Windows) reuse all the same flags.
+build:macos --config=posix
+build:linux --config=posix

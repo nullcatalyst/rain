@@ -9,3 +9,4 @@
 #include "cirrus/ast/expr/integer.hpp"
 #include "cirrus/ast/expr/member.hpp"
 #include "cirrus/ast/expr/parenthesis.hpp"
+#include "cirrus/ast/expr/return.hpp"
