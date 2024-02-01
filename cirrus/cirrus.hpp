@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "cirrus/code/builder.hpp"
+#include "cirrus/code/linker.hpp"
 #include "cirrus/lang/lexer.hpp"
 #include "cirrus/lang/parser.hpp"
 #include "cirrus/util/result.hpp"

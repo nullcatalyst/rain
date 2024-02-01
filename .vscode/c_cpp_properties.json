@@ -4,6 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}",
+                "${workspaceFolder}/external/llvm-project/lld/include",
                 "${workspaceFolder}/external/llvm-project/llvm/include",
                 "${workspaceFolder}/external/com_google_absl",
                 "${workspaceFolder}/external/com_google_googletest/googletest/include",

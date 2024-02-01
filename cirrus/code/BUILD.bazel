@@ -1,12 +1,33 @@
+_WASM_DEPS = [
+    "@llvm-project//llvm:WebAssemblyCodeGen",
+    "@llvm-project//llvm:WebAssemblyInfo",
+    "@llvm-project//llvm:WebAssemblyAsmParser",
+]
+
+_X86_DEPS = [
+    "@llvm-project//llvm:X86CodeGen",
+    "@llvm-project//llvm:X86Info",
+    "@llvm-project//llvm:X86AsmParser",
+]
+
+_ARM_DEPS = [
+    "@llvm-project//llvm:AArch64CodeGen",
+    "@llvm-project//llvm:AArch64Info",
+    "@llvm-project//llvm:AArch64AsmParser",
+]
+
 cc_library(
     name = "code",
     srcs = [
         "builder.cpp",
+        "linker.cpp",
         "module.cpp",
         "scope.cpp",
+        "writer.cpp",
     ],
     hdrs = [
         "builder.hpp",
+        "linker.hpp",
         "module.hpp",
         "scope.hpp",
     ],
@@ -18,18 +39,11 @@ cc_library(
         "//cirrus/lang",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings:str_format",
+        "@llvm-project//lld:Common",
+        "@llvm-project//lld:Wasm",
         "@llvm-project//llvm:CodeGen",
         "@llvm-project//llvm:Linker",
-        "@llvm-project//llvm:WebAssemblyCodeGen",
-        "@llvm-project//llvm:WebAssemblyInfo",
-        "@llvm-project//llvm:WebAssemblyAsmParser",
+        "@llvm-project//llvm:MC",
         "@llvm-project//llvm:common_transforms",
-
-        # "@llvm-project//llvm:AArch64CodeGen",
-        # "@llvm-project//llvm:AArch64Info",
-        # "@llvm-project//llvm:AArch64AsmParser",
-        # "@llvm-project//llvm:X86CodeGen",
-        # "@llvm-project//llvm:X86Info",
-        # "@llvm-project//llvm:X86AsmParser",
-    ],
+    ] + _WASM_DEPS,
 )

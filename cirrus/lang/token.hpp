@@ -24,6 +24,7 @@ enum TokenKind : uint32_t {
     Loop,
     While,
     For,
+    Export,
     Struct,
     Fn,
     Return,

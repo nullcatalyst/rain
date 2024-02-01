@@ -8,6 +8,10 @@
 #include "cirrus/err/simple.hpp"
 #include "cirrus/util/before_return.hpp"
 
+// Always export all functions, even if they are not used.
+// TODO: This is temporary, and should be removed. It's here for easier debugging.
+#define ALWAYS_EXPORT 0
+
 namespace cirrus::code {
 
 void Builder::initialize_llvm() {
@@ -42,6 +46,12 @@ util::Result<Module> Builder::build(const lang::Module& mod) {
             case ast::NodeKind::StructType: {
                 auto llvm_struct_type = build(code_mod, scope, ast::StructType::from(node));
                 FORWARD_ERROR_WITH_TYPE(Module, llvm_struct_type);
+                break;
+            }
+
+            case ast::NodeKind::ExportExpression: {
+                auto llvm_function_type = build(code_mod, scope, ast::ExportExpression::from(node));
+                FORWARD_ERROR_WITH_TYPE(Module, llvm_function_type);
                 break;
             }
 
@@ -123,9 +133,31 @@ util::Result<llvm::Value*> Builder::build(Module& code_mod, Scope& scope,
         case ast::NodeKind::BinaryOperatorExpression:
             return build(code_mod, scope, ast::BinaryOperatorExpression::from(expression));
 
+        case ast::NodeKind::CallExpression:
+            return build(code_mod, scope, ast::CallExpression::from(expression));
+
         default:
             return ERR_PTR(llvm::Value*, err::SimpleError, "not implemented");
     }
+}
+
+util::Result<llvm::Function*> Builder::build(Module& code_mod, Scope& scope,
+                                             const ast::ExportExpression& export_expression) {
+    auto function_expression  = ast::FunctionExpression::from(export_expression.expression());
+    auto llvm_function_result = build(code_mod, scope, function_expression);
+    FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_function_result);
+
+    auto llvm_function = llvm_function_result.unwrap();
+    {
+        // Export the function, making it callable from JS (instead of just WASM).
+        llvm::Attribute wasm_export_attr = llvm::Attribute::get(
+            llvm_function->getContext(), "wasm-export-name", function_expression.name_or_empty());
+        llvm_function->addFnAttr(wasm_export_attr);
+
+        llvm_function->setLinkage(llvm::Function::ExternalLinkage);
+    }
+
+    return OK(llvm::Function*, llvm_function);
 }
 
 util::Result<llvm::Function*> Builder::build(Module& code_mod, Scope& scope,
@@ -148,9 +180,10 @@ util::Result<llvm::Function*> Builder::build(Module& code_mod, Scope& scope,
 
     llvm::FunctionType* llvm_function_type =
         llvm::FunctionType::get(llvm_return_type, llvm_argument_types, false);
-    auto llvm_function =
-        llvm::Function::Create(llvm_function_type, llvm::Function::ExternalLinkage,
-                               function_expression.name_or_empty(), code_mod.llvm_module());
+    llvm::Function* llvm_function = llvm::Function::Create(
+        llvm_function_type,
+        ALWAYS_EXPORT ? llvm::Function::ExternalLinkage : llvm::Function::InternalLinkage,
+        function_expression.name_or_empty(), code_mod.llvm_module());
 
     Scope function_scope(&scope);
 
@@ -184,6 +217,11 @@ util::Result<llvm::Function*> Builder::build(Module& code_mod, Scope& scope,
         FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_expression_result);
     }
 
+    scope.set_variable(function_expression.name_or_empty(), Variable{
+                                                                ._value   = llvm_function,
+                                                                ._mutable = false,
+                                                                ._alloca  = false,
+                                                            });
     return OK(llvm::Function*, llvm_function);
 }
 
@@ -215,6 +253,32 @@ util::Result<llvm::Value*> Builder::build(Module& code_mod, Scope& scope,
                                           const ast::IntegerExpression& integer_expression) {
     return OK(llvm::Value*,
               llvm::ConstantInt::get(*_ctx, llvm::APInt(32, integer_expression.value())));
+}
+
+util::Result<llvm::Value*> Builder::build(Module& code_mod, Scope& scope,
+                                          const ast::CallExpression& call_expression) {
+    // TODO: Get the proper function type instead of assuming all `i32`s.
+    llvm::Type* const                 llvm_i32_type = llvm::Type::getInt32Ty(*_ctx);
+    llvm::SmallVector<llvm::Type*, 4> llvm_argument_types;
+    llvm_argument_types.reserve(call_expression.arguments().size());
+    for (const auto& argument : call_expression.arguments()) {
+        llvm_argument_types.emplace_back(llvm_i32_type);
+    }
+    llvm::FunctionType* const llvm_function_type =
+        llvm::FunctionType::get(llvm_i32_type, llvm_argument_types, false);
+
+    auto callee = build(code_mod, scope, call_expression.callee());
+    FORWARD_ERROR_WITH_TYPE(llvm::Value*, callee);
+
+    llvm::SmallVector<llvm::Value*, 4> llvm_arguments;
+    llvm_arguments.reserve(call_expression.arguments().size());
+    for (const auto& argument : call_expression.arguments()) {
+        auto llvm_argument_result = build(code_mod, scope, argument);
+        FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_argument_result);
+        llvm_arguments.emplace_back(llvm_argument_result.unwrap());
+    }
+
+    return OK(llvm::Value*, _ir.CreateCall(llvm_function_type, callee.unwrap(), llvm_arguments));
 }
 
 util::Result<llvm::Value*> Builder::build(Module& code_mod, Scope& scope,

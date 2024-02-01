@@ -28,6 +28,7 @@ enum class NodeKind {
     BinaryOperatorExpression,
     BlockExpression,
     CallExpression,
+    ExportExpression,
     FunctionExpression,
     IdentifierExpression,
     IfExpression,

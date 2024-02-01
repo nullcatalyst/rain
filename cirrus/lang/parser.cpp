@@ -522,6 +522,27 @@ util::Result<ast::Expression> parse_whole_expression(Lexer& lexer) {
     return parse_rhs(lexer, lhs.unwrap(), Precendence::Unknown);
 }
 
+util::Result<ast::ExportExpression> parse_export(Lexer& lexer) {
+    const auto export_token = lexer.next();
+    if (export_token.kind != TokenKind::Export) {
+        return ERR_PTR(ast::ExportExpression, err::SyntaxError, lexer, export_token.location,
+                       "expected keyword 'export'");
+    }
+
+    const auto next_token = lexer.peek();
+    switch (next_token.kind) {
+        case TokenKind::Fn: {
+            auto result = parse_function(lexer);
+            FORWARD_ERROR_WITH_TYPE(ast::ExportExpression, result);
+            return OK_ALLOC(ast::ExportExpression, std::move(result.unwrap()));
+        }
+
+        default:
+            return ERR_PTR(ast::ExportExpression, err::SyntaxError, lexer, next_token.location,
+                           "unexpected token");
+    }
+}
+
 }  // namespace
 
 util::Result<ast::Type> Parser::parse_type(Lexer& lexer) { return parse_whole_type(lexer); }
@@ -538,6 +559,12 @@ util::Result<Module> Parser::parse(Lexer& lexer) {
         switch (token.kind) {
             case TokenKind::Struct: {
                 auto result = parse_type(lexer);
+                FORWARD_ERROR_WITH_TYPE(Module, result);
+                nodes.emplace_back(std::move(result.unwrap()));
+            }
+
+            case TokenKind::Export: {
+                auto result = parse_export(lexer);
                 FORWARD_ERROR_WITH_TYPE(Module, result);
                 nodes.emplace_back(std::move(result.unwrap()));
             }

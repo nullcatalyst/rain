@@ -30,8 +30,13 @@ bool cirrus_compile_and_print(const char* source, const int optimize) {
         result.unwrap().optimize();
     }
 
-    const auto ir = result.unwrap().llvm_ir();
-    std::cout << ir << std::endl;
+    auto ir = result.unwrap().emit_ir();
+    if (ir.is_error()) {
+        std::cerr << ir.unwrap_error()->message() << std::endl;
+        return false;
+    }
+
+    std::cout << ir.unwrap() << std::endl;
     return true;
 }
 

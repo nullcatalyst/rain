@@ -2,6 +2,7 @@
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Target/TargetMachine.h>
 
 #include <memory>
 
@@ -10,8 +11,9 @@
 namespace cirrus::code {
 
 class Module {
-    std::shared_ptr<llvm::LLVMContext> _ctx;
-    std::unique_ptr<llvm::Module>      _mod;
+    std::shared_ptr<llvm::LLVMContext>   _ctx;
+    std::unique_ptr<llvm::Module>        _mod;
+    std::unique_ptr<llvm::TargetMachine> _target_machine;
 
     Scope _exported_scope;
 
@@ -31,8 +33,10 @@ class Module {
     [[nodiscard]] const Scope& exported_scope() const noexcept { return _exported_scope; }
     [[nodiscard]] Scope&       exported_scope() noexcept { return _exported_scope; }
 
-    void                      optimize();
-    [[nodiscard]] std::string llvm_ir() const;
+    void optimize();
+
+    [[nodiscard]] util::Result<std::string>                         emit_ir() const;
+    [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> emit_obj() const;
 };
 
 }  // namespace cirrus::code

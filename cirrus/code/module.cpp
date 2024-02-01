@@ -1,7 +1,12 @@
 #include "cirrus/code/module.hpp"
 
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/MC/TargetRegistry.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/StandardInstrumentations.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
@@ -14,11 +19,46 @@
 
 namespace cirrus::code {
 
+namespace {
+
+std::unique_ptr<llvm::TargetMachine> get_wasm_target_machine() {
+    // std::cout << "Available targets:\n";
+    // std::for_each(llvm::TargetRegistry::targets().begin(), llvm::TargetRegistry::targets().end(),
+    //               [](const llvm::Target& target) { std::cout << target.getName() << "\n"; });
+    // outputs:
+    // wasm64
+    // wasm32
+
+    std::string error;
+
+    std::string         target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
+    const llvm::Target* target        = llvm::TargetRegistry::lookupTarget(target_triple, error);
+    if (target == nullptr) {
+        std::cerr << "failed to lookup target: " << error << "\n";
+        std::abort();
+    }
+
+    std::string cpu;
+    std::string features =
+        "+simd128,+sign-ext,+bulk-memory,+mutable-globals,+nontrapping-fptoint,+multivalue";
+    return std::unique_ptr<llvm::LLVMTargetMachine>(static_cast<llvm::LLVMTargetMachine*>(
+        target->createTargetMachine(target_triple, cpu, features, llvm::TargetOptions(),
+                                    std::nullopt, std::nullopt, llvm::CodeGenOptLevel::Default)));
+
+    // std::string target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
+    // WebAssemblyTargetMachine(const Target& T, const Triple& TT, StringRef CPU, StringRef FS,
+    //                          const TargetOptions& Options, std::optional<Reloc::Model> RM,
+    //                          std::optional<CodeModel::Model> CM, CodeGenOptLevel OL, bool JIT);
+}
+
+}  // namespace
+
 Module::Module(std::shared_ptr<llvm::LLVMContext> ctx, const std::string_view name)
     : _ctx(std::move(ctx)), _mod(std::make_unique<llvm::Module>(name, *_ctx)) {
-    // Set the target triple for the module
-    _mod->setDataLayout("e-m:e-p:32:32-i64:64-n32:64-S128");
-    _mod->setTargetTriple("wasm32-unknown-unknown");
+    _target_machine = get_wasm_target_machine();
+
+    _mod->setDataLayout(_target_machine->createDataLayout());
+    _mod->setTargetTriple(_target_machine->getTargetTriple().str());
 }
 
 void Module::optimize() {
@@ -55,11 +95,28 @@ void Module::optimize() {
     mpm.run(*_mod, mam);
 }
 
-std::string Module::llvm_ir() const {
+util::Result<std::string> Module::emit_ir() const {
     std::string              str;
     llvm::raw_string_ostream os(str);
     _mod->print(os, nullptr);
-    return os.str();
+    return OK(std::string, os.str());
+}
+
+util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
+    llvm::SmallString<0>      code;
+    llvm::raw_svector_ostream ostream(code);
+    llvm::legacy::PassManager pass_manager;
+    if (_target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                             llvm::CodeGenFileType::ObjectFile)) {
+        std::abort();
+    }
+    pass_manager.run(*_mod);
+
+    // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
+    // always up to date, so there is no need to call flush().
+    // ostream.flush();
+    return OK(std::unique_ptr<llvm::MemoryBuffer>,
+              llvm::MemoryBuffer::getMemBufferCopy(code.str()));
 }
 
 }  // namespace cirrus::code

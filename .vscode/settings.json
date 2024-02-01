@@ -7,6 +7,7 @@
     "files.associations": {
         "*.def": "cpp",
         "*.inc": "cpp",
+        "__availability": "cpp",
         "__bit_reference": "cpp",
         "__config": "cpp",
         "__debug": "cpp",
@@ -77,6 +78,7 @@
         "system_error": "cpp",
         "thread": "cpp",
         "tuple": "cpp",
+        "type_traits": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "unordered_map": "cpp",
@@ -84,6 +86,5 @@
         "valarray": "cpp",
         "variant": "cpp",
         "vector": "cpp",
-        "type_traits": "cpp"
     }
 }

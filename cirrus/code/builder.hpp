@@ -37,6 +37,8 @@ class Builder {
                                      const ast::Expression& expression);
 
     util::Result<llvm::Function*> build(Module& code_mod, Scope& scope,
+                                        const ast::ExportExpression& export_expression);
+    util::Result<llvm::Function*> build(Module& code_mod, Scope& scope,
                                         const ast::FunctionExpression& function_expression);
     util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
                                         const ast::ReturnExpression& return_expression);
@@ -44,6 +46,8 @@ class Builder {
                                         const ast::IntegerExpression& integer_expression);
     util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
                                         const ast::IdentifierExpression& identifier_expression);
+    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+                                        const ast::CallExpression& call_expression);
     util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
                                         const ast::BinaryOperatorExpression& binop_expression);
 };
