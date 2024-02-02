@@ -1,4 +1,4 @@
-#include "cirrus/code/builder.hpp"
+#include "cirrus/code/compiler.hpp"
 
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/MC/TargetRegistry.h>
@@ -56,7 +56,7 @@ llvm::ExecutionEngine* create_interpreter(llvm::Module*        llvm_mod,
 
 }  // namespace
 
-void Builder::initialize_llvm() {
+void Compiler::initialize_llvm() {
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
@@ -77,13 +77,13 @@ void Builder::initialize_llvm() {
     }
 }
 
-Builder::Builder()
+Compiler::Compiler()
     : _llvm_ctx(std::make_shared<llvm::LLVMContext>()),
       _llvm_target_machine(get_wasm_target_machine()),
       _llvm_ir(*_llvm_ctx),
       _builtin_scope(Scope::builtin_scope(*_llvm_ctx)) {}
 
-util::Result<Module> Builder::build(const lang::Module& mod) {
+util::Result<Module> Compiler::build(const lang::Module& mod) {
     llvm::Module*                          llvm_mod    = new llvm::Module("cirrus", *_llvm_ctx);
     std::unique_ptr<llvm::ExecutionEngine> llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
         create_interpreter(llvm_mod, get_wasm_target_machine()));
@@ -121,7 +121,7 @@ util::Result<Module> Builder::build(const lang::Module& mod) {
               Module(_llvm_ctx, _llvm_target_machine, std::move(llvm_mod_clone), std::move(scope)));
 }
 
-util::Result<llvm::Type*> Builder::find_or_build_type(const Context& ctx, const ast::Type& type) {
+util::Result<llvm::Type*> Compiler::find_or_build_type(const Context& ctx, const ast::Type& type) {
     switch (type.kind()) {
         case ast::NodeKind::StructType: {
             const auto struct_type = ast::StructType::from(type);
@@ -158,8 +158,8 @@ util::Result<llvm::Type*> Builder::find_or_build_type(const Context& ctx, const 
     }
 }
 
-util::Result<llvm::StructType*> Builder::build(const Context&         ctx,
-                                               const ast::StructType& struct_type) {
+util::Result<llvm::StructType*> Compiler::build(const Context&         ctx,
+                                                const ast::StructType& struct_type) {
     auto llvm_struct_type = llvm::StructType::create(*_llvm_ctx, struct_type.name_or_empty());
     std::vector<llvm::Type*> llvm_field_types;
     for (const auto& field : struct_type.fields()) {
@@ -171,7 +171,7 @@ util::Result<llvm::StructType*> Builder::build(const Context&         ctx,
     return OK(llvm::StructType*, llvm_struct_type);
 }
 
-util::Result<llvm::Value*> Builder::build(const Context& ctx, const ast::Expression& expression) {
+util::Result<llvm::Value*> Compiler::build(const Context& ctx, const ast::Expression& expression) {
     switch (expression.kind()) {
         case ast::NodeKind::FunctionExpression:
             return build(ctx, ast::FunctionExpression::from(expression));
@@ -205,8 +205,8 @@ util::Result<llvm::Value*> Builder::build(const Context& ctx, const ast::Express
     }
 }
 
-util::Result<llvm::Function*> Builder::build(const Context&               ctx,
-                                             const ast::ExportExpression& export_expression) {
+util::Result<llvm::Function*> Compiler::build(const Context&               ctx,
+                                              const ast::ExportExpression& export_expression) {
     auto function_expression  = ast::FunctionExpression::from(export_expression.expression());
     auto llvm_function_result = build(ctx, function_expression);
     FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_function_result);
@@ -224,8 +224,8 @@ util::Result<llvm::Function*> Builder::build(const Context&               ctx,
     return OK(llvm::Function*, llvm_function);
 }
 
-util::Result<llvm::Function*> Builder::build(const Context&                 ctx,
-                                             const ast::FunctionExpression& function_expression) {
+util::Result<llvm::Function*> Compiler::build(const Context&                 ctx,
+                                              const ast::FunctionExpression& function_expression) {
     llvm::Type* llvm_return_type = llvm::Type::getVoidTy(*_llvm_ctx);
     if (function_expression.return_type().has_value()) {
         auto llvm_return_type_result =
@@ -291,8 +291,8 @@ util::Result<llvm::Function*> Builder::build(const Context&                 ctx,
     return OK(llvm::Function*, llvm_function);
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&               ctx,
-                                          const ast::ReturnExpression& return_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&               ctx,
+                                           const ast::ReturnExpression& return_expression) {
     _returned = true;
 
     if (return_expression.expr().has_value()) {
@@ -306,8 +306,8 @@ util::Result<llvm::Value*> Builder::build(const Context&               ctx,
     return OK(llvm::Value*, nullptr);
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&                   ctx,
-                                          const ast::IdentifierExpression& identifier_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&                   ctx,
+                                           const ast::IdentifierExpression& identifier_expression) {
     const Variable* const var = ctx.scope.find_variable(identifier_expression.name());
     if (var == nullptr) {
         return ERR_PTR(llvm::Value*, err::SimpleError,
@@ -317,19 +317,20 @@ util::Result<llvm::Value*> Builder::build(const Context&                   ctx,
     return OK(llvm::Value*, var->_value);
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&                ctx,
-                                          const ast::IntegerExpression& integer_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&                ctx,
+                                           const ast::IntegerExpression& integer_expression) {
     return OK(llvm::Value*,
               llvm::ConstantInt::get(*_llvm_ctx, llvm::APInt(32, integer_expression.value())));
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&             ctx,
-                                          const ast::CallExpression& call_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&             ctx,
+                                           const ast::CallExpression& call_expression) {
     // TODO: Get the proper function type instead of assuming all `i32`s.
     llvm::Type* const                 llvm_i32_type = llvm::Type::getInt32Ty(*_llvm_ctx);
     llvm::SmallVector<llvm::Type*, 4> llvm_argument_types;
     llvm_argument_types.reserve(call_expression.arguments().size());
     for (const auto& argument : call_expression.arguments()) {
+        // TODO: determine the type of the argument.
         llvm_argument_types.emplace_back(llvm_i32_type);
     }
     llvm::FunctionType* const llvm_function_type =
@@ -350,8 +351,8 @@ util::Result<llvm::Value*> Builder::build(const Context&             ctx,
               _llvm_ir.CreateCall(llvm_function_type, callee.unwrap(), llvm_arguments));
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&                       ctx,
-                                          const ast::BinaryOperatorExpression& binop_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&                       ctx,
+                                           const ast::BinaryOperatorExpression& binop_expression) {
     auto llvm_lhs_result = build(ctx, binop_expression.lhs());
     FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_lhs_result);
     auto llvm_rhs_result = build(ctx, binop_expression.rhs());
@@ -396,8 +397,8 @@ util::Result<llvm::Value*> Builder::build(const Context&                       c
     }
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&             ctx,
-                                          const ast::ExecExpression& exec_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&             ctx,
+                                           const ast::ExecExpression& exec_expression) {
     // TODO: Determine return type from expression.
     llvm::Type*         llvm_return_type = llvm::Type::getInt32Ty(*_llvm_ctx);
     llvm::FunctionType* llvm_function_type =
@@ -430,8 +431,8 @@ util::Result<llvm::Value*> Builder::build(const Context&             ctx,
                                      llvm::APInt(32, llvm_return_value.IntVal.getSExtValue())));
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&              ctx,
-                                          const ast::BlockExpression& block_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&              ctx,
+                                           const ast::BlockExpression& block_expression) {
     Scope   block_scope(ctx.scope);
     Context block_ctx(ctx, block_scope);
     for (const auto& expression : block_expression.expressions()) {
@@ -441,8 +442,8 @@ util::Result<llvm::Value*> Builder::build(const Context&              ctx,
     return OK(llvm::Value*, nullptr);
 }
 
-util::Result<llvm::Value*> Builder::build(const Context&           ctx,
-                                          const ast::IfExpression& if_expression) {
+util::Result<llvm::Value*> Compiler::build(const Context&           ctx,
+                                           const ast::IfExpression& if_expression) {
     auto llvm_condition_result = build(ctx, if_expression.condition());
     FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_condition_result);
 

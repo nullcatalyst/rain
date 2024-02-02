@@ -19,14 +19,14 @@ _ARM_DEPS = [
 cc_library(
     name = "code",
     srcs = [
-        "builder.cpp",
+        "compiler.cpp",
         "linker.cpp",
         "module.cpp",
         "scope.cpp",
         "writer.cpp",
     ],
     hdrs = [
-        "builder.hpp",
+        "compiler.hpp",
         "linker.hpp",
         "module.hpp",
         "scope.hpp",

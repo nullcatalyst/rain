@@ -14,7 +14,7 @@
 
 namespace cirrus::code {
 
-class Builder {
+class Compiler {
     std::shared_ptr<llvm::LLVMContext>   _llvm_ctx;
     std::shared_ptr<llvm::TargetMachine> _llvm_target_machine;
     llvm::IRBuilder<>                    _llvm_ir;
@@ -23,8 +23,8 @@ class Builder {
   public:
     static void initialize_llvm();
 
-    Builder();
-    ~Builder() = default;
+    Compiler();
+    ~Compiler() = default;
 
     util::Result<Module> build(const lang::Module& lang_mod);
 

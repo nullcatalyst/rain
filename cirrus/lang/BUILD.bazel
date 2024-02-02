@@ -31,10 +31,13 @@ cc_library(
 )
 
 cc_test(
-    name = "lang-test",
+    name = "test",
     srcs = [
         "lexer.test.cpp",
         "parser.test.cpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
     ],
     deps = [
         ":lang",

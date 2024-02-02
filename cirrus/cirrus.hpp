@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "cirrus/code/builder.hpp"
+#include "cirrus/code/compiler.hpp"
 #include "cirrus/code/linker.hpp"
 #include "cirrus/lang/lexer.hpp"
 #include "cirrus/lang/parser.hpp"

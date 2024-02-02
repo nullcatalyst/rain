@@ -10,9 +10,9 @@ util::Result<code::Module> compile(const std::string_view source) {
     auto parse_result = parser.parse(lexer);
     FORWARD_ERROR_WITH_TYPE(code::Module, parse_result);
 
-    code::Builder::initialize_llvm();
-    code::Builder builder;
-    return builder.build(parse_result.unwrap());
+    code::Compiler::initialize_llvm();
+    code::Compiler compiler;
+    return compiler.build(parse_result.unwrap());
 }
 
 }  // namespace cirrus
