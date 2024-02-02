@@ -1,7 +1,10 @@
 #pragma once
 
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
+
+#include <memory>
 
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
@@ -12,44 +15,55 @@
 namespace cirrus::code {
 
 class Builder {
-    std::shared_ptr<llvm::LLVMContext> _ctx;
-    llvm::IRBuilder<>                  _ir;
-    Scope                              _builtin_scope;
+    std::shared_ptr<llvm::LLVMContext>   _llvm_ctx;
+    std::shared_ptr<llvm::TargetMachine> _llvm_target_machine;
+    llvm::IRBuilder<>                    _llvm_ir;
+    Scope                                _builtin_scope;
 
   public:
     static void initialize_llvm();
 
-    Builder()
-        : _ctx(std::make_shared<llvm::LLVMContext>()),
-          _ir(*_ctx),
-          _builtin_scope(Scope::builtin_scope(*_ctx)) {}
+    Builder();
     ~Builder() = default;
 
     util::Result<Module> build(const lang::Module& lang_mod);
 
   private:
-    util::Result<llvm::Type*>       find_or_build_type(Module& code_mod, Scope& scope,
-                                                       const ast::Type& type);
-    util::Result<llvm::StructType*> build(Module& code_mod, Scope& scope,
-                                          const ast::StructType& struct_type);
+    struct Context {
+        llvm::Module&          llvm_mod;
+        llvm::ExecutionEngine& llvm_engine;
+        Scope&                 scope;
 
-    util::Result<llvm::Value*> build(Module& code_mod, Scope& scope,
-                                     const ast::Expression& expression);
+        Context(llvm::Module& llvm_mod, llvm::ExecutionEngine& llvm_engine, Scope& scope)
+            : llvm_mod(llvm_mod), llvm_engine(llvm_engine), scope(scope) {}
+        Context(const Context& other, Scope& scope)
+            : llvm_mod(other.llvm_mod), llvm_engine(other.llvm_engine), scope(scope) {}
+    };
 
-    util::Result<llvm::Function*> build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Type*>       find_or_build_type(const Context& ctx, const ast::Type& type);
+    util::Result<llvm::StructType*> build(const Context& ctx, const ast::StructType& struct_type);
+
+    util::Result<llvm::Value*> build(const Context& ctx, const ast::Expression& expression);
+
+    util::Result<llvm::Function*> build(const Context&               ctx,
                                         const ast::ExportExpression& export_expression);
-    util::Result<llvm::Function*> build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Function*> build(const Context&                 ctx,
                                         const ast::FunctionExpression& function_expression);
-    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Value*>    build(const Context&               ctx,
                                         const ast::ReturnExpression& return_expression);
-    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Value*>    build(const Context&                ctx,
                                         const ast::IntegerExpression& integer_expression);
-    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Value*>    build(const Context&                   ctx,
                                         const ast::IdentifierExpression& identifier_expression);
-    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Value*>    build(const Context&             ctx,
                                         const ast::CallExpression& call_expression);
-    util::Result<llvm::Value*>    build(Module& code_mod, Scope& scope,
+    util::Result<llvm::Value*>    build(const Context&                       ctx,
                                         const ast::BinaryOperatorExpression& binop_expression);
+    util::Result<llvm::Value*>    build(const Context&             ctx,
+                                        const ast::ExecExpression& exec_expression);
+    util::Result<llvm::Value*>    build(const Context&              ctx,
+                                        const ast::BlockExpression& block_expression);
+    util::Result<llvm::Value*>    build(const Context& ctx, const ast::IfExpression& if_expression);
 };
 
 }  // namespace cirrus::code

@@ -8,25 +8,29 @@
 int main(const int argc, const char* const argv[]) {
     using namespace cirrus;
 
-#define ABORT_ON_ERROR(result)                                 \
+#define ABORT_ON_ERROR(result, msg)                            \
     if (result.is_error()) {                                   \
+        std::cerr << COUT_COLOR_RED(msg << '\n');              \
         std::cerr << result.unwrap_error()->message() << "\n"; \
         return 1;                                              \
     }
 
     const std::string_view source = R"(
-    fn demo_function(x: i32, y: i32) -> i32 {
-        return x * y
+    fn fib(n: i32) -> i32 {
+        if n <= 1 {
+            return n
+        }
+        return fib(n - 1) + fib(n - 2)
     }
 
     export fn main() -> i32 {
-        return demo_function(2, 3)
+        return #fib(6)
     }
     )";
     std::cout << COUT_COLOR_CYAN("\nSource code:\n") << source << "\n\n";
 
     auto result = compile(source);
-    ABORT_ON_ERROR(result);
+    ABORT_ON_ERROR(result, "Failed to compile");
 
     {
         // Optimize the LLVM module. This is done in place.
@@ -36,24 +40,24 @@ int main(const int argc, const char* const argv[]) {
     {
         // Print the LLVM IR. This is useful for debugging.
         auto ir = result.unwrap().emit_ir();
-        ABORT_ON_ERROR(ir);
+        ABORT_ON_ERROR(ir, "Failed to emit IR");
         std::cout << ir.unwrap() << "\n";
     }
 
-    auto obj = result.unwrap().emit_obj();
-    ABORT_ON_ERROR(obj);
+    // auto obj = result.unwrap().emit_obj();
+    // ABORT_ON_ERROR(obj, "Failed to emit object file");
 
-    {
-        // Link the modules into a single `.wasm` file.
-        code::Linker linker;
-        linker.add(std::move(obj.unwrap()));
+    // {
+    //     // Link the modules into a single `.wasm` file.
+    //     code::Linker linker;
+    //     linker.add(std::move(obj.unwrap()));
 
-        auto wasm = linker.link();
-        ABORT_ON_ERROR(wasm);
+    //     auto wasm = linker.link();
+    //     ABORT_ON_ERROR(wasm);
 
-        std::ofstream out_file("/Users/scott/git/cirrus/out.wasm", std::ios::binary);
-        out_file.write(wasm.unwrap()->getBufferStart(), wasm.unwrap()->getBufferSize());
-    }
+    //     std::ofstream out_file("/Users/scott/git/cirrus/out.wasm", std::ios::binary);
+    //     out_file.write(wasm.unwrap()->getBufferStart(), wasm.unwrap()->getBufferSize());
+    // }
 
     return 0;
 

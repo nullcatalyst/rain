@@ -11,9 +11,9 @@
 namespace cirrus::code {
 
 class Module {
-    std::shared_ptr<llvm::LLVMContext>   _ctx;
-    std::unique_ptr<llvm::Module>        _mod;
-    std::unique_ptr<llvm::TargetMachine> _target_machine;
+    std::shared_ptr<llvm::LLVMContext>   _llvm_ctx;
+    std::unique_ptr<llvm::Module>        _llvm_mod;
+    std::shared_ptr<llvm::TargetMachine> _llvm_target_machine;
 
     Scope _exported_scope;
 
@@ -22,13 +22,14 @@ class Module {
     Module(const Module&) = delete;
     Module(Module&&)      = default;
 
-    Module(std::shared_ptr<llvm::LLVMContext> ctx, const std::string_view name);
-    Module(std::shared_ptr<llvm::LLVMContext> ctx) : Module(std::move(ctx), "cirrus") {}
+    Module(std::shared_ptr<llvm::LLVMContext>   ctx,
+           std::shared_ptr<llvm::TargetMachine> target_machine, std::unique_ptr<llvm::Module> mod,
+           Scope exported_scope);
     ~Module() = default;
 
-    [[nodiscard]] const llvm::LLVMContext& llvm_context() const noexcept { return *_ctx; }
-    [[nodiscard]] const llvm::Module&      llvm_module() const noexcept { return *_mod; }
-    [[nodiscard]] llvm::Module&            llvm_module() noexcept { return *_mod; }
+    [[nodiscard]] const llvm::LLVMContext& llvm_context() const noexcept { return *_llvm_ctx; }
+    [[nodiscard]] const llvm::Module&      llvm_module() const noexcept { return *_llvm_mod; }
+    [[nodiscard]] llvm::Module&            llvm_module() noexcept { return *_llvm_mod; }
 
     [[nodiscard]] const Scope& exported_scope() const noexcept { return _exported_scope; }
     [[nodiscard]] Scope&       exported_scope() noexcept { return _exported_scope; }

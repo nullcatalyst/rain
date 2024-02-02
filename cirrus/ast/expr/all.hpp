@@ -3,6 +3,7 @@
 #include "cirrus/ast/expr/binary_operator.hpp"
 #include "cirrus/ast/expr/block.hpp"
 #include "cirrus/ast/expr/call.hpp"
+#include "cirrus/ast/expr/exec.hpp"
 #include "cirrus/ast/expr/export.hpp"
 #include "cirrus/ast/expr/function.hpp"
 #include "cirrus/ast/expr/identifier.hpp"

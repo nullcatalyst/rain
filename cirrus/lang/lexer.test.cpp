@@ -138,11 +138,11 @@ TEST(Lexer, single_char_operators) {
 TEST(Lexer, multi_char_operators) {
     Lexer lexer("-> << >> == != <= >=");
     EXPECT_EQ(lexer.next().kind, TokenKind::RArrow);
-    EXPECT_EQ(lexer.next().kind, TokenKind::LessThanLessThan);
-    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterThanGreaterThan);
+    EXPECT_EQ(lexer.next().kind, TokenKind::LessLess);
+    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterGreater);
     EXPECT_EQ(lexer.next().kind, TokenKind::EqualEqual);
     EXPECT_EQ(lexer.next().kind, TokenKind::ExclaimEqual);
-    EXPECT_EQ(lexer.next().kind, TokenKind::LessThanEqual);
-    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterThanEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::LessEqual);
+    EXPECT_EQ(lexer.next().kind, TokenKind::GreaterEqual);
     EXPECT_EQ(lexer.next().kind, TokenKind::Eof);
 }

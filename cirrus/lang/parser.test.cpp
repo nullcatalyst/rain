@@ -174,6 +174,19 @@ TEST(Parser, parse_member_good) {
     }
 }
 
+TEST(Parser, parse_unary_operator_good) {
+    {
+        // Compile-time executed expression
+        Lexer      lexer("#fib(4)");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::ExecExpression::is(expr), true);
+    }
+}
+
 TEST(Parser, parse_binary_operator_good) {
     Lexer      lexer("1 + 1");
     Parser     parser;
@@ -256,6 +269,26 @@ TEST(Parser, parse_call_good) {
 
         const auto call_expr = ast::CallExpression::from(expr);
         EXPECT_EQ(call_expr.arguments().size(), 3);
+    }
+
+    {
+        // Mising function calls with binary operators
+        Lexer      lexer("one() + two()");
+        Parser     parser;
+        const auto result = parser.parse_expression(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        const auto expr = result.unwrap();
+        ASSERT_EQ(ast::BinaryOperatorExpression::is(expr), true);
+
+        const auto binop_expr = ast::BinaryOperatorExpression::from(expr);
+        EXPECT_EQ(binop_expr.op(), ast::BinaryOperator::Add);
+
+        const auto lhs = binop_expr.lhs();
+        ASSERT_EQ(ast::CallExpression::is(lhs), true);
+
+        const auto rhs = binop_expr.rhs();
+        ASSERT_EQ(ast::CallExpression::is(rhs), true);
     }
 }
 
@@ -445,4 +478,26 @@ TEST(Parser, parse_function_good) {
         const auto fn_expr = ast::FunctionExpression::from(expr);
         EXPECT_EQ(fn_expr.expressions().size(), 1);
     }
+}
+
+TEST(Parser, parse_export_good) {
+    {
+        // Export a single function
+        Lexer      lexer("export fn one() { return 1 }");
+        Parser     parser;
+        const auto result = parser.parse(lexer);
+        ASSERT_NOT_ERROR(result);
+
+        ASSERT_EQ(result.unwrap().nodes().size(), 1);
+    }
+
+    // {
+    //     // Export two functions
+    //     Lexer      lexer("export fn one() { 1 }\nexport fn two() { 2 }\n");
+    //     Parser     parser;
+    //     const auto result = parser.parse(lexer);
+    //     ASSERT_NOT_ERROR(result);
+
+    //     ASSERT_EQ(result.unwrap().nodes().size(), 2);
+    // }
 }

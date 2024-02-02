@@ -19,46 +19,15 @@
 
 namespace cirrus::code {
 
-namespace {
-
-std::unique_ptr<llvm::TargetMachine> get_wasm_target_machine() {
-    // std::cout << "Available targets:\n";
-    // std::for_each(llvm::TargetRegistry::targets().begin(), llvm::TargetRegistry::targets().end(),
-    //               [](const llvm::Target& target) { std::cout << target.getName() << "\n"; });
-    // outputs:
-    // wasm64
-    // wasm32
-
-    std::string error;
-
-    std::string         target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
-    const llvm::Target* target        = llvm::TargetRegistry::lookupTarget(target_triple, error);
-    if (target == nullptr) {
-        std::cerr << "failed to lookup target: " << error << "\n";
-        std::abort();
-    }
-
-    std::string cpu;
-    std::string features =
-        "+simd128,+sign-ext,+bulk-memory,+mutable-globals,+nontrapping-fptoint,+multivalue";
-    return std::unique_ptr<llvm::LLVMTargetMachine>(static_cast<llvm::LLVMTargetMachine*>(
-        target->createTargetMachine(target_triple, cpu, features, llvm::TargetOptions(),
-                                    std::nullopt, std::nullopt, llvm::CodeGenOptLevel::Default)));
-
-    // std::string target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
-    // WebAssemblyTargetMachine(const Target& T, const Triple& TT, StringRef CPU, StringRef FS,
-    //                          const TargetOptions& Options, std::optional<Reloc::Model> RM,
-    //                          std::optional<CodeModel::Model> CM, CodeGenOptLevel OL, bool JIT);
-}
-
-}  // namespace
-
-Module::Module(std::shared_ptr<llvm::LLVMContext> ctx, const std::string_view name)
-    : _ctx(std::move(ctx)), _mod(std::make_unique<llvm::Module>(name, *_ctx)) {
-    _target_machine = get_wasm_target_machine();
-
-    _mod->setDataLayout(_target_machine->createDataLayout());
-    _mod->setTargetTriple(_target_machine->getTargetTriple().str());
+Module::Module(std::shared_ptr<llvm::LLVMContext>   ctx,
+               std::shared_ptr<llvm::TargetMachine> target_machine,
+               std::unique_ptr<llvm::Module> mod, Scope exported_scope)
+    : _llvm_ctx(std::move(ctx)),
+      _llvm_mod(std::move(mod)),
+      _llvm_target_machine(std::move(target_machine)),
+      _exported_scope(std::move(exported_scope)) {
+    // _mod->setDataLayout(_target_machine->createDataLayout());
+    // _mod->setTargetTriple(_target_machine->getTargetTriple().str());
 }
 
 void Module::optimize() {
@@ -68,7 +37,7 @@ void Module::optimize() {
     auto cgam = llvm::CGSCCAnalysisManager();
     auto mam  = llvm::ModuleAnalysisManager();
     auto pic  = llvm::PassInstrumentationCallbacks();
-    auto si   = llvm::StandardInstrumentations(*_ctx, /*DebugLogging*/ false);
+    auto si   = llvm::StandardInstrumentations(*_llvm_ctx, /*DebugLogging*/ false);
     si.registerCallbacks(pic, &mam);
 
     auto fpm = llvm::FunctionPassManager();
@@ -92,13 +61,13 @@ void Module::optimize() {
     llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::Os,
                                                                    /*LTOPreLink*/ false);
     mpm.addPass(llvm::createModuleToFunctionPassAdaptor(std::move(fpm)));
-    mpm.run(*_mod, mam);
+    mpm.run(*_llvm_mod, mam);
 }
 
 util::Result<std::string> Module::emit_ir() const {
     std::string              str;
     llvm::raw_string_ostream os(str);
-    _mod->print(os, nullptr);
+    _llvm_mod->print(os, nullptr);
     return OK(std::string, os.str());
 }
 
@@ -106,11 +75,11 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
     llvm::SmallString<0>      code;
     llvm::raw_svector_ostream ostream(code);
     llvm::legacy::PassManager pass_manager;
-    if (_target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-                                             llvm::CodeGenFileType::ObjectFile)) {
+    if (_llvm_target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                                  llvm::CodeGenFileType::ObjectFile)) {
         std::abort();
     }
-    pass_manager.run(*_mod);
+    pass_manager.run(*_llvm_mod);
 
     // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
     // always up to date, so there is no need to call flush().

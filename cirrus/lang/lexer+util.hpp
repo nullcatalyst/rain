@@ -58,8 +58,8 @@ constexpr std::array<TokenKind, 128> OPERATORS = []() {
     operators['%'] = TokenKind::Percent;
 
     operators['='] = TokenKind::Equal;
-    operators['<'] = TokenKind::LessThan;
-    operators['>'] = TokenKind::GreaterThan;
+    operators['<'] = TokenKind::Less;
+    operators['>'] = TokenKind::Greater;
 
     operators['('] = TokenKind::LRoundBracket;
     operators[')'] = TokenKind::RRoundBracket;
@@ -104,22 +104,22 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
                     break;
             }
 
-        case TokenKind::LessThan:
+        case TokenKind::Less:
             switch (*(index + 1)) {
                 case '=':
-                    return std::tuple(TokenKind::LessThanEqual, 2);
+                    return std::tuple(TokenKind::LessEqual, 2);
                 case '<':
-                    return std::tuple(TokenKind::LessThanLessThan, 2);
+                    return std::tuple(TokenKind::LessLess, 2);
                 default:
                     break;
             }
 
-        case TokenKind::GreaterThan:
+        case TokenKind::Greater:
             switch (*(index + 1)) {
                 case '=':
-                    return std::tuple(TokenKind::GreaterThanEqual, 2);
+                    return std::tuple(TokenKind::GreaterEqual, 2);
                 case '>':
-                    return std::tuple(TokenKind::GreaterThanGreaterThan, 2);
+                    return std::tuple(TokenKind::GreaterGreater, 2);
                 default:
                     break;
             }

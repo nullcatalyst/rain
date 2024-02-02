@@ -236,7 +236,7 @@ util::Result<ast::BlockExpression> parse_block(Lexer& lexer) {
         const auto next_token = lexer.peek();
         if (next_token.kind == TokenKind::RCurlyBracket) {
             lexer.next();  // Consume the '}' token
-            break;
+            return OK_ALLOC(ast::BlockExpression, std::move(expressions));
         }
 
         auto expr = parse_whole_expression(lexer);
@@ -245,7 +245,7 @@ util::Result<ast::BlockExpression> parse_block(Lexer& lexer) {
         expressions.emplace_back(std::move(expr.unwrap()));
     }
 
-    return OK_ALLOC(ast::BlockExpression, std::move(expressions));
+    __builtin_unreachable();
 }
 
 util::Result<ast::IfExpression> parse_if(Lexer& lexer) {
@@ -369,6 +369,20 @@ util::Result<ast::ReturnExpression> parse_return(Lexer& lexer) {
     return OK_ALLOC(ast::ReturnExpression, std::move(expr.unwrap()));
 }
 
+util::Result<ast::Expression>     parse_lhs(Lexer& lexer);
+util::Result<ast::ExecExpression> parse_exec(Lexer& lexer) {
+    const auto token = lexer.next();
+    if (token.kind != TokenKind::Hash) {
+        return ERR_PTR(ast::ExecExpression, err::SyntaxError, lexer, token.location,
+                       "expected '#'");
+    }
+
+    auto expr = parse_lhs(lexer);
+    FORWARD_ERROR_WITH_TYPE(ast::ExecExpression, expr);
+
+    return OK_ALLOC(ast::ExecExpression, std::move(expr.unwrap()));
+}
+
 enum Precendence : int {
     Unknown        = 0,
     Logical        = 10,  // And, Or
@@ -415,6 +429,22 @@ ast::BinaryOperator get_operator_for_token(Token token) {
             return ast::BinaryOperator::Or;
         case TokenKind::Caret:
             return ast::BinaryOperator::Xor;
+        case TokenKind::LessLess:
+            return ast::BinaryOperator::ShiftLeft;
+        case TokenKind::GreaterGreater:
+            return ast::BinaryOperator::ShiftRight;
+        case TokenKind::EqualEqual:
+            return ast::BinaryOperator::Equal;
+        case TokenKind::ExclaimEqual:
+            return ast::BinaryOperator::NotEqual;
+        case TokenKind::Less:
+            return ast::BinaryOperator::Less;
+        case TokenKind::Greater:
+            return ast::BinaryOperator::Greater;
+        case TokenKind::LessEqual:
+            return ast::BinaryOperator::LessEqual;
+        case TokenKind::GreaterEqual:
+            return ast::BinaryOperator::GreaterEqual;
         default:
             return ast::BinaryOperator::Unknown;
     }
@@ -452,6 +482,14 @@ util::Result<ast::Expression> parse_lhs(Lexer& lexer) {
         case TokenKind::Return:
             expression = parse_return(lexer);
             break;
+
+        case TokenKind::Hash:
+            expression = parse_exec(lexer);
+            break;
+
+        case TokenKind::Eof:
+            return ERR_PTR(ast::Expression, err::SyntaxError, lexer, token.location,
+                           "unexpected end of file");
 
         default:
             return ERR_PTR(ast::Expression, err::SyntaxError, lexer, token.location,
@@ -561,21 +599,29 @@ util::Result<Module> Parser::parse(Lexer& lexer) {
                 auto result = parse_type(lexer);
                 FORWARD_ERROR_WITH_TYPE(Module, result);
                 nodes.emplace_back(std::move(result.unwrap()));
+                break;
             }
 
             case TokenKind::Export: {
                 auto result = parse_export(lexer);
                 FORWARD_ERROR_WITH_TYPE(Module, result);
                 nodes.emplace_back(std::move(result.unwrap()));
+                break;
             }
 
-            case TokenKind::Eof:
-                return util::Result<Module>::ok(Module(std::move(nodes)));
-
-            default: {
-                auto result = parse_expression(lexer);
+            case TokenKind::Fn: {
+                auto result = parse_function(lexer);
                 FORWARD_ERROR_WITH_TYPE(Module, result);
                 nodes.emplace_back(std::move(result.unwrap()));
+                break;
+            }
+
+            case TokenKind::Eof: {
+                return util::Result<Module>::ok(Module(std::move(nodes)));
+            }
+
+            default: {
+                return ERR_PTR(Module, err::SyntaxError, lexer, token.location, "unexpected token");
             }
         }
     }
