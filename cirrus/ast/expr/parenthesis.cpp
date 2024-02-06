@@ -3,20 +3,12 @@
 namespace cirrus::ast {
 
 const ExpressionVtbl ParenthesisExpression::_vtbl{
-    /* Node */ {
-        /* util::RetainableVtbl */ {
-            .retain  = util::_Retainable_vtbl.retain,
-            .release = util::_Retainable_vtbl.release,
-            .drop =
-                [](const util::RetainableVtbl* const vtbl,
-                   util::RetainableData* const       data) noexcept {
-                    ParenthesisExpressionData* _data =
-                        static_cast<ParenthesisExpressionData*>(data);
-                    delete _data;
-                },
+    EXPRESSION_VTBL_COMMON_IMPL(Parenthesis),
+    .compile_time_able =
+        [](const ExpressionVtbl* const vtbl, ExpressionData* const data) noexcept {
+            const ParenthesisExpressionData* _data = static_cast<ParenthesisExpressionData*>(data);
+            return _data->expr.compile_time_able();
         },
-        /*.kind = */ NodeKind::ParenthesisExpression,
-    },
 };
 
 ParenthesisExpression ParenthesisExpression::alloc(const Expression expr) noexcept {

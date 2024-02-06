@@ -20,6 +20,10 @@ cc_library(
     name = "code",
     srcs = [
         "compiler.cpp",
+        "compiler+lit.cpp",
+        "compiler+op.cpp",
+        "compiler+stmt.cpp",
+        "compiler+type.cpp",
         "linker.cpp",
         "module.cpp",
         "scope.cpp",

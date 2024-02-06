@@ -16,7 +16,7 @@ class Parser {
     [[nodiscard]] util::Result<ast::Type>       parse_type(Lexer& lexer);
     [[nodiscard]] util::Result<ast::Expression> parse_expression(Lexer& lexer);
 
-    [[nodiscard]] util::Result<Module> parse(Lexer& lexer);
+    [[nodiscard]] util::Result<ParsedModule> parse(Lexer& lexer);
 };
 
 }  // namespace cirrus::lang

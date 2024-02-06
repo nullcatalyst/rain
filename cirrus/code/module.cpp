@@ -59,7 +59,9 @@ void Module::optimize() {
     pb.crossRegisterProxies(lam, fam, cgam, mam);
 
     llvm::ModulePassManager mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::Os,
-                                                                   /*LTOPreLink*/ false);
+                                                                   /*LTOPreLink*/ true);
+    // llvm::ModulePassManager mpm = pb.buildModuleInlinerPipeline(
+    //     llvm::OptimizationLevel::Os, llvm::ThinOrFullLTOPhase::ThinLTOPreLink);
     mpm.addPass(llvm::createModuleToFunctionPassAdaptor(std::move(fpm)));
     mpm.run(*_llvm_mod, mam);
 }

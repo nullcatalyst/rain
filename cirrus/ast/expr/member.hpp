@@ -9,13 +9,9 @@ struct MemberExpressionData : public ExpressionData {
     std::string_view member;
 };
 
-struct MemberExpression
-    : public IExpression<MemberExpression, ExpressionVtbl, MemberExpressionData> {
-    using IExpression<MemberExpression, ExpressionVtbl, MemberExpressionData>::IExpression;
+DECLARE_EXPRESSION(Member) {
+    EXPRESSION_COMMON_IMPL(Member);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static MemberExpression alloc(Expression expr, std::string_view member) noexcept;
 
     [[nodiscard]] constexpr const Expression& expr() const noexcept { return _data->expr; }

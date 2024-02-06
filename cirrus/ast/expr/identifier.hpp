@@ -10,13 +10,9 @@ struct IdentifierExpressionData : public ExpressionData {
     std::string_view name;
 };
 
-struct IdentifierExpression
-    : public IExpression<IdentifierExpression, ExpressionVtbl, IdentifierExpressionData> {
-    using IExpression<IdentifierExpression, ExpressionVtbl, IdentifierExpressionData>::IExpression;
+DECLARE_EXPRESSION(Identifier) {
+    EXPRESSION_COMMON_IMPL(Identifier);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static IdentifierExpression alloc(const std::string_view name) noexcept;
 
     [[nodiscard]] constexpr std::string_view name() const noexcept { return _data->name; }

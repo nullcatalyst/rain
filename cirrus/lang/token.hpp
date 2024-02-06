@@ -24,10 +24,13 @@ enum TokenKind : uint32_t {
     Loop,
     While,
     For,
+    Return,
+    Break,
+    Continue,
     Export,
     Struct,
     Fn,
-    Return,
+    Let,
 
     // Operators
     Hash,

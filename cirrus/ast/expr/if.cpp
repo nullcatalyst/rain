@@ -3,35 +3,14 @@
 namespace cirrus::ast {
 
 const ExpressionVtbl IfExpression::_vtbl{
-    /* Node */ {
-        /* util::RetainableVtbl */ {
-            .retain  = util::_Retainable_vtbl.retain,
-            .release = util::_Retainable_vtbl.release,
-            .drop =
-                [](const util::RetainableVtbl* const vtbl,
-                   util::RetainableData* const       data) noexcept {
-                    IfExpressionData* _data = static_cast<IfExpressionData*>(data);
-                    delete _data;
-                },
+    EXPRESSION_VTBL_COMMON_IMPL(If),
+    .compile_time_able =
+        [](const ExpressionVtbl* const vtbl, ExpressionData* const data) noexcept {
+            const IfExpressionData* _data = static_cast<IfExpressionData*>(data);
+            return _data->condition.compile_time_able() && _data->then.compile_time_able() &&
+                   (!_data->else_.has_value() || _data->else_.value().compile_time_able());
         },
-        /*.kind = */ NodeKind::IfExpression,
-    },
 };
-
-IfExpression IfExpression::alloc(Expression condition, Expression then) noexcept {
-    IfExpressionData* data = new IfExpressionData{};
-    data->then             = std::move(then);
-    data->condition        = std::move(condition);
-    return IfExpression::from_raw(&IfExpression::_vtbl, data);
-}
-
-IfExpression IfExpression::alloc(Expression condition, Expression then, Expression else_) noexcept {
-    IfExpressionData* data = new IfExpressionData{};
-    data->then             = std::move(then);
-    data->condition        = std::move(condition);
-    data->else_            = std::move(else_);
-    return IfExpression::from_raw(&IfExpression::_vtbl, data);
-}
 
 IfExpression IfExpression::alloc(Expression condition, Expression then,
                                  std::optional<Expression> else_) noexcept {

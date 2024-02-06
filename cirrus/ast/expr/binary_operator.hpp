@@ -30,14 +30,9 @@ struct BinaryOperatorExpressionData : public ExpressionData {
     BinaryOperator op;
 };
 
-struct BinaryOperatorExpression
-    : public IExpression<BinaryOperatorExpression, ExpressionVtbl, BinaryOperatorExpressionData> {
-    using IExpression<BinaryOperatorExpression, ExpressionVtbl,
-                      BinaryOperatorExpressionData>::IExpression;
+DECLARE_EXPRESSION(BinaryOperator) {
+    EXPRESSION_COMMON_IMPL(BinaryOperator);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static BinaryOperatorExpression alloc(Expression lhs, Expression rhs,
                                                         BinaryOperator op) noexcept;
 

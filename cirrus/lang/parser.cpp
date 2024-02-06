@@ -356,6 +356,34 @@ util::Result<ast::FunctionExpression> parse_function(Lexer& lexer) {
                     std::move(arguments), std::move(body.unwrap().expressions()));
 }
 
+util::Result<ast::LetExpression> parse_let(Lexer& lexer) {
+    const auto let_token = lexer.next();
+    if (let_token.kind != TokenKind::Let) {
+        return ERR_PTR(ast::LetExpression, err::SyntaxError, lexer, let_token.location,
+                       "expected keyword 'let'");
+    }
+
+    const auto name_token = lexer.next();
+    if (name_token.kind != TokenKind::Identifier) {
+        return ERR_PTR(ast::LetExpression, err::SyntaxError, lexer, name_token.location,
+                       "expected variable name after 'let'");
+    }
+    const std::string_view let_name = name_token.location.source;
+
+    const auto eq_token = lexer.next();
+    if (eq_token.kind != TokenKind::Equal) {
+        return ERR_PTR(ast::LetExpression, err::SyntaxError, lexer, eq_token.location,
+                       "expected '=' between variable name and initial value");
+    }
+
+    auto value = parse_whole_expression(lexer);
+    FORWARD_ERROR_WITH_TYPE(ast::LetExpression, value);
+
+    // TODO: Handle the 'mutable' keyword
+    bool mutable_ = true;
+    return OK_ALLOC(ast::LetExpression, std::move(let_name), std::move(value.unwrap()), mutable_);
+}
+
 util::Result<ast::ReturnExpression> parse_return(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Return) {
@@ -479,10 +507,6 @@ util::Result<ast::Expression> parse_lhs(Lexer& lexer) {
             expression = parse_function(lexer);
             break;
 
-        case TokenKind::Return:
-            expression = parse_return(lexer);
-            break;
-
         case TokenKind::Hash:
             expression = parse_exec(lexer);
             break;
@@ -554,10 +578,22 @@ util::Result<ast::Expression> parse_rhs(Lexer& lexer, ast::Expression lhs_expres
 }
 
 util::Result<ast::Expression> parse_whole_expression(Lexer& lexer) {
-    auto lhs = parse_lhs(lexer);
-    FORWARD_ERROR(lhs);
+    // Handle the expressions that are only allowed at the top level
+    const auto token = lexer.peek();
+    switch (token.kind) {
+        case TokenKind::Let:
+            return parse_let(lexer);
 
-    return parse_rhs(lexer, lhs.unwrap(), Precendence::Unknown);
+        case TokenKind::Return:
+            return parse_return(lexer);
+
+        default:
+            // Default to parsing any type of expression that can be combined with operators
+            auto lhs = parse_lhs(lexer);
+            FORWARD_ERROR(lhs);
+
+            return parse_rhs(lexer, lhs.unwrap(), Precendence::Unknown);
+    }
 }
 
 util::Result<ast::ExportExpression> parse_export(Lexer& lexer) {
@@ -589,7 +625,7 @@ util::Result<ast::Expression> Parser::parse_expression(Lexer& lexer) {
     return parse_whole_expression(lexer);
 }
 
-util::Result<Module> Parser::parse(Lexer& lexer) {
+util::Result<ParsedModule> Parser::parse(Lexer& lexer) {
     std::vector<ast::Node> nodes;
 
     for (;;) {
@@ -597,31 +633,32 @@ util::Result<Module> Parser::parse(Lexer& lexer) {
         switch (token.kind) {
             case TokenKind::Struct: {
                 auto result = parse_type(lexer);
-                FORWARD_ERROR_WITH_TYPE(Module, result);
+                FORWARD_ERROR_WITH_TYPE(ParsedModule, result);
                 nodes.emplace_back(std::move(result.unwrap()));
                 break;
             }
 
             case TokenKind::Export: {
                 auto result = parse_export(lexer);
-                FORWARD_ERROR_WITH_TYPE(Module, result);
+                FORWARD_ERROR_WITH_TYPE(ParsedModule, result);
                 nodes.emplace_back(std::move(result.unwrap()));
                 break;
             }
 
             case TokenKind::Fn: {
                 auto result = parse_function(lexer);
-                FORWARD_ERROR_WITH_TYPE(Module, result);
+                FORWARD_ERROR_WITH_TYPE(ParsedModule, result);
                 nodes.emplace_back(std::move(result.unwrap()));
                 break;
             }
 
             case TokenKind::Eof: {
-                return util::Result<Module>::ok(Module(std::move(nodes)));
+                return OK(ParsedModule, std::move(nodes));
             }
 
             default: {
-                return ERR_PTR(Module, err::SyntaxError, lexer, token.location, "unexpected token");
+                return ERR_PTR(ParsedModule, err::SyntaxError, lexer, token.location,
+                               "unexpected token");
             }
         }
     }

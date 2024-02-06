@@ -12,15 +12,9 @@ struct IfExpressionData : public ExpressionData {
     std::optional<Expression> else_;
 };
 
-struct IfExpression : public IExpression<IfExpression, ExpressionVtbl, IfExpressionData> {
-    using IExpression<IfExpression, ExpressionVtbl, IfExpressionData>::IExpression;
+DECLARE_EXPRESSION(If) {
+    EXPRESSION_COMMON_IMPL(If);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
-    [[nodiscard]] static IfExpression alloc(Expression condition, Expression then) noexcept;
-    [[nodiscard]] static IfExpression alloc(Expression condition, Expression then,
-                                            Expression else_) noexcept;
     [[nodiscard]] static IfExpression alloc(Expression condition, Expression then,
                                             std::optional<Expression> else_) noexcept;
 

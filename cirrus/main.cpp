@@ -23,7 +23,25 @@ int main(const int argc, const char* const argv[]) {
         return fib(n - 1) + fib(n - 2)
     }
 
+    // Iterative fib
+    // fn fib2(n: i32) -> i32 {
+    //     let mut a = 0
+    //     let mut b = 1
+    //     for _ in 0..n {
+    //         let tmp = a
+    //         a = b
+    //         b = tmp + b
+    //     }
+    //     return a
+    // }
+
+    fn double(n: i32) -> i32 {
+        let n = n * 2
+        return n
+    }
+
     export fn main() -> i32 {
+        let i = double(42)
         return #fib(6)
     }
     )";

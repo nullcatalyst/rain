@@ -20,17 +20,12 @@ struct FunctionExpressionData : public ExpressionData {
     std::vector<Expression>           expressions;
 };
 
-struct FunctionExpression
-    : public IExpression<FunctionExpression, ExpressionVtbl, FunctionExpressionData> {
-    using IExpression<FunctionExpression, ExpressionVtbl, FunctionExpressionData>::IExpression;
+DECLARE_EXPRESSION(Function) {
+    EXPRESSION_COMMON_IMPL(Function);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
-    [[nodiscard]] static FunctionExpression alloc(std::optional<std::string_view>   name,
-                                                  std::optional<Type>               return_type,
-                                                  std::vector<FunctionArgumentData> arguments,
-                                                  std::vector<Expression> expressions) noexcept;
+    [[nodiscard]] static FunctionExpression alloc(
+        std::optional<std::string_view> name, std::optional<Type> return_type,
+        std::vector<FunctionArgumentData> arguments, std::vector<Expression> expressions) noexcept;
 
     [[nodiscard]] constexpr bool is_named() const noexcept { return _data->name != std::nullopt; }
     [[nodiscard]] constexpr std::optional<std::string_view> name() const noexcept {

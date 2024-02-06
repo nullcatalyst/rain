@@ -3,19 +3,12 @@
 namespace cirrus::ast {
 
 const ExpressionVtbl ExportExpression::_vtbl{
-    /* Node */ {
-        /* util::RetainableVtbl */ {
-            .retain  = util::_Retainable_vtbl.retain,
-            .release = util::_Retainable_vtbl.release,
-            .drop =
-                [](const util::RetainableVtbl* const vtbl,
-                   util::RetainableData* const       data) noexcept {
-                    ExportExpressionData* _data = static_cast<ExportExpressionData*>(data);
-                    delete _data;
-                },
+    EXPRESSION_VTBL_COMMON_IMPL(Export),
+    .compile_time_able =
+        [](const ExpressionVtbl* const vtbl, ExpressionData* const data) noexcept {
+            const ExportExpressionData* _data = static_cast<ExportExpressionData*>(data);
+            return _data->expression.compile_time_able();
         },
-        /*.kind = */ NodeKind::ExportExpression,
-    },
 };
 
 ExportExpression ExportExpression::alloc(Expression expression) noexcept {

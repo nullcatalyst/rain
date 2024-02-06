@@ -19,6 +19,9 @@ enum class NodeKind {
 
     // Types
     // <keep-sorted>
+    FunctionType,
+    InterfaceType,
+    OpaqueType,
     StructType,
     UnresolvedType,
     // </keep-sorted>
@@ -34,32 +37,36 @@ enum class NodeKind {
     IdentifierExpression,
     IfExpression,
     IntegerExpression,
+    LetExpression,
     MemberExpression,
     ParenthesisExpression,
     ReturnExpression,
     UnaryOperatorExpression,
     // </keep-sorted>
+
+    Count,
 };
 
 struct NodeVtbl : public util::RetainableVtbl {
-    NodeKind kind;
+    NodeKind _kind;
 };
 
 struct NodeData : public util::RetainableData {
-    lang::Location location;
+    lang::Location _location;
 };
 
 template <typename This, typename Vtbl, typename Data>
 struct INode : public util::Retainable<This, Vtbl, Data> {
     using util::Retainable<This, Vtbl, Data>::Retainable;
 
-    [[nodiscard]] constexpr NodeKind kind() const { return this->_vtbl->kind; }
+    [[nodiscard]] constexpr NodeKind       kind() const { return this->_vtbl->_kind; }
+    [[nodiscard]] constexpr lang::Location location() const noexcept {
+        return this->_data->_location;
+    }
 };
 
 struct Node : public INode<Node, NodeVtbl, NodeData> {
     using INode<Node, NodeVtbl, NodeData>::INode;
-
-    [[nodiscard]] constexpr lang::Location location() const noexcept { return _data->location; }
 };
 
 }  // namespace cirrus::ast

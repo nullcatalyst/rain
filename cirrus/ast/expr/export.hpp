@@ -10,13 +10,9 @@ struct ExportExpressionData : public ExpressionData {
     Expression expression;
 };
 
-struct ExportExpression
-    : public IExpression<ExportExpression, ExpressionVtbl, ExportExpressionData> {
-    using IExpression<ExportExpression, ExpressionVtbl, ExportExpressionData>::IExpression;
+DECLARE_EXPRESSION(Export) {
+    EXPRESSION_COMMON_IMPL(Export);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static ExportExpression alloc(Expression expression) noexcept;
 
     [[nodiscard]] constexpr const Expression& expression() const noexcept {

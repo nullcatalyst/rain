@@ -3,20 +3,14 @@
 namespace cirrus::ast {
 
 const ExpressionVtbl BinaryOperatorExpression::_vtbl{
-    /* Node */ {
-        /* util::RetainableVtbl */ {
-            .retain  = util::_Retainable_vtbl.retain,
-            .release = util::_Retainable_vtbl.release,
-            .drop =
-                [](const util::RetainableVtbl* const vtbl,
-                   util::RetainableData* const       data) noexcept {
-                    BinaryOperatorExpressionData* _data =
-                        static_cast<BinaryOperatorExpressionData*>(data);
-                    delete _data;
-                },
+    EXPRESSION_VTBL_COMMON_IMPL(BinaryOperator),
+    .compile_time_able =
+        [](const ExpressionVtbl* const vtbl, ExpressionData* const data) noexcept {
+            const BinaryOperatorExpressionData* _data =
+                static_cast<BinaryOperatorExpressionData*>(data);
+            // TODO: This also depends on the implementation of the operator itself
+            return _data->lhs.compile_time_able() && _data->rhs.compile_time_able();
         },
-        /*.kind = */ NodeKind::BinaryOperatorExpression,
-    },
 };
 
 BinaryOperatorExpression BinaryOperatorExpression::alloc(Expression lhs, Expression rhs,

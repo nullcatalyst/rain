@@ -79,7 +79,7 @@ class Scope {
     }
 
     void set_variable(const std::string_view name, Variable var) {
-        _variables.emplace(name, std::move(var));
+        _variables.insert_or_assign(name, std::move(var));
     }
 };
 

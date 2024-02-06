@@ -11,12 +11,9 @@ struct CallExpressionData : public ExpressionData {
     std::vector<Expression> arguments;
 };
 
-struct CallExpression : public IExpression<CallExpression, ExpressionVtbl, CallExpressionData> {
-    using IExpression<CallExpression, ExpressionVtbl, CallExpressionData>::IExpression;
+DECLARE_EXPRESSION(Call) {
+    EXPRESSION_COMMON_IMPL(Call);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static CallExpression alloc(Expression              callee,
                                               std::vector<Expression> expressions) noexcept;
 

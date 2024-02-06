@@ -10,12 +10,9 @@ struct BlockExpressionData : public ExpressionData {
     std::vector<Expression> expressions;
 };
 
-struct BlockExpression : public IExpression<BlockExpression, ExpressionVtbl, BlockExpressionData> {
-    using IExpression<BlockExpression, ExpressionVtbl, BlockExpressionData>::IExpression;
+DECLARE_EXPRESSION(Block) {
+    EXPRESSION_COMMON_IMPL(Block);
 
-    static const ExpressionVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Expression expr) noexcept { return expr.vtbl() == &_vtbl; }
     [[nodiscard]] static BlockExpression alloc(const std::vector<Expression> expressions) noexcept;
 
     [[nodiscard]] constexpr const std::vector<Expression>& expressions() const noexcept {
