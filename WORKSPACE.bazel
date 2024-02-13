@@ -89,6 +89,19 @@ http_archive(
     url = "https://github.com/google/googletest/archive/refs/tags/v{version}.tar.gz".format(version = _GTEST_VERSION),
 )
 
+_GBENCHMARK_VERSION = "1.8.3"
+
+http_archive(
+    name = "com_github_google_benchmark",
+    sha256 = "6bc180a57d23d4d9515519f92b0c83d61b05b5bab188961f36ac7b06b0d9e9ce",
+    strip_prefix = "benchmark-{version}".format(version = _GBENCHMARK_VERSION),
+    url = "https://github.com/google/benchmark/archive/refs/tags/v{version}.tar.gz".format(version = _GBENCHMARK_VERSION),
+)
+
+load("@com_github_google_benchmark//:bazel/benchmark_deps.bzl", "benchmark_deps")
+
+benchmark_deps()
+
 #### LLVM ####
 # LLVM_COMMIT = "f28c006a5895fc0e329fe15fead81e37457cb1d1"
 # LLVM_VERSION = "17.0.6"

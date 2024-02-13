@@ -23,15 +23,15 @@ class SyntaxError : public util::Error {
         std::stringstream ss;
 
         ss << COUT_COLOR_BOLD(_lexer.file_name()
-                              << ':' << _location.line << ':' << _location.column << ": ")
-           << COUT_COLOR_RED("error: ") << COUT_COLOR_BOLD(_msg) << ANSI_RESET << '\n';
-        ss << _lexer.get_whole_line(_location).source << '\n';
+                              << ':' << _location.line() << ':' << _location.column() << ": ")
+           << COUT_COLOR_RED("error: ") << COUT_COLOR_BOLD(_msg) << '\n';
+        ss << _lexer.get_whole_line(_location).substr() << '\n';
 
-        for (int i = 0; i < _location.column - 1; ++i) {
+        for (int i = 0; i < _location.column() - 1; ++i) {
             ss << ' ';
         }
         ss << ANSI_GREEN << '^';
-        for (int i = 0; i < _location.source.size() - 1; ++i) {
+        for (int i = 0; i < _location.substr().size() - 1; ++i) {
             ss << '~';
         }
         ss << ANSI_RESET << '\n';

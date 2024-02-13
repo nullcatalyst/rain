@@ -59,10 +59,8 @@ template <typename This, typename Vtbl, typename Data>
 struct INode : public util::Retainable<This, Vtbl, Data> {
     using util::Retainable<This, Vtbl, Data>::Retainable;
 
-    [[nodiscard]] constexpr NodeKind       kind() const { return this->_vtbl->_kind; }
-    [[nodiscard]] constexpr lang::Location location() const noexcept {
-        return this->_data->_location;
-    }
+    [[nodiscard]] constexpr NodeKind kind() const { return this->_vtbl->_kind; }
+    [[nodiscard]] lang::Location     location() const noexcept { return this->_data->_location; }
 };
 
 struct Node : public INode<Node, NodeVtbl, NodeData> {

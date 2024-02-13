@@ -9,9 +9,28 @@ cc_library(
         "ptr.hpp",
         "result.hpp",
         "retain.hpp",
+        "string.hpp",
+        "twine.hpp",
         "wasm.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",
+    ],
+    deps = [
+        "@llvm-project//llvm:Support",
+    ],
+)
+
+cc_test(
+    name = "test",
+    srcs = [
+        "twine.test.cpp",
+    ],
+    visibility = [
+        "//cirrus:__subpackages__",
+    ],
+    deps = [
+        ":util",
+        "@com_google_googletest//:gtest_main",
     ],
 )

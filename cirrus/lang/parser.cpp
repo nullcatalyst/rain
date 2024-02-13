@@ -23,12 +23,12 @@ util::Result<ast::StructType> parse_struct(Lexer& lexer) {
                        "expected keyword 'struct'");
     }
 
-    std::optional<std::string_view> struct_name;
-    auto                            next_token = lexer.next();
+    std::optional<util::String> struct_name;
+    auto                        next_token = lexer.next();
 
     // The struct name is optional
     if (next_token.kind == TokenKind::Identifier) {
-        struct_name = next_token.location.source;
+        struct_name = next_token.location.substr();
         next_token  = lexer.next();
     }
 
@@ -55,7 +55,7 @@ util::Result<ast::StructType> parse_struct(Lexer& lexer) {
                                "expected identifier for struct field name");
         }
 
-        const auto field_name = next_token.location.source;
+        const auto field_name = next_token.location.substr();
 
         next_token = lexer.next();
         if (next_token.kind != TokenKind::Colon) {
@@ -89,7 +89,7 @@ util::Result<ast::Type> parse_whole_type(Lexer& lexer) {
 
         case TokenKind::Identifier:
             lexer.next();  // Consume the identifier token
-            return OK_ALLOC(ast::UnresolvedType, token.location.source);
+            return OK_ALLOC(ast::UnresolvedType, token.location.substr());
 
         default:
             return ERR_PTR(ast::Type, err::SyntaxError, lexer, token.location, "unexpected token");
@@ -107,7 +107,12 @@ util::Result<ast::IntegerExpression> parse_integer(Lexer& lexer) {
 
     constexpr uint64_t MAX   = std::numeric_limits<uint64_t>::max() / 10;
     uint64_t           value = 0;
-    for (char c : token.location.source) {
+
+    // TODO: Add support for util::Twine for each loops
+    // for (char c : token.location.source.substr()) {
+    const auto s = token.location.substr();
+    for (auto begin = 0, end = s.size(); begin < end; ++begin) {
+        const char c = s[begin];
         if (value > MAX) {
             // Multiplying by 10 will overflow
             return ERR_PTR(ast::IntegerExpression, err::SyntaxError, lexer, token.location,
@@ -133,7 +138,7 @@ util::Result<ast::IdentifierExpression> parse_identifier(Lexer& lexer) {
                        "expected identifier");
     }
 
-    return OK_ALLOC(ast::IdentifierExpression, token.location.source);
+    return OK_ALLOC(ast::IdentifierExpression, token.location.substr());
 }
 
 util::Result<ast::ParenthesisExpression> parse_parenthesis(Lexer& lexer) {
@@ -168,7 +173,7 @@ util::Result<ast::MemberExpression> parse_member(Lexer& lexer, ast::Expression o
                        "expected identifier after '.'");
     }
 
-    return OK_ALLOC(ast::MemberExpression, std::move(owner), member_token.location.source);
+    return OK_ALLOC(ast::MemberExpression, std::move(owner), member_token.location.substr());
 }
 
 util::Result<ast::CallExpression> parse_call(Lexer& lexer, ast::Expression callee) {
@@ -284,12 +289,12 @@ util::Result<ast::FunctionExpression> parse_function(Lexer& lexer) {
                        "expected keyword 'fn'");
     }
 
-    std::optional<std::string_view> fn_name;
-    auto                            next_token = lexer.next();
+    std::optional<util::String> fn_name;
+    auto                        next_token = lexer.next();
 
     // The struct name is optional
     if (next_token.kind == TokenKind::Identifier) {
-        fn_name    = next_token.location.source;
+        fn_name    = next_token.location.substr();
         next_token = lexer.next();
     }
 
@@ -311,7 +316,7 @@ util::Result<ast::FunctionExpression> parse_function(Lexer& lexer) {
                            "expected identifier for function argument name");
         }
 
-        const auto argument_name = next_token.location.source;
+        const auto argument_name = next_token.location.substr();
 
         next_token = lexer.next();
         if (next_token.kind != TokenKind::Colon) {
@@ -368,7 +373,7 @@ util::Result<ast::LetExpression> parse_let(Lexer& lexer) {
         return ERR_PTR(ast::LetExpression, err::SyntaxError, lexer, name_token.location,
                        "expected variable name after 'let'");
     }
-    const std::string_view let_name = name_token.location.source;
+    const auto let_name = name_token.location.substr();
 
     const auto eq_token = lexer.next();
     if (eq_token.kind != TokenKind::Equal) {

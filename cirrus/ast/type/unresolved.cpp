@@ -18,9 +18,9 @@ const TypeVtbl UnresolvedType::_vtbl{
     },
 };
 
-UnresolvedType UnresolvedType::alloc(std::string_view name) noexcept {
+UnresolvedType UnresolvedType::alloc(util::Twine name) noexcept {
     UnresolvedTypeData* data = new UnresolvedTypeData{};
-    data->name               = name;
+    data->name               = std::move(name);
     return UnresolvedType::from_raw(&UnresolvedType::_vtbl, data);
 }
 

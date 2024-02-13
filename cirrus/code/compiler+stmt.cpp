@@ -63,11 +63,13 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
         ALWAYS_EXPORT ? llvm::Function::ExternalLinkage : llvm::Function::InternalLinkage,
         function_expression.name_or_empty(), ctx.llvm_mod);
 
-    ctx.scope.set_variable(function_expression.name_or_empty(), Variable{
-                                                                    ._value   = llvm_function,
-                                                                    ._mutable = false,
-                                                                    ._alloca  = false,
-                                                                });
+    if (const auto name = function_expression.name_or_empty(); name.size() > 0) {
+        ctx.scope.set_variable(name, Variable{
+                                         ._value   = llvm_function,
+                                         ._mutable = false,
+                                         ._alloca  = false,
+                                     });
+    }
 
     Scope   function_scope(&ctx.scope);
     Context function_ctx(ctx, function_scope);
@@ -112,17 +114,17 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::LetExpressio
     llvm::Value* llvm_alloca = nullptr;
     if (let_expression.mutable_()) {
         llvm_alloca = _llvm_ir.CreateAlloca(llvm_value_result.unwrap()->getType(), nullptr,
-                                            let_expression.name());
+                                            let_expression.name().str());
         _llvm_ir.CreateStore(llvm_value_result.unwrap(), llvm_alloca);
     } else {
         llvm_alloca = llvm_value_result.unwrap();
     }
 
-    ctx.scope.set_variable(let_expression.name(), Variable{
-                                                      ._value   = llvm_alloca,
-                                                      ._mutable = let_expression.mutable_(),
-                                                      ._alloca  = let_expression.mutable_(),
-                                                  });
+    ctx.scope.set_variable(let_expression.name().str(), Variable{
+                                                            ._value   = llvm_alloca,
+                                                            ._mutable = let_expression.mutable_(),
+                                                            ._alloca  = let_expression.mutable_(),
+                                                        });
 
     return OK(llvm::Value*, llvm_alloca);
 }

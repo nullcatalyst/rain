@@ -18,21 +18,7 @@ const TypeVtbl StructType::_vtbl{
     },
 };
 
-StructType StructType::alloc(std::vector<StructTypeFieldData> fields) noexcept {
-    StructTypeData* data = new StructTypeData{};
-    data->fields         = std::move(fields);
-    return StructType::from_raw(&StructType::_vtbl, data);
-}
-
-StructType StructType::alloc(std::string_view                 name,
-                             std::vector<StructTypeFieldData> fields) noexcept {
-    StructTypeData* data = new StructTypeData{};
-    data->name           = name;
-    data->fields         = std::move(fields);
-    return StructType::from_raw(&StructType::_vtbl, data);
-}
-
-StructType StructType::alloc(std::optional<std::string_view>  name,
+StructType StructType::alloc(std::optional<util::Twine>       name,
                              std::vector<StructTypeFieldData> fields) noexcept {
     StructTypeData* data = new StructTypeData{};
     data->name           = name;

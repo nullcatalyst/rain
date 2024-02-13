@@ -11,8 +11,7 @@ const ExpressionVtbl LetExpression::_vtbl{
         },
 };
 
-LetExpression LetExpression::alloc(std::string_view name, Expression value,
-                                   bool mutable_) noexcept {
+LetExpression LetExpression::alloc(util::Twine name, Expression value, bool mutable_) noexcept {
     LetExpressionData* data = new LetExpressionData{};
     data->_name             = std::move(name);
     data->_value            = std::move(value);

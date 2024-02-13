@@ -16,7 +16,7 @@ const ExpressionVtbl FunctionExpression::_vtbl{
         },
 };
 
-FunctionExpression FunctionExpression::alloc(std::optional<std::string_view>   name,
+FunctionExpression FunctionExpression::alloc(std::optional<util::String>       name,
                                              std::optional<Type>               return_type,
                                              std::vector<FunctionArgumentData> arguments,
                                              std::vector<Expression> expressions) noexcept {

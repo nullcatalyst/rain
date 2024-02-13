@@ -22,13 +22,13 @@ util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::
                 FORWARD_ERROR_WITH_TYPE(llvm::Type*, llvm_struct_type);
                 return OK(llvm::Type*, llvm_struct_type.unwrap());
             } else {
-                if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(name);
+                if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(name.str());
                     llvm_type != nullptr) {
                     return OK(llvm::Type*, llvm_type);
                 } else {
                     auto llvm_struct_type = build(ctx, struct_type);
                     FORWARD_ERROR_WITH_TYPE(llvm::Type*, llvm_struct_type);
-                    ctx.scope.set_llvm_type(name, llvm_struct_type.unwrap());
+                    ctx.scope.set_llvm_type(name.str(), llvm_struct_type.unwrap());
                     return OK(llvm::Type*, llvm_struct_type.unwrap());
                 }
             }
@@ -36,10 +36,11 @@ util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::
 
         case ast::NodeKind::UnresolvedType: {
             const auto unresolved_type = ast::UnresolvedType::from(type);
-            if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(unresolved_type.name());
+            if (llvm::Type* const llvm_type =
+                    ctx.scope.find_llvm_type(unresolved_type.name().str());
                 llvm_type == nullptr) {
                 return ERR_PTR(llvm::Type*, err::SimpleError,
-                               absl::StrFormat("unknown type: %s", unresolved_type.name()));
+                               absl::StrFormat("unknown type: %s", unresolved_type.name().str()));
             } else {
                 return OK(llvm::Type*, llvm_type);
             }
@@ -51,7 +52,7 @@ util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::
 }
 
 util::Result<llvm::StructType*> Compiler::build(Context& ctx, const ast::StructType& struct_type) {
-    auto llvm_struct_type = llvm::StructType::create(*_llvm_ctx, struct_type.name_or_empty());
+    auto llvm_struct_type = llvm::StructType::create(*_llvm_ctx, struct_type.name_or_empty().str());
     std::vector<llvm::Type*> llvm_field_types;
     for (const auto& field : struct_type.fields()) {
         auto llvm_argument_type_result = find_or_build_type(ctx, field.type);

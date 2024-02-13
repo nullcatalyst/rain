@@ -19,9 +19,9 @@ const ExpressionVtbl IdentifierExpression::_vtbl{
         },
 };
 
-IdentifierExpression IdentifierExpression::alloc(const std::string_view name) noexcept {
+IdentifierExpression IdentifierExpression::alloc(util::String name) noexcept {
     IdentifierExpressionData* data = new IdentifierExpressionData{};
-    data->name                     = name;
+    data->name                     = std::move(name);
     return IdentifierExpression::from_raw(&IdentifierExpression::_vtbl, data);
 }
 

@@ -11,10 +11,10 @@ const ExpressionVtbl MemberExpression::_vtbl{
         },
 };
 
-MemberExpression MemberExpression::alloc(Expression expr, std::string_view member) noexcept {
+MemberExpression MemberExpression::alloc(Expression expr, util::Twine member) noexcept {
     MemberExpressionData* data = new MemberExpressionData{};
     data->expr                 = std::move(expr);
-    data->member               = member;
+    data->member               = std::move(member);
     return MemberExpression::from_raw(&MemberExpression::_vtbl, data);
 }
 

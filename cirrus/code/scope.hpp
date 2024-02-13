@@ -63,12 +63,17 @@ class Scope {
         return nullptr;
     }
 
-    void set_llvm_type(const std::string_view name, llvm::Type* const llvm_type) {
-        _types.emplace(name, llvm_type);
+    void set_llvm_type(std::string_view name, llvm::Type* const llvm_type) {
+        _types.emplace(std::string(name), llvm_type);
     }
 
-    const Variable* find_variable(const std::string_view name) {
-        if (const auto it = _variables.find(name); it != _variables.end()) {
+    const Variable* find_variable(const util::String name) {
+#if CIRRUS_USE_TWINE
+        const auto str_name = std::string(name);
+#else
+        const auto str_name = name;
+#endif
+        if (const auto it = _variables.find(str_name); it != _variables.end()) {
             return &it->second;
         }
 
@@ -78,8 +83,8 @@ class Scope {
         return nullptr;
     }
 
-    void set_variable(const std::string_view name, Variable var) {
-        _variables.insert_or_assign(name, std::move(var));
+    void set_variable(std::string_view name, Variable var) {
+        _variables.insert_or_assign(std::string(name), std::move(var));
     }
 };
 

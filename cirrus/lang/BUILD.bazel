@@ -27,6 +27,7 @@ cc_library(
         ":hdrs",
         "//cirrus/ast",
         "//cirrus/err",
+        "//cirrus/util",
     ],
 )
 

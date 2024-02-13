@@ -1,15 +1,12 @@
 #pragma once
 
-#include <optional>
-#include <string_view>
-#include <vector>
-
 #include "cirrus/ast/type/type.hpp"
+#include "cirrus/util/twine.hpp"
 
 namespace cirrus::ast {
 
 struct UnresolvedTypeData : public TypeData {
-    std::string_view name;
+    util::Twine name;
 };
 
 struct UnresolvedType : public IType<UnresolvedType, TypeVtbl, UnresolvedTypeData> {
@@ -18,9 +15,9 @@ struct UnresolvedType : public IType<UnresolvedType, TypeVtbl, UnresolvedTypeDat
     static const TypeVtbl _vtbl;
 
     [[nodiscard]] static bool is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-    [[nodiscard]] static UnresolvedType alloc(std::string_view name) noexcept;
+    [[nodiscard]] static UnresolvedType alloc(util::Twine name) noexcept;
 
-    [[nodiscard]] constexpr std::string_view name() const noexcept { return _data->name; }
+    [[nodiscard]] constexpr const util::Twine& name() const noexcept { return _data->name; }
 };
 
 }  // namespace cirrus::ast

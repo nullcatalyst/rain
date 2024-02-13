@@ -26,12 +26,18 @@ constexpr std::array<std::tuple<std::string_view, TokenKind>, 9> KEYWORDS{
     // clang-format on
 };
 
-TokenKind find_keyword(std::string_view source) {
+TokenKind find_keyword(util::String source) {
+#if CIRRUS_USE_TWINE
+    const std::string str_source = std::string(source);
+#else
+    const std::string_view str_source = source;
+#endif
+
     // Binary search through the list of keywords
     const auto it =
-        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), source,
+        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), str_source,
                          [](const auto& lhs, const auto& rhs) { return std::get<0>(lhs) < rhs; });
-    if (it != KEYWORDS.end() && std::get<0>(*it) == source) {
+    if (it != KEYWORDS.end() && std::get<0>(*it) == str_source) {
         return std::get<1>(*it);
     }
 
@@ -72,15 +78,15 @@ constexpr std::array<TokenKind, 128> OPERATORS = []() {
     return operators;
 }();
 
-std::tuple<TokenKind, int> find_operator(const char* index) {
-    if (index == nullptr || *index < 0) [[unlikely]] {
+std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine::Iterator index) {
+    if (index == -1) [[unlikely]] {
         return std::tuple(TokenKind::Undefined, 0);
     }
 
-    const auto op = OPERATORS[static_cast<uint8_t>(*index)];
+    const auto op = OPERATORS[static_cast<uint8_t>(source[index])];
     switch (op) {
         case TokenKind::Minus:
-            switch (*(index + 1)) {
+            switch (source[index + 1]) {
                 case '>':
                     return std::tuple(TokenKind::RArrow, 2);
                 default:
@@ -89,7 +95,7 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
             break;
 
         case TokenKind::Equal:
-            switch (*(index + 1)) {
+            switch (source[index + 1]) {
                 case '=':
                     return std::tuple(TokenKind::EqualEqual, 2);
                 default:
@@ -98,7 +104,7 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
             break;
 
         case TokenKind::Exclaim:
-            switch (*(index + 1)) {
+            switch (source[index + 1]) {
                 case '=':
                     return std::tuple(TokenKind::ExclaimEqual, 2);
                 default:
@@ -106,7 +112,7 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
             }
 
         case TokenKind::Less:
-            switch (*(index + 1)) {
+            switch (source[index + 1]) {
                 case '=':
                     return std::tuple(TokenKind::LessEqual, 2);
                 case '<':
@@ -116,7 +122,7 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
             }
 
         case TokenKind::Greater:
-            switch (*(index + 1)) {
+            switch (source[index + 1]) {
                 case '=':
                     return std::tuple(TokenKind::GreaterEqual, 2);
                 case '>':
@@ -131,41 +137,47 @@ std::tuple<TokenKind, int> find_operator(const char* index) {
     return std::tuple(op, 1);
 }
 
-std::tuple<const char* /*index*/, int /*line*/, int /*column*/> skip_whitespace(const char* index,
-                                                                                int         line,
-                                                                                int column) {
-    if (index == nullptr) [[unlikely]] {
-        return std::make_tuple(nullptr, line, column);
+std::tuple<util::Twine::Iterator /*index*/, int /*line*/, int /*column*/> skip_whitespace(
+    const util::Twine& twine, util::Twine::Iterator it, int line, int column) {
+    const auto end = twine.end();
+    if (it >= end) [[unlikely]] {
+        return std::make_tuple(-1, line, column);
     }
 
     do {
+        char c = twine[it];
+
         // Skip whitespace
-        while (std::isspace(*index)) {
-            if (*index == '\n') {
+        while (std::isspace(c)) {
+            if (c == '\n') {
                 ++line;
                 column = 1;
             } else {
                 ++column;
             }
 
-            ++index;
+            ++it;
+            c = twine[it];
         }
+
+        c = twine[it];
 
         // Skip comments
-        if (*index == '/' && *(index + 1) == '/') {
-            while (*index != '\n' && *index != '\0') {
-                ++index;
+        if (c == '/' && twine[it + 1] == '/') {
+            while (c != '\n' && c != '\0') {
                 ++column;
+                ++it;
+                c = twine[it];
             }
         }
-    } while (std::isspace(*index));
+    } while (std::isspace(twine[it]));
 
     // Reset the index to the nullptr if we've reached the end of the string
-    if (*index == '\0') [[unlikely]] {
-        index = nullptr;
+    if (twine[it] == '\0') [[unlikely]] {
+        it = -1;
     }
 
-    return std::make_tuple(index, line, column);
+    return std::make_tuple(it, line, column);
 }
 
 }  // namespace

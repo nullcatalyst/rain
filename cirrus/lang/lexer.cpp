@@ -9,136 +9,102 @@
 namespace cirrus::lang {
 
 Location Lexer::get_whole_line(Location location) const noexcept {
-    const char* line_start = location.source.begin();
+    auto line_start = location.source().rfind('\n', location.begin());
+    if (line_start == -1) {
+        // The source location is at the start of the file
+        line_start = 0;
+    }
 
-    if (line_start == _source.end()) [[unlikely]] {
+    auto line_end = location.source().find('\n', location.begin());
+    if (line_end == -1) {
         // The source location is at the end of the file
-
-        if (_source.empty()) [[unlikely]] {
-            // This can happen if the source is empty
-            return location;
-        }
-
-        --line_start;
+        line_end = location.source().size();
     }
 
-    while (line_start > _source.begin() && line_start[-1] != '\n') {
-        --line_start;
-        --location.column;
-    }
-
-    const char* line_end = location.source.end();
-    while (line_end < _source.end() && *line_end != '\n') {
-        ++line_end;
-    }
-
-    location.source = std::string_view(line_start, line_end - line_start);
-    return location;
+    return Location(location.source(), line_start, line_end, location.line(), 1);
 }
 
 Token Lexer::next() {
     {
         // Skip whitespace and comments
-        const auto [index, line, column] = skip_whitespace(_index, _line, _column);
+        const auto [it, line, column] = skip_whitespace(_source, _it, _line, _column);
 
-        _index  = index;
+        _it     = it;
         _line   = line;
         _column = column;
 
-        if (_index == nullptr) [[unlikely]] {
+        if (_it == -1) [[unlikely]] {
             return Token{
-                .kind = TokenKind::Eof,
-                .location =
-                    Location{
-                        .line   = _line,
-                        .column = _column,
-                        .source = std::string_view(_index, 0),
-                    },
+                .kind     = TokenKind::Eof,
+                .location = Location(_source, -1, -1, _line, _column),
             };
         }
     }
 
     // Save the start of the token
-    const auto token_start = _index;
+    const auto token_start = _it;
     const auto line        = _line;
     const auto column      = _column;
 
+    char       c         = _source[_it];
+    const auto next_char = [&, this]() -> char {
+        ++_it;
+        ++_column;
+        c = _source[_it];
+        return c;
+    };
+
     // Integer or real
-    if (std::isdigit(*_index)) {
-        while (std::isdigit(*_index)) {
-            ++_index;
-            ++_column;
+    if (std::isdigit(c)) {
+        while (std::isdigit(c)) {
+            next_char();
         }
 
-        if (*_index != '.' || !std::isdigit(*(_index + 1))) {
+        if (c != '.' || !std::isdigit(_source[_it + 1])) {
             return Token{
-                .kind = TokenKind::Integer,
-                .location =
-                    Location{
-                        .line   = line,
-                        .column = column,
-                        .source = std::string_view(token_start, _index - token_start),
-                    },
+                .kind     = TokenKind::Integer,
+                .location = Location(_source, token_start, _it, line, column),
             };
         }
 
         // Skip the decimal point
-        ++_index;
-        ++_column;
+        next_char();
 
-        while (std::isdigit(*_index)) {
-            ++_index;
-            ++_column;
+        while (std::isdigit(c)) {
+            next_char();
         }
 
         return Token{
-            .kind = TokenKind::Real,
-            .location =
-                Location{
-                    .line   = line,
-                    .column = column,
-                    .source = std::string_view(token_start, _index - token_start),
-                },
+            .kind     = TokenKind::Real,
+            .location = Location(_source, token_start, _it, line, column),
         };
     }
 
     // Identifier or keyword
-    if (std::isalpha(*_index) || *_index == '_') {
-        while (std::isalnum(*_index) || *_index == '_') {
-            ++_index;
-            ++_column;
+    if (std::isalpha(c) || c == '_') {
+        while (std::isalnum(c) || c == '_') {
+            next_char();
         }
 
-        const auto identifier = std::string_view(token_start, _index - token_start);
-
-        const auto keyword = find_keyword(identifier);
+        const auto identifier = _source.substr(token_start, _it - token_start);
+        const auto keyword    = find_keyword(identifier);
         if (keyword != TokenKind::Undefined) {
             return Token{
-                .kind = keyword,
-                .location =
-                    Location{
-                        .line   = line,
-                        .column = column,
-                        .source = identifier,
-                    },
+                .kind     = keyword,
+                .location = Location(_source, token_start, _it, line, column),
             };
         }
 
         return Token{
-            .kind = TokenKind::Identifier,
-            .location =
-                Location{
-                    .line   = line,
-                    .column = column,
-                    .source = identifier,
-                },
+            .kind     = TokenKind::Identifier,
+            .location = Location(_source, token_start, _it, line, column),
         };
     }
 
     // Operator
-    const auto [operator_kind, length] = find_operator(_index);
+    const auto [operator_kind, length] = find_operator(_source, _it);
     if (operator_kind != TokenKind::Undefined) {
-        _index += length;
+        _it += length;
         _column += length;
 
         // std::cout << " Operator: " << std::string_view(token_start, _index - token_start)
@@ -146,13 +112,8 @@ Token Lexer::next() {
         //           << std::endl;
 
         return Token{
-            .kind = operator_kind,
-            .location =
-                Location{
-                    .line   = line,
-                    .column = column,
-                    .source = std::string_view(token_start, _index - token_start),
-                },
+            .kind     = operator_kind,
+            .location = Location(_source, token_start, _it, line, column),
         };
     }
 
@@ -163,13 +124,13 @@ Token Lexer::peek() {
     // TODO: This can be implemented so much more efficiently
     // Currently it just calls next() and then rewinds the lexer
 
-    const auto index  = _index;
+    const auto it     = _it;
     const auto line   = _line;
     const auto column = _column;
 
     const auto token = next();
 
-    _index  = index;
+    _it     = it;
     _line   = line;
     _column = column;
 

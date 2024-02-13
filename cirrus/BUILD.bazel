@@ -1,5 +1,10 @@
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 
+alias(
+    name = "cirrus",
+    actual = ":main",
+)
+
 cc_library(
     name = "lib",
     srcs = [
@@ -27,4 +32,12 @@ wasm_cc_binary(
     name = "main_wasm",
     cc_target = ":main",
     simd = True,
+)
+
+cc_test(
+    name = "vtbl",
+    srcs = ["vtbl.benchmark.cpp"],
+    deps = [
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
 )
