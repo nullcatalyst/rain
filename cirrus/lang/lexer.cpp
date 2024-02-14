@@ -38,7 +38,7 @@ Token Lexer::next() {
         return c;
     };
 
-    // Integer or real
+    // Integer or float
     if (std::isdigit(c)) {
         while (std::isdigit(c)) {
             next_char();
@@ -59,7 +59,7 @@ Token Lexer::next() {
         }
 
         return Token{
-            .kind     = TokenKind::Real,
+            .kind     = TokenKind::Float,
             .location = Location(_source, token_start, _it, line, column),
         };
     }

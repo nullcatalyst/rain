@@ -1,42 +1,29 @@
 #include "cirrus/code/compiler.hpp"
 
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/MC/TargetRegistry.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Target/TargetMachine.h>
-#include <llvm/Transforms/Utils/Cloning.h>
-
-#include "absl/strings/str_format.h"
+#include "absl/strings/str_cat.h"
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
+#include "cirrus/code/target.hpp"
 #include "cirrus/err/simple.hpp"
+#include "llvm/Transforms/Utils/Cloning.h"
+
+namespace llvm {
+
+typedef GenericValue (*ExFunc)(FunctionType*, ArrayRef<GenericValue>);
+void InterpreterRegisterExternalFunction(const std::string& name, ExFunc fn);
+void InterpreterRemoveExternalFunction(const std::string& name);
+
+}  // namespace llvm
 
 namespace cirrus::code {
 
 namespace {
 
-llvm::TargetMachine* get_wasm_target_machine() {
-    std::string error;
-
-    std::string         target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
-    const llvm::Target* target        = llvm::TargetRegistry::lookupTarget(target_triple, error);
-    if (target == nullptr) {
-        std::cerr << "failed to lookup target: " << error << "\n";
-        std::abort();
-    }
-
-    std::string cpu;
-    std::string features =
-        "+simd128,+sign-ext,+bulk-memory,+mutable-globals,+nontrapping-fptoint,+multivalue";
-    return target->createTargetMachine(target_triple, cpu, features, llvm::TargetOptions(),
-                                       std::nullopt, std::nullopt, llvm::CodeGenOptLevel::Default);
-}
-
-llvm::ExecutionEngine* create_interpreter(llvm::Module*        llvm_mod,
-                                          llvm::TargetMachine* llvm_target_machine) {
+llvm::ExecutionEngine* create_interpreter(
+    llvm::Module* llvm_mod, std::unique_ptr<llvm::TargetMachine> llvm_target_machine) {
     llvm::EngineBuilder builder{std::unique_ptr<llvm::Module>(llvm_mod)};
     builder.setEngineKind(llvm::EngineKind::Interpreter);
-    auto* engine = builder.create(llvm_target_machine);
+    auto* engine = builder.create(llvm_target_machine.release());
     if (engine == nullptr) {
         std::cerr << "failed to create interpreter\n";
         std::abort();
@@ -67,21 +54,83 @@ void Compiler::initialize_llvm() {
     }
 }
 
+void Compiler::use_external_function(const std::string_view function_name,
+                                     llvm::GenericValue (*external_function)(
+                                         llvm::FunctionType*, llvm::ArrayRef<llvm::GenericValue>)) {
+    llvm::InterpreterRegisterExternalFunction(absl::StrCat("lle_X_", function_name),
+                                              external_function);
+}
+
 Compiler::Compiler()
     : _llvm_ctx(std::make_shared<llvm::LLVMContext>()),
-      _llvm_target_machine(get_wasm_target_machine()),
+      _llvm_target_machine(wasm_target_machine()),
       _llvm_ir(*_llvm_ctx),
-      _builtin_scope(Scope::builtin_scope(*_llvm_ctx)) {}
+      _builtin_scope(Scope::builtin_scope(*_llvm_ctx)) {
+    _llvm_mod    = new llvm::Module("cirrus", *_llvm_ctx);
+    _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
+        create_interpreter(_llvm_mod, wasm_target_machine()));
+}
 
-util::Result<Module> Compiler::build(const lang::Module& mod) {
-    llvm::Module*                          llvm_mod    = new llvm::Module("cirrus", *_llvm_ctx);
-    std::unique_ptr<llvm::ExecutionEngine> llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
-        create_interpreter(llvm_mod, get_wasm_target_machine()));
+void Compiler::_initialize_builtins() {
+    _llvm_mod    = new llvm::Module("cirrus", *_llvm_ctx);
+    _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
+        create_interpreter(_llvm_mod, wasm_target_machine()));
+}
 
+util::Result<std::shared_ptr<ast::FunctionType>> Compiler::get_function_type(
+    std::vector<ast::TypePtr> argument_types, std::optional<ast::TypePtr> return_type) {
+    return ast::FunctionType::alloc(std::move(argument_types), std::move(return_type));
+}
+
+util::Result<void> Compiler::declare_external_function(
+    const std::string_view name, std::shared_ptr<ast::FunctionType> function_type) {
+    if (name.empty()) {
+        return ERR_PTR(err::SimpleError, "cannot declare external function, no name given");
+    }
+    if (function_type == nullptr) {
+        return ERR_PTR(err::SimpleError,
+                       "cannot declare external function, no function type given");
+    }
+
+    Context ctx(*_llvm_mod, *_llvm_engine, _builtin_scope);
+
+    llvm::Type* llvm_return_type = llvm::Type::getVoidTy(*_llvm_ctx);
+    if (function_type->return_type().has_value()) {
+        auto llvm_found_type = find_or_build_type(ctx, function_type->return_type().value());
+        FORWARD_ERROR(llvm_found_type);
+        llvm_return_type = std::move(llvm_found_type).value();
+    }
+
+    std::vector<llvm::Type*> llvm_argument_types;
+    llvm_argument_types.reserve(function_type->argument_types().size());
+    for (const auto& argument_type : function_type->argument_types()) {
+        auto llvm_argument_type = find_or_build_type(ctx, argument_type);
+        FORWARD_ERROR(llvm_argument_type);
+        llvm_argument_types.emplace_back(std::move(llvm_argument_type).value());
+    }
+
+    llvm::FunctionType* llvm_function_type =
+        llvm::FunctionType::get(llvm_return_type, llvm_argument_types, false);
+
+    auto llvm_global         = _llvm_mod->getOrInsertFunction(name, llvm_function_type);
+    auto llvm_function_value = llvm::cast<llvm::Function>(llvm_global.getCallee());
+    llvm_function_value->setLinkage(llvm::Function::ExternalLinkage);
+
+    _builtin_scope.set_variable(name, Variable{
+                                          ._value   = llvm_function_value,
+                                          ._type    = llvm_function_type,
+                                          ._mutable = false,
+                                          ._alloca  = false,
+                                      });
+
+    return {};
+}
+
+util::Result<Module> Compiler::build(const lang::Module& lang_mod) {
     Scope   scope(&_builtin_scope);
-    Context ctx(*llvm_mod, *llvm_engine, scope);
+    Context ctx(*_llvm_mod, *_llvm_engine, scope);
 
-    for (const auto& node : mod.nodes()) {
+    for (const auto& node : lang_mod.nodes()) {
         switch (node->kind()) {
             case ast::NodeKind::StructType: {
                 auto llvm_struct_type =
@@ -103,12 +152,18 @@ util::Result<Module> Compiler::build(const lang::Module& mod) {
         }
     }
 
-    auto llvm_mod_clone = llvm::CloneModule(*llvm_mod);
+    auto llvm_mod_clone = llvm::CloneModule(*_llvm_mod);
     llvm_mod_clone->setDataLayout(_llvm_target_machine->createDataLayout());
     llvm_mod_clone->setTargetTriple(_llvm_target_machine->getTargetTriple().str());
 
     scope.set_parent(nullptr);
-    return Module(_llvm_ctx, _llvm_target_machine, std::move(llvm_mod_clone), std::move(scope));
+
+    Module code_mod(_llvm_ctx, std::move(llvm_mod_clone), std::move(scope));
+
+    // Reset the compiler.
+    _initialize_builtins();
+
+    return std::move(code_mod);
 }
 
 util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPtr& expression) {
@@ -124,6 +179,9 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPt
 
         case ast::NodeKind::IntegerExpression:
             return build(ctx, *std::static_pointer_cast<ast::IntegerExpression>(expression));
+
+        case ast::NodeKind::FloatExpression:
+            return build(ctx, *std::static_pointer_cast<ast::FloatExpression>(expression));
 
         case ast::NodeKind::IdentifierExpression:
             return build(ctx, *std::static_pointer_cast<ast::IdentifierExpression>(expression));
@@ -144,7 +202,7 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPt
             return build(ctx, *std::static_pointer_cast<ast::IfExpression>(expression));
 
         default:
-            return ERR_PTR(err::SimpleError, "not implemented");
+            return ERR_PTR(err::SimpleError, "cannot compile expression: unknown expression kind");
     }
 }
 

@@ -11,19 +11,19 @@
 namespace cirrus::code {
 
 class Module {
-    std::shared_ptr<llvm::LLVMContext>   _llvm_ctx;
-    std::unique_ptr<llvm::Module>        _llvm_mod;
-    std::shared_ptr<llvm::TargetMachine> _llvm_target_machine;
+    std::shared_ptr<llvm::LLVMContext> _llvm_ctx;
+    std::unique_ptr<llvm::Module>      _llvm_mod;
 
     Scope _exported_scope;
 
   public:
-    Module()              = default;
-    Module(const Module&) = delete;
-    Module(Module&&)      = default;
+    Module()                         = default;
+    Module(const Module&)            = delete;
+    Module& operator=(const Module&) = delete;
+    Module(Module&&)                 = default;
+    Module& operator=(Module&&)      = default;
 
-    Module(std::shared_ptr<llvm::LLVMContext>   ctx,
-           std::shared_ptr<llvm::TargetMachine> target_machine, std::unique_ptr<llvm::Module> mod,
+    Module(std::shared_ptr<llvm::LLVMContext> ctx, std::unique_ptr<llvm::Module> mod,
            Scope exported_scope);
     ~Module() = default;
 

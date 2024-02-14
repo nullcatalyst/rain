@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "absl/strings/numbers.h"
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
 #include "cirrus/err/all.hpp"
@@ -121,6 +122,20 @@ util::Result<std::shared_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer
     }
 
     return ast::IntegerExpression::alloc(value);
+}
+
+util::Result<std::shared_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
+    const auto token = lexer.next();
+    if (token.kind != TokenKind::Float) {
+        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected floating point literal");
+    }
+
+    double value = 0.0;
+    if (!absl::SimpleAtod(token.location.substr(), &value)) {
+        return ERR_PTR(err::SyntaxError, lexer, token.location, "invalid floating point literal");
+    }
+
+    return ast::FloatExpression::alloc(value);
 }
 
 util::Result<std::shared_ptr<ast::IdentifierExpression>> parse_identifier(Lexer& lexer) {
@@ -473,6 +488,10 @@ util::Result<ast::ExpressionPtr> parse_lhs(Lexer& lexer) {
     switch (token.kind) {
         case TokenKind::Integer:
             expression = parse_integer(lexer);
+            break;
+
+        case TokenKind::Float:
+            expression = parse_float(lexer);
             break;
 
         case TokenKind::Identifier:

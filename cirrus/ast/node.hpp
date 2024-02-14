@@ -31,6 +31,7 @@ enum class NodeKind {
     CallExpression,
     ExecExpression,
     ExportExpression,
+    FloatExpression,
     FunctionExpression,
     IdentifierExpression,
     IfExpression,

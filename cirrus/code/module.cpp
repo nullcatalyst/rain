@@ -1,30 +1,26 @@
 #include "cirrus/code/module.hpp"
 
-#include <llvm/IR/LegacyPassManager.h>
-#include <llvm/MC/TargetRegistry.h>
-#include <llvm/Passes/PassBuilder.h>
-#include <llvm/Passes/StandardInstrumentations.h>
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Target/TargetMachine.h>
-#include <llvm/Transforms/InstCombine/InstCombine.h>
-#include <llvm/Transforms/Scalar.h>
-#include <llvm/Transforms/Scalar/GVN.h>
-#include <llvm/Transforms/Scalar/Reassociate.h>
-#include <llvm/Transforms/Scalar/SimplifyCFG.h>
-
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
+#include "cirrus/code/target.hpp"
 #include "cirrus/err/simple.hpp"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/StandardInstrumentations.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Scalar/Reassociate.h"
+#include "llvm/Transforms/Scalar/SimplifyCFG.h"
 
 namespace cirrus::code {
 
-Module::Module(std::shared_ptr<llvm::LLVMContext>   ctx,
-               std::shared_ptr<llvm::TargetMachine> target_machine,
-               std::unique_ptr<llvm::Module> mod, Scope exported_scope)
+Module::Module(std::shared_ptr<llvm::LLVMContext> ctx, std::unique_ptr<llvm::Module> mod,
+               Scope exported_scope)
     : _llvm_ctx(std::move(ctx)),
       _llvm_mod(std::move(mod)),
-      _llvm_target_machine(std::move(target_machine)),
       _exported_scope(std::move(exported_scope)) {
     // _mod->setDataLayout(_target_machine->createDataLayout());
     // _mod->setTargetTriple(_target_machine->getTargetTriple().str());
@@ -77,8 +73,10 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
     llvm::SmallString<0>      code;
     llvm::raw_svector_ostream ostream(code);
     llvm::legacy::PassManager pass_manager;
-    if (_llvm_target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-                                                  llvm::CodeGenFileType::ObjectFile)) {
+
+    auto target_machine = wasm_target_machine();
+    if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                            llvm::CodeGenFileType::ObjectFile)) {
         std::abort();
     }
     pass_manager.run(*_llvm_mod);

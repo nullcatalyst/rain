@@ -8,23 +8,17 @@
 
 namespace cirrus::ast {
 
-struct FunctionTypeArgumentData {
-    util::String name;
-    TypePtr      type;
-};
-
 class FunctionType : public Type {
-    std::vector<FunctionTypeArgumentData> _arguments;
-    std::optional<TypePtr>                _return_type;
+    std::vector<TypePtr>   _argument_types;
+    std::optional<TypePtr> _return_type;
 
   public:
-    FunctionType(std::vector<FunctionTypeArgumentData> arguments,
-                 std::optional<TypePtr>                return_type)
-        : _arguments{std::move(arguments)}, _return_type{std::move(return_type)} {}
+    FunctionType(std::vector<TypePtr> argument_types, std::optional<TypePtr> return_type)
+        : _argument_types{std::move(argument_types)}, _return_type{std::move(return_type)} {}
 
-    [[nodiscard]] static std::shared_ptr<FunctionType> alloc(
-        std::vector<FunctionTypeArgumentData> arguments, std::optional<TypePtr> return_type) {
-        return std::make_shared<FunctionType>(std::move(arguments), std::move(return_type));
+    [[nodiscard]] static std::shared_ptr<FunctionType> alloc(std::vector<TypePtr>   argument_types,
+                                                             std::optional<TypePtr> return_type) {
+        return std::make_shared<FunctionType>(std::move(argument_types), std::move(return_type));
     }
 
     [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FunctionType; }
@@ -32,11 +26,11 @@ class FunctionType : public Type {
     [[nodiscard]] const std::optional<TypePtr>& return_type() const noexcept {
         return _return_type;
     }
-    [[nodiscard]] const std::vector<FunctionTypeArgumentData>& arguments() const& noexcept {
-        return _arguments;
+    [[nodiscard]] const std::vector<TypePtr>& argument_types() const& noexcept {
+        return _argument_types;
     }
-    [[nodiscard]] std::vector<FunctionTypeArgumentData>&& arguments() && noexcept {
-        return std::move(_arguments);
+    [[nodiscard]] std::vector<TypePtr>&& argument_types() && noexcept {
+        return std::move(_argument_types);
     }
 };
 

@@ -14,7 +14,7 @@ enum TokenKind : uint32_t {
     // Atoms and literals
     Identifier,
     Integer,
-    Real,
+    Float,
 
     // Keywords
     True,

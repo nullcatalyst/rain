@@ -42,7 +42,8 @@ util::Result<llvm::Value*> Compiler::build(Context&                             
         case ast::BinaryOperatorKind::GreaterEqual:
             return _llvm_ir.CreateICmpSGE(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
         default:
-            return ERR_PTR(err::SimpleError, "not implemented");
+            return ERR_PTR(err::SimpleError,
+                           "cannot compile binary operation: unknown binary operator");
     }
 }
 

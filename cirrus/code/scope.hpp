@@ -18,6 +18,7 @@ namespace cirrus::code {
 
 struct Variable {
     llvm::Value* _value = nullptr;
+    llvm::Type*  _type  = nullptr;
 
     /// If true, the variable can be mutated. This is a compile-time property
     bool _mutable = false;

@@ -67,6 +67,7 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
     if (const auto name = function_expression.name_or_empty(); name.size() > 0) {
         ctx.scope.set_variable(name, Variable{
                                          ._value   = llvm_function,
+                                         ._type    = llvm_function_type,
                                          ._mutable = false,
                                          ._alloca  = false,
                                      });
@@ -82,10 +83,13 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
             ++argument_index;
 
             arg->setName(argument.name);
-            function_scope.set_variable(argument.name, Variable{
-                                                           ._value   = arg,
-                                                           ._mutable = false,
-                                                       });
+            function_scope.set_variable(argument.name,
+                                        Variable{
+                                            ._value   = arg,
+                                            ._type    = llvm_argument_types[argument_index],
+                                            ._mutable = false,
+                                            ._alloca  = false,
+                                        });
         }
     }
 
@@ -127,6 +131,7 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::LetExpressio
 
     ctx.scope.set_variable(let_expression.name(), Variable{
                                                       ._value   = llvm_value,
+                                                      ._type    = nullptr,
                                                       ._mutable = let_expression.mutable_(),
                                                       ._alloca  = let_expression.mutable_(),
                                                   });
