@@ -103,22 +103,43 @@ load("@com_github_google_benchmark//:bazel/benchmark_deps.bzl", "benchmark_deps"
 benchmark_deps()
 
 #### LLVM ####
-# LLVM_COMMIT = "f28c006a5895fc0e329fe15fead81e37457cb1d1"
+LLVM_COMMIT = "c94e5a2d02e8face986c4c457b93bd8e5708ada0"
+
+http_archive(
+    name = "llvm-raw",
+    build_file_content = "# empty",
+    patch_args = [
+        "-p1",
+    ],
+    patches = [
+        "@//third_party/llvm:interpreter_functions.patch",
+    ],
+    sha256 = "579b4f77da555f35a839a26725c5f8ab51e472dfa1c99e48d9a7c07827f8d1f3",
+    strip_prefix = "llvm-project-{commit}".format(commit = LLVM_COMMIT),
+    url = "https://github.com/nullcatalyst/llvm-project/archive/{commit}.tar.gz".format(commit = LLVM_COMMIT),
+)
+
 # LLVM_VERSION = "17.0.6"
 
 # http_archive(
 #     name = "llvm-raw",
 #     build_file_content = "# empty",
+#     patch_args = [
+#         "-p1",
+#     ],
+#     patches = [
+#         "@//third_party/llvm:interpreter_functions.patch",
+#     ],
 #     sha256 = "81494d32e6f12ea6f73d6d25424dbd2364646011bb8f7e345ca870750aa27de1",
 #     strip_prefix = "llvm-project-llvmorg-{version}".format(version = LLVM_VERSION),
 #     url = "https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{version}.tar.gz".format(version = LLVM_VERSION),
 # )
 
-new_local_repository(
-    name = "llvm-raw",
-    build_file_content = "# empty",
-    path = "../llvm-project",
-)
+# new_local_repository(
+#     name = "llvm_raw",
+#     build_file_content = "# empty",
+#     path = "../llvm-project",
+# )
 
 load("@llvm-raw//utils/bazel:configure.bzl", "llvm_configure")
 

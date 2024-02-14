@@ -1,0 +1,24 @@
+diff --git a/llvm/lib/ExecutionEngine/Interpreter/ExternalFunctions.cpp b/llvm/lib/ExecutionEngine/Interpreter/ExternalFunctions.cpp
+index 4f8f883a75f3..553b6a4adeb0 100644
+--- a/llvm/lib/ExecutionEngine/Interpreter/ExternalFunctions.cpp
++++ b/llvm/lib/ExecutionEngine/Interpreter/ExternalFunctions.cpp
+@@ -531,3 +531,19 @@ void Interpreter::initializeExternalFunctions() {
+   Fns.FuncNames["lle_X_memset"]       = lle_X_memset;
+   Fns.FuncNames["lle_X_memcpy"]       = lle_X_memcpy;
+ }
++
++namespace llvm {
++
++void InterpreterRegisterExternalFunction(const std::string& name, ExFunc fn) {
++  auto &Fns = getFunctions();
++  sys::ScopedLock Writer(Fns.Lock);
++  Fns.FuncNames[name] = fn;
++}
++
++void InterpreterRemoveExternalFunction(const std::string& name) {
++  auto &Fns = getFunctions();
++  sys::ScopedLock Writer(Fns.Lock);
++  Fns.FuncNames.erase(name);
++}
++
++} // namespace llvm
