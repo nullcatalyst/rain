@@ -22,7 +22,6 @@ class Lexer {
         : _source(std::move(source)), _file_name(file_name) {}
 
     [[nodiscard]] constexpr const util::String& file_name() const noexcept { return _file_name; }
-    [[nodiscard]] Location                      get_whole_line(Location location) const noexcept;
 
     Token next();
     Token peek();

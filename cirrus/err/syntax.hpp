@@ -16,25 +16,40 @@ class SyntaxError : public util::Error {
 
   public:
     SyntaxError(const lang::Lexer& lexer, lang::Location location, std::string msg)
-        : _lexer(lexer), _location(location), _msg(std::move(msg)) {}
+        : _lexer(lexer), _location(location), _msg(std::move(msg)) {
+        std::cerr << COUT_COLOR_BOLD(_lexer.file_name() << ':' << _location.line() << ':'
+                                                        << _location.column() << ": ")
+                  << COUT_COLOR_RED("error: ") << COUT_COLOR_BOLD(_msg) << '\n';
+        std::cerr << _location.whole_line().substr() << '\n';
+
+        for (int i = 0; i < _location.column() - 1; ++i) {
+            std::cerr << ' ';
+        }
+        std::cerr << ANSI_GREEN << '^';
+        for (int i = 0; i < _location.substr().size() - 1; ++i) {
+            std::cerr << '~';
+        }
+        std::cerr << ANSI_RESET << '\n';
+        std::abort();
+    }
     ~SyntaxError() override = default;
 
     [[nodiscard]] std::string message() const noexcept override {
         std::stringstream ss;
 
-        ss << COUT_COLOR_BOLD(_lexer.file_name()
-                              << ':' << _location.line() << ':' << _location.column() << ": ")
-           << COUT_COLOR_RED("error: ") << COUT_COLOR_BOLD(_msg) << '\n';
-        ss << _lexer.get_whole_line(_location).substr() << '\n';
+        // ss << COUT_COLOR_BOLD(_lexer.file_name()
+        //                       << ':' << _location.line() << ':' << _location.column() << ": ")
+        //    << COUT_COLOR_RED("error: ") << /*COUT_COLOR_BOLD(_msg) <<*/ '\n';
+        // ss << _lexer.get_whole_line(_location).substr() << '\n';
 
-        for (int i = 0; i < _location.column() - 1; ++i) {
-            ss << ' ';
-        }
-        ss << ANSI_GREEN << '^';
-        for (int i = 0; i < _location.substr().size() - 1; ++i) {
-            ss << '~';
-        }
-        ss << ANSI_RESET << '\n';
+        // for (int i = 0; i < _location.column() - 1; ++i) {
+        //     ss << ' ';
+        // }
+        // ss << ANSI_GREEN << '^';
+        // for (int i = 0; i < _location.substr().size() - 1; ++i) {
+        //     ss << '~';
+        // }
+        // ss << ANSI_RESET << '\n';
 
         return ss.str();
     }

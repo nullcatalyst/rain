@@ -8,11 +8,11 @@ util::Result<code::Module> compile(const std::string_view source) {
     lang::Parser parser;
 
     auto parse_result = parser.parse(lexer);
-    FORWARD_ERROR_WITH_TYPE(code::Module, parse_result);
+    FORWARD_ERROR(parse_result);
 
     code::Compiler::initialize_llvm();
     code::Compiler compiler;
-    return compiler.build(parse_result.unwrap());
+    return compiler.build(std::move(parse_result).value());
 }
 
 }  // namespace cirrus
@@ -21,22 +21,23 @@ extern "C" {
 
 bool cirrus_compile_and_print(const char* source, const int optimize) {
     auto result = cirrus::compile(source);
-    if (result.is_error()) {
-        std::cerr << result.unwrap_error()->message() << std::endl;
+    if (!result.has_value()) {
+        std::cerr << result.error()->message() << '\n';
         return false;
     }
 
+    auto mod = std::move(result).value();
     if (optimize) {
-        result.unwrap().optimize();
+        mod.optimize();
     }
 
-    auto ir = result.unwrap().emit_ir();
-    if (ir.is_error()) {
-        std::cerr << ir.unwrap_error()->message() << std::endl;
+    auto ir = mod.emit_ir();
+    if (!ir.has_value()) {
+        std::cerr << ir.error()->message() << '\n';
         return false;
     }
 
-    std::cout << ir.unwrap() << std::endl;
+    std::cout << std::move(ir).value() << '\n';
     return true;
 }
 

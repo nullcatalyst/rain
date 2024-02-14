@@ -21,39 +21,40 @@ namespace cirrus::code {
 
 util::Result<llvm::Function*> Compiler::build(Context&                     ctx,
                                               const ast::ExportExpression& export_expression) {
-    auto function_expression  = ast::FunctionExpression::from(export_expression.expression());
-    auto llvm_function_result = build(ctx, function_expression);
-    FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_function_result);
+    const ast::FunctionExpression& function_expression =
+        *std::static_pointer_cast<ast::FunctionExpression>(export_expression.expression());
+    auto llvm_function = build(ctx, function_expression);
+    FORWARD_ERROR(llvm_function);
 
-    auto llvm_function = llvm_function_result.unwrap();
+    llvm::Function* llvm_function_value = std::move(llvm_function).value();
+    llvm_function_value->setLinkage(llvm::Function::ExternalLinkage);
+
     {
         // Export the function, making it callable from JS (instead of just WASM).
-        llvm::Attribute wasm_export_attr = llvm::Attribute::get(
-            llvm_function->getContext(), "wasm-export-name", function_expression.name_or_empty());
-        llvm_function->addFnAttr(wasm_export_attr);
-
-        llvm_function->setLinkage(llvm::Function::ExternalLinkage);
+        llvm::Attribute wasm_export_attr =
+            llvm::Attribute::get(llvm_function_value->getContext(), "wasm-export-name",
+                                 function_expression.name_or_empty());
+        llvm_function_value->addFnAttr(wasm_export_attr);
     }
 
-    return OK(llvm::Function*, llvm_function);
+    return llvm_function_value;
 }
 
 util::Result<llvm::Function*> Compiler::build(Context&                       ctx,
                                               const ast::FunctionExpression& function_expression) {
     llvm::Type* llvm_return_type = llvm::Type::getVoidTy(*_llvm_ctx);
     if (function_expression.return_type().has_value()) {
-        auto llvm_return_type_result =
-            find_or_build_type(ctx, function_expression.return_type().value());
-        FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_return_type_result);
-        llvm_return_type = llvm_return_type_result.unwrap();
+        auto llvm_found_type = find_or_build_type(ctx, function_expression.return_type().value());
+        FORWARD_ERROR(llvm_found_type);
+        llvm_return_type = std::move(llvm_found_type).value();
     }
 
     std::vector<llvm::Type*> llvm_argument_types;
     llvm_argument_types.reserve(function_expression.arguments().size());
     for (const auto& argument : function_expression.arguments()) {
-        auto llvm_argument_type_result = find_or_build_type(ctx, argument.type);
-        FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_argument_type_result);
-        llvm_argument_types.emplace_back(llvm_argument_type_result.unwrap());
+        auto llvm_argument_type = find_or_build_type(ctx, argument.type);
+        FORWARD_ERROR(llvm_argument_type);
+        llvm_argument_types.emplace_back(std::move(llvm_argument_type).value());
     }
 
     llvm::FunctionType* llvm_function_type =
@@ -101,47 +102,52 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
     _llvm_ir.SetInsertPoint(llvm_entry_block);
     for (const auto& expression : function_expression.expressions()) {
         auto llvm_expression_result = build(function_ctx, expression);
-        FORWARD_ERROR_WITH_TYPE(llvm::Function*, llvm_expression_result);
+        FORWARD_ERROR(llvm_expression_result);
     }
 
-    return OK(llvm::Function*, llvm_function);
+    return llvm_function;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::LetExpression& let_expression) {
-    auto llvm_value_result = build(ctx, let_expression.value());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_value_result);
+    auto llvm_let_value = build(ctx, let_expression.value());
+    FORWARD_ERROR(llvm_let_value);
 
-    llvm::Value* llvm_alloca = nullptr;
+    llvm::Value* llvm_value = std::move(llvm_let_value).value();
     if (let_expression.mutable_()) {
-        llvm_alloca = _llvm_ir.CreateAlloca(llvm_value_result.unwrap()->getType(), nullptr,
-                                            let_expression.name().str());
-        _llvm_ir.CreateStore(llvm_value_result.unwrap(), llvm_alloca);
-    } else {
-        llvm_alloca = llvm_value_result.unwrap();
+        if (llvm_value == nullptr) {
+            return ERR_PTR(err::SimpleError, "mutable variable must be initialized with a value");
+        }
+
+        // Store the expression value into an alloca.
+        llvm::Value* llvm_alloca =
+            _llvm_ir.CreateAlloca(llvm_value->getType(), nullptr, let_expression.name());
+        _llvm_ir.CreateStore(llvm_value, llvm_alloca);
+        llvm_value = llvm_alloca;
     }
 
-    ctx.scope.set_variable(let_expression.name().str(), Variable{
-                                                            ._value   = llvm_alloca,
-                                                            ._mutable = let_expression.mutable_(),
-                                                            ._alloca  = let_expression.mutable_(),
-                                                        });
+    ctx.scope.set_variable(let_expression.name(), Variable{
+                                                      ._value   = llvm_value,
+                                                      ._mutable = let_expression.mutable_(),
+                                                      ._alloca  = let_expression.mutable_(),
+                                                  });
 
-    return OK(llvm::Value*, llvm_alloca);
+    return llvm_value;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
                                            const ast::ReturnExpression& return_expression) {
-    if (return_expression.expr().has_value()) {
-        auto llvm_return_value_result = build(ctx, return_expression.expr().value());
-        FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_return_value_result);
-        _llvm_ir.CreateRet(llvm_return_value_result.unwrap());
+    if (return_expression.value().has_value()) {
+        auto llvm_return_value = build(ctx, return_expression.value().value());
+        FORWARD_ERROR(llvm_return_value);
+        llvm::Value* llvm_value = std::move(llvm_return_value).value();
+        _llvm_ir.CreateRet(llvm_value);
         ctx.returned = true;
-        return llvm_return_value_result;
+        return llvm_value;
     }
 
     _llvm_ir.CreateRetVoid();
     ctx.returned = true;
-    return OK(llvm::Value*, nullptr);
+    return nullptr;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                    ctx,
@@ -150,18 +156,18 @@ util::Result<llvm::Value*> Compiler::build(Context&                    ctx,
     Context block_ctx(ctx, block_scope);
     for (const auto& expression : block_expression.expressions()) {
         auto llvm_expression_result = build(block_ctx, expression);
-        FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_expression_result);
+        FORWARD_ERROR(llvm_expression_result);
         if (block_ctx.returned) {
             ctx.returned = true;
             return llvm_expression_result;
         }
     }
-    return OK(llvm::Value*, nullptr);
+    return nullptr;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::IfExpression& if_expression) {
-    auto llvm_condition_result = build(ctx, if_expression.condition());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_condition_result);
+    auto llvm_condition = build(ctx, if_expression.condition());
+    FORWARD_ERROR(llvm_condition);
 
     llvm::Function* const   llvm_function = _llvm_ir.GetInsertBlock()->getParent();
     llvm::BasicBlock* const llvm_then_block =
@@ -171,11 +177,11 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::IfExpression
     llvm::BasicBlock* const llvm_merge_block =
         llvm::BasicBlock::Create(*_llvm_ctx, "merge", llvm_function);
 
-    _llvm_ir.CreateCondBr(llvm_condition_result.unwrap(), llvm_then_block, llvm_else_block);
+    _llvm_ir.CreateCondBr(std::move(llvm_condition).value(), llvm_then_block, llvm_else_block);
 
     _llvm_ir.SetInsertPoint(llvm_then_block);
     auto llvm_then_result = build(ctx, if_expression.then());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_then_result);
+    FORWARD_ERROR(llvm_then_result);
     if (!ctx.returned) {
         _llvm_ir.CreateBr(llvm_merge_block);
     }
@@ -185,7 +191,7 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::IfExpression
     _llvm_ir.SetInsertPoint(llvm_else_block);
     if (if_expression.else_().has_value()) {
         auto llvm_else_result = build(ctx, if_expression.else_().value());
-        FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_else_result);
+        FORWARD_ERROR(llvm_else_result);
     }
     if (!ctx.returned) {
         _llvm_ir.CreateBr(llvm_merge_block);
@@ -194,7 +200,7 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::IfExpression
     ctx.returned = then_returned && ctx.returned;
 
     _llvm_ir.SetInsertPoint(llvm_merge_block);
-    return OK(llvm::Value*, nullptr);
+    return nullptr;
 }
 
 }  // namespace cirrus::code

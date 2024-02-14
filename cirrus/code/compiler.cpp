@@ -82,21 +82,23 @@ util::Result<Module> Compiler::build(const lang::Module& mod) {
     Context ctx(*llvm_mod, *llvm_engine, scope);
 
     for (const auto& node : mod.nodes()) {
-        switch (node.kind()) {
+        switch (node->kind()) {
             case ast::NodeKind::StructType: {
-                auto llvm_struct_type = build(ctx, ast::StructType::from(node));
-                FORWARD_ERROR_WITH_TYPE(Module, llvm_struct_type);
+                auto llvm_struct_type =
+                    build(ctx, *std::static_pointer_cast<ast::StructType>(node));
+                FORWARD_ERROR(llvm_struct_type);
                 break;
             }
 
             case ast::NodeKind::ExportExpression: {
-                auto llvm_function_type = build(ctx, ast::ExportExpression::from(node));
-                FORWARD_ERROR_WITH_TYPE(Module, llvm_function_type);
+                auto llvm_function_type =
+                    build(ctx, *std::static_pointer_cast<ast::ExportExpression>(node));
+                FORWARD_ERROR(llvm_function_type);
                 break;
             }
 
             default: {
-                auto llvm_value = build(ctx, ast::Expression::from(node));
+                auto llvm_value = build(ctx, std::static_pointer_cast<ast::Expression>(node));
             }
         }
     }
@@ -104,47 +106,45 @@ util::Result<Module> Compiler::build(const lang::Module& mod) {
     auto llvm_mod_clone = llvm::CloneModule(*llvm_mod);
     llvm_mod_clone->setDataLayout(_llvm_target_machine->createDataLayout());
     llvm_mod_clone->setTargetTriple(_llvm_target_machine->getTargetTriple().str());
-    // delete llvm_engine;
 
     scope.set_parent(nullptr);
-    return OK(Module,
-              Module(_llvm_ctx, _llvm_target_machine, std::move(llvm_mod_clone), std::move(scope)));
+    return Module(_llvm_ctx, _llvm_target_machine, std::move(llvm_mod_clone), std::move(scope));
 }
 
-util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::Expression& expression) {
-    switch (expression.kind()) {
+util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPtr& expression) {
+    switch (expression->kind()) {
         case ast::NodeKind::FunctionExpression:
-            return build(ctx, ast::FunctionExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::FunctionExpression>(expression));
 
         case ast::NodeKind::LetExpression:
-            return build(ctx, ast::LetExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::LetExpression>(expression));
 
         case ast::NodeKind::ReturnExpression:
-            return build(ctx, ast::ReturnExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::ReturnExpression>(expression));
 
         case ast::NodeKind::IntegerExpression:
-            return build(ctx, ast::IntegerExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::IntegerExpression>(expression));
 
         case ast::NodeKind::IdentifierExpression:
-            return build(ctx, ast::IdentifierExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::IdentifierExpression>(expression));
 
         case ast::NodeKind::BinaryOperatorExpression:
-            return build(ctx, ast::BinaryOperatorExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::BinaryOperatorExpression>(expression));
 
         case ast::NodeKind::CallExpression:
-            return build(ctx, ast::CallExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::CallExpression>(expression));
 
         case ast::NodeKind::ExecExpression:
-            return build(ctx, ast::ExecExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::ExecExpression>(expression));
 
         case ast::NodeKind::BlockExpression:
-            return build(ctx, ast::BlockExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::BlockExpression>(expression));
 
         case ast::NodeKind::IfExpression:
-            return build(ctx, ast::IfExpression::from(expression));
+            return build(ctx, *std::static_pointer_cast<ast::IfExpression>(expression));
 
         default:
-            return ERR_PTR(llvm::Value*, err::SimpleError, "not implemented");
+            return ERR_PTR(err::SimpleError, "not implemented");
     }
 }
 

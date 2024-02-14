@@ -1,22 +1,16 @@
 #pragma once
 
-#include <string_view>
+#include <memory>
 
 #include "cirrus/ast/node.hpp"
 
 namespace cirrus::ast {
 
-struct TypeVtbl : public NodeVtbl {};
-
-struct TypeData : public NodeData {};
-
-template <typename This, typename Vtbl, typename Data>
-struct IType : public INode<This, Vtbl, Data> {
-    using INode<This, Vtbl, Data>::INode;
+class Type : public Node {
+  public:
+    ~Type() override = default;
 };
 
-struct Type : public IType<Type, TypeVtbl, TypeData> {
-    using IType<Type, TypeVtbl, TypeData>::IType;
-};
+using TypePtr = std::shared_ptr<Type>;
 
 }  // namespace cirrus::ast

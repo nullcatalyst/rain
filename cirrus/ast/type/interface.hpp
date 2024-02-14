@@ -9,23 +9,32 @@
 namespace cirrus::ast {
 
 struct InterfaceTypeMethodData {
-    std::string_view name;
-    Type             type;
+    util::String name;
+    TypePtr      type;
 };
 
-struct InterfaceTypeData : public TypeData {
-    std::string_view                     name;
-    std::vector<InterfaceTypeMethodData> fields;
-};
+struct InterfaceType : public Type {
+    util::String                         _name;
+    std::vector<InterfaceTypeMethodData> _fields;
 
-struct InterfaceType : public IType<InterfaceType, TypeVtbl, InterfaceTypeData> {
-    using IType<InterfaceType, TypeVtbl, InterfaceTypeData>::IType;
+  public:
+    InterfaceType(util::String name, std::vector<InterfaceTypeMethodData> fields)
+        : _name{std::move(name)}, _fields{std::move(fields)} {}
 
-    static const TypeVtbl _vtbl;
+    [[nodiscard]] static std::shared_ptr<InterfaceType> alloc(
+        util::String name, std::vector<InterfaceTypeMethodData> fields) {
+        return std::make_shared<InterfaceType>(std::move(name), std::move(fields));
+    }
 
-    [[nodiscard]] static bool is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-    [[nodiscard]] static InterfaceType alloc(std::string_view                     name,
-                                             std::vector<InterfaceTypeMethodData> fields) noexcept;
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::InterfaceType; }
+
+    [[nodiscard]] util::String name() const noexcept { return _name; }
+    [[nodiscard]] const std::vector<InterfaceTypeMethodData>& fields() const& noexcept {
+        return _fields;
+    }
+    [[nodiscard]] std::vector<InterfaceTypeMethodData>&& fields() && noexcept {
+        return std::move(_fields);
+    }
 };
 
 }  // namespace cirrus::ast

@@ -44,12 +44,12 @@ class Compiler {
     };
 
     // Types
-    util::Result<llvm::Type*> find_or_build_type(Context& ctx, const ast::Type& type);
+    util::Result<llvm::Type*> find_or_build_type(Context& ctx, const ast::TypePtr& type);
 
     util::Result<llvm::StructType*> build(Context& ctx, const ast::StructType& struct_type);
 
     // Expressions
-    util::Result<llvm::Value*> build(Context& ctx, const ast::Expression& expression);
+    util::Result<llvm::Value*> build(Context& ctx, const ast::ExpressionPtr& expression);
 
     // Literals
     util::Result<llvm::Value*> build(Context&                      ctx,

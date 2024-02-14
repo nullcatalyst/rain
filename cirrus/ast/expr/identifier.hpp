@@ -1,20 +1,36 @@
 #pragma once
 
 #include "cirrus/ast/expr/expression.hpp"
-#include "cirrus/util/twine.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
-struct IdentifierExpressionData : public ExpressionData {
-    util::String name;
-};
+class IdentifierExpression : public Expression {
+    util::String _name;
 
-DECLARE_EXPRESSION(Identifier) {
-    EXPRESSION_COMMON_IMPL(Identifier);
+  public:
+    IdentifierExpression(util::String name) : _name(std::move(name)) {}
 
-    [[nodiscard]] static IdentifierExpression alloc(const util::String name) noexcept;
+    [[nodiscard]] static std::shared_ptr<IdentifierExpression> alloc(util::String name) {
+        return std::make_shared<IdentifierExpression>(std::move(name));
+    }
 
-    [[nodiscard]] constexpr const util::String& name() const noexcept { return _data->name; }
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::IdentifierExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        // TODO: This must be determined based on the variable's declaration
+        //   1. If the variable is not declared as mutable, using a compile-time-capable value, then
+        //      this should return true. (trivial case)
+        //   2. If the variable is declared as mutable, BUT assigned using a non-compile-time-
+        //      capable value AND there is no mutation in between the declaration and the usage,
+        //      then this should return true.
+        //   3. If the variable is declared as mutable AND (assigned using a non-compile-time-
+        //      capable value OR there is mutation in between the declaration and the usage), then
+        //      this should return false.
+        return true;
+    }
+
+    [[nodiscard]] util::String name() const noexcept { return _name; }
 };
 
 }  // namespace cirrus::ast

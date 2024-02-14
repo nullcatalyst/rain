@@ -1,43 +1,42 @@
 #pragma once
 
 #include <optional>
-#include <string_view>
 #include <vector>
 
 #include "cirrus/ast/type/type.hpp"
-#include "cirrus/util/twine.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
 struct StructTypeFieldData {
-    util::Twine name;
-    Type        type;
+    util::String name;
+    TypePtr      type;
 };
 
-struct StructTypeData : public TypeData {
-    std::optional<util::Twine>       name;
-    std::vector<StructTypeFieldData> fields;
-};
+class StructType : public Type {
+    std::optional<util::String>      _name;
+    std::vector<StructTypeFieldData> _fields;
 
-struct StructType : public IType<StructType, TypeVtbl, StructTypeData> {
-    using IType<StructType, TypeVtbl, StructTypeData>::IType;
+  public:
+    StructType(std::optional<util::String> name, std::vector<StructTypeFieldData> fields)
+        : _name{std::move(name)}, _fields{std::move(fields)} {}
 
-    static const TypeVtbl _vtbl;
-
-    [[nodiscard]] static bool is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-
-    [[nodiscard]] static StructType alloc(std::optional<util::Twine>       name,
-                                          std::vector<StructTypeFieldData> fields) noexcept;
-
-    [[nodiscard]] constexpr bool is_named() const noexcept { return _data->name != std::nullopt; }
-    [[nodiscard]] constexpr const std::optional<util::Twine>& name() const noexcept {
-        return _data->name;
+    [[nodiscard]] static std::shared_ptr<StructType> alloc(
+        std::optional<util::String> name, std::vector<StructTypeFieldData> fields) {
+        return std::make_shared<StructType>(std::move(name), std::move(fields));
     }
-    [[nodiscard]] util::Twine name_or_empty() const noexcept {
-        return _data->name.value_or(util::Twine{});
+
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::StructType; }
+
+    [[nodiscard]] constexpr bool is_named() const noexcept { return _name.has_value(); }
+    [[nodiscard]] util::String   name_or_empty() const noexcept {
+        return _name.value_or(util::String{});
     }
-    [[nodiscard]] constexpr const std::vector<StructTypeFieldData>& fields() const noexcept {
-        return _data->fields;
+    [[nodiscard]] constexpr const std::vector<StructTypeFieldData>& fields() const& noexcept {
+        return _fields;
+    }
+    [[nodiscard]] constexpr std::vector<StructTypeFieldData>&& fields() && noexcept {
+        return std::move(_fields);
     }
 };
 

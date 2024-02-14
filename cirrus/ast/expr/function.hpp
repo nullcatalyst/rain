@@ -4,53 +4,65 @@
 
 #include "cirrus/ast/expr/expression.hpp"
 #include "cirrus/ast/type/type.hpp"
-#include "cirrus/util/twine.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
 struct FunctionArgumentData {
     util::String name;
-    Type         type;
+    TypePtr      type;
 };
 
-struct FunctionExpressionData : public ExpressionData {
-    std::optional<util::String>       name;
-    std::optional<Type>               return_type;
-    std::vector<FunctionArgumentData> arguments;
-    std::vector<Expression>           expressions;
-};
+class FunctionExpression : public Expression {
+    std::optional<util::String>       _name;
+    std::optional<TypePtr>            _return_type;
+    std::vector<FunctionArgumentData> _arguments;
+    std::vector<ExpressionPtr>        _expressions;
 
-DECLARE_EXPRESSION(Function) {
-    EXPRESSION_COMMON_IMPL(Function);
+  public:
+    FunctionExpression(std::optional<util::String> name, std::optional<TypePtr> return_type,
+                       std::vector<FunctionArgumentData> arguments,
+                       std::vector<ExpressionPtr>        expressions)
+        : _name{std::move(name)},
+          _return_type{std::move(return_type)},
+          _arguments{std::move(arguments)},
+          _expressions{std::move(expressions)} {}
 
-    [[nodiscard]] static FunctionExpression alloc(
-        std::optional<util::String> name, std::optional<Type> return_type,
-        std::vector<FunctionArgumentData> arguments, std::vector<Expression> expressions) noexcept;
+    [[nodiscard]] static std::shared_ptr<FunctionExpression> alloc(
+        std::optional<util::String> name, std::optional<TypePtr> return_type,
+        std::vector<FunctionArgumentData> arguments, std::vector<ExpressionPtr> expressions) {
+        return std::make_shared<FunctionExpression>(std::move(name), std::move(return_type),
+                                                    std::move(arguments), std::move(expressions));
+    }
 
-    [[nodiscard]] constexpr bool is_named() const noexcept { return _data->name != std::nullopt; }
-    [[nodiscard]] constexpr const std::optional<util::String>& name() const noexcept {
-        return _data->name;
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FunctionExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        // TODO: Should this always return true?
+        // Sure, we can always compile the function, but the function could access global mutable
+        // variables. We should probably check for that.
+        return true;
     }
-    [[nodiscard]] util::String name_or_empty() const noexcept {
-        return _data->name.value_or(util::String{});
+
+    [[nodiscard]] constexpr bool is_named() const noexcept { return _name.has_value(); }
+    [[nodiscard]] util::String   name_or_empty() const noexcept {
+        return _name.value_or(util::String{});
     }
-    [[nodiscard]] constexpr bool has_return_type() const noexcept {
-        return _data->return_type != std::nullopt;
+    [[nodiscard]] constexpr const std::optional<TypePtr>& return_type() const noexcept {
+        return _return_type;
     }
-    [[nodiscard]] constexpr const std::optional<Type>& return_type() const noexcept {
-        return _data->return_type;
+    [[nodiscard]] constexpr bool has_arguments() const noexcept { return !_arguments.empty(); }
+    [[nodiscard]] constexpr const std::vector<FunctionArgumentData>& arguments() const& noexcept {
+        return _arguments;
     }
-    [[nodiscard]] constexpr bool has_arguments() const noexcept {
-        return !_data->arguments.empty();
+    [[nodiscard]] constexpr std::vector<FunctionArgumentData>&& arguments() && noexcept {
+        return std::move(_arguments);
     }
-    [[nodiscard]] constexpr const std::vector<FunctionArgumentData>& arguments() const noexcept {
-        return _data->arguments;
+    [[nodiscard]] constexpr const std::vector<ExpressionPtr>& expressions() const& noexcept {
+        return _expressions;
     }
-    [[nodiscard]] constexpr const std::vector<Expression>& expressions() const noexcept {
-        return _data->expressions;
-    }
-    [[nodiscard]] constexpr std::vector<Expression>& expressions() noexcept {
-        return _data->expressions;
+    [[nodiscard]] constexpr std::vector<ExpressionPtr>&& expressions() && noexcept {
+        return std::move(_expressions);
     }
 };
 

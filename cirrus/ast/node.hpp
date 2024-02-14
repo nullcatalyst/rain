@@ -6,8 +6,6 @@
 
 namespace cirrus::ast {
 
-#define OK_ALLOC(ResultType, ...) OK(ResultType, ResultType::alloc(__VA_ARGS__))
-
 /**
  * A list of all possible AST node kinds.
  *
@@ -47,24 +45,18 @@ enum class NodeKind {
     Count,
 };
 
-struct NodeVtbl : public util::RetainableVtbl {
-    NodeKind _kind;
-};
-
-struct NodeData : public util::RetainableData {
+class Node : public std::enable_shared_from_this<Node> {
+  protected:
     lang::Location _location;
+
+  public:
+    virtual ~Node() = default;
+
+    [[nodiscard]] virtual constexpr NodeKind kind() const = 0;
+
+    [[nodiscard]] lang::Location location() const noexcept { return _location; }
 };
 
-template <typename This, typename Vtbl, typename Data>
-struct INode : public util::Retainable<This, Vtbl, Data> {
-    using util::Retainable<This, Vtbl, Data>::Retainable;
-
-    [[nodiscard]] constexpr NodeKind kind() const { return this->_vtbl->_kind; }
-    [[nodiscard]] lang::Location     location() const noexcept { return this->_data->_location; }
-};
-
-struct Node : public INode<Node, NodeVtbl, NodeData> {
-    using INode<Node, NodeVtbl, NodeData>::INode;
-};
+using NodePtr = std::shared_ptr<Node>;
 
 }  // namespace cirrus::ast

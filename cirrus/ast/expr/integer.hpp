@@ -4,16 +4,21 @@
 
 namespace cirrus::ast {
 
-struct IntegerExpressionData : public ExpressionData {
-    uint64_t value;
-};
+class IntegerExpression : public Expression {
+    uint64_t _value;
 
-DECLARE_EXPRESSION(Integer) {
-    EXPRESSION_COMMON_IMPL(Integer);
+  public:
+    IntegerExpression(const uint64_t value) : _value(value) {}
 
-    [[nodiscard]] static IntegerExpression alloc(const uint64_t value) noexcept;
+    [[nodiscard]] static std::shared_ptr<IntegerExpression> alloc(const uint64_t value) {
+        return std::make_shared<IntegerExpression>(value);
+    }
 
-    [[nodiscard]] constexpr uint64_t value() const noexcept { return _data->value; }
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::IntegerExpression; }
+
+    [[nodiscard]] constexpr bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] uint64_t value() const noexcept { return _value; }
 };
 
 }  // namespace cirrus::ast

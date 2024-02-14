@@ -1,25 +1,33 @@
 #pragma once
 
 #include "cirrus/ast/expr/expression.hpp"
-#include "cirrus/util/twine.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
-struct LetExpressionData : public ExpressionData {
-    util::Twine _name;
-    Expression  _value;
-    bool        _mutable;
-};
+class LetExpression : public Expression {
+    util::String  _name;
+    ExpressionPtr _value;
+    bool          _mutable;
 
-DECLARE_EXPRESSION(Let) {
-    EXPRESSION_COMMON_IMPL(Let);
+  public:
+    LetExpression(util::String name, ExpressionPtr value, bool mutable_)
+        : _name(name), _value(std::move(value)), _mutable(mutable_) {}
 
-    [[nodiscard]] static LetExpression alloc(util::Twine name, Expression expression,
-                                             bool mutable_) noexcept;
+    [[nodiscard]] static std::shared_ptr<LetExpression> alloc(util::String  name,
+                                                              ExpressionPtr value, bool mutable_) {
+        return std::make_shared<LetExpression>(name, std::move(value), mutable_);
+    }
 
-    [[nodiscard]] constexpr const util::Twine& name() const noexcept { return _data->_name; }
-    [[nodiscard]] constexpr const Expression&  value() const noexcept { return _data->_value; }
-    [[nodiscard]] constexpr bool               mutable_() const noexcept { return _data->_mutable; }
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::LetExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        return _value->compile_time_capable();
+    }
+
+    [[nodiscard]] util::String         name() const noexcept { return _name; }
+    [[nodiscard]] const ExpressionPtr& value() const noexcept { return _value; }
+    [[nodiscard]] bool                 mutable_() const noexcept { return _mutable; }
 };
 
 }  // namespace cirrus::ast

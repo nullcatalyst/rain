@@ -8,11 +8,11 @@
 int main(const int argc, const char* const argv[]) {
     using namespace cirrus;
 
-#define ABORT_ON_ERROR(result, msg)                            \
-    if (result.is_error()) {                                   \
-        std::cerr << COUT_COLOR_RED(msg << '\n');              \
-        std::cerr << result.unwrap_error()->message() << "\n"; \
-        return 1;                                              \
+#define ABORT_ON_ERROR(result, msg)                     \
+    if (!result.has_value()) {                          \
+        std::cerr << COUT_COLOR_RED(msg << '\n');       \
+        std::cerr << result.error()->message() << "\n"; \
+        return 1;                                       \
     }
 
     const std::string_view source = R"(
@@ -35,7 +35,7 @@ int main(const int argc, const char* const argv[]) {
     //     return a
     // }
 
-    fn double(n: i32) -> i32 {
+    export fn double(n: i32) -> i32 {
         let n = n * 2
         return n
     }
@@ -50,16 +50,17 @@ int main(const int argc, const char* const argv[]) {
     auto result = compile(source);
     ABORT_ON_ERROR(result, "Failed to compile");
 
+    auto mod = std::move(result).value();
     {
         // Optimize the LLVM module. This is done in place.
-        result.unwrap().optimize();
+        mod.optimize();
     }
 
     {
         // Print the LLVM IR. This is useful for debugging.
-        auto ir = result.unwrap().emit_ir();
+        auto ir = mod.emit_ir();
         ABORT_ON_ERROR(ir, "Failed to emit IR");
-        std::cout << ir.unwrap() << "\n";
+        std::cout << std::move(ir).value() << "\n";
     }
 
     // auto obj = result.unwrap().emit_obj();

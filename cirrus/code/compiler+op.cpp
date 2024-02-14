@@ -13,53 +13,42 @@ namespace cirrus::code {
 
 util::Result<llvm::Value*> Compiler::build(Context&                             ctx,
                                            const ast::BinaryOperatorExpression& binop_expression) {
-    auto llvm_lhs_result = build(ctx, binop_expression.lhs());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_lhs_result);
-    auto llvm_rhs_result = build(ctx, binop_expression.rhs());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_rhs_result);
+    auto llvm_lhs = build(ctx, binop_expression.lhs());
+    FORWARD_ERROR(llvm_lhs);
+    auto llvm_rhs = build(ctx, binop_expression.rhs());
+    FORWARD_ERROR(llvm_rhs);
 
-    switch (binop_expression.op()) {
-        case ast::BinaryOperator::Add:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateAdd(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Subtract:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateSub(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Multiply:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateMul(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Divide:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateSDiv(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Modulo:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateSRem(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Equal:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpEQ(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::NotEqual:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpNE(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Less:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpSLT(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::LessEqual:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpSLE(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::Greater:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpSGT(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
-        case ast::BinaryOperator::GreaterEqual:
-            return OK(llvm::Value*,
-                      _llvm_ir.CreateICmpSGE(llvm_lhs_result.unwrap(), llvm_rhs_result.unwrap()));
+    switch (binop_expression.op_kind()) {
+        case ast::BinaryOperatorKind::Add:
+            return _llvm_ir.CreateAdd(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Subtract:
+            return _llvm_ir.CreateSub(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Multiply:
+            return _llvm_ir.CreateMul(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Divide:
+            return _llvm_ir.CreateSDiv(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Modulo:
+            return _llvm_ir.CreateSRem(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Equal:
+            return _llvm_ir.CreateICmpEQ(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::NotEqual:
+            return _llvm_ir.CreateICmpNE(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Less:
+            return _llvm_ir.CreateICmpSLT(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::LessEqual:
+            return _llvm_ir.CreateICmpSLE(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::Greater:
+            return _llvm_ir.CreateICmpSGT(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
+        case ast::BinaryOperatorKind::GreaterEqual:
+            return _llvm_ir.CreateICmpSGE(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());
         default:
-            return ERR_PTR(llvm::Value*, err::SimpleError, "not implemented");
+            return ERR_PTR(err::SimpleError, "not implemented");
     }
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
                                            const ast::ExecExpression& exec_expression) {
-    if (!exec_expression.compile_time_able()) {
+    if (!exec_expression.compile_time_capable()) {
         // TODO: Emit warning
         return build(ctx, exec_expression.expression());
     }
@@ -85,17 +74,16 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
 
     // TODO: This needs to be careful, it can only build constant expressions
     auto llvm_value = build(ctx, exec_expression.expression());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_value);
-    _llvm_ir.CreateRet(llvm_value.unwrap());
+    FORWARD_ERROR(llvm_value);
+    _llvm_ir.CreateRet(std::move(llvm_value).value());
 
     llvm::GenericValue llvm_return_value =
         ctx.llvm_engine.runFunction(llvm_function, llvm::ArrayRef<llvm::GenericValue>());
 
     llvm_function->eraseFromParent();
 
-    return OK(llvm::Value*,
-              llvm::ConstantInt::get(*_llvm_ctx,
-                                     llvm::APInt(32, llvm_return_value.IntVal.getSExtValue())));
+    return llvm::ConstantInt::get(*_llvm_ctx,
+                                  llvm::APInt(32, llvm_return_value.IntVal.getSExtValue()));
 }
 /*
 // TODO: Finish implementing this once we have a way to declare variables.
@@ -111,7 +99,7 @@ util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
         llvm::ConstantInt::get(*_llvm_ctx, llvm::APInt(32, 0)),
     };
 
-    return OK(llvm::Value*, _llvm_ir.CreateInBoundsGEP(llvm_lhs_result.unwrap(), gep_indices));
+    return OK(llvm::Value*, _llvm_ir.CreateInBoundsGEP(llvm_lhs_result.value(), gep_indices));
 }
 */
 }  // namespace cirrus::code

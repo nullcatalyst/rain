@@ -8,22 +8,6 @@
 
 namespace cirrus::lang {
 
-Location Lexer::get_whole_line(Location location) const noexcept {
-    auto line_start = location.source().rfind('\n', location.begin());
-    if (line_start == -1) {
-        // The source location is at the start of the file
-        line_start = 0;
-    }
-
-    auto line_end = location.source().find('\n', location.begin());
-    if (line_end == -1) {
-        // The source location is at the end of the file
-        line_end = location.source().size();
-    }
-
-    return Location(location.source(), line_start, line_end, location.line(), 1);
-}
-
 Token Lexer::next() {
     {
         // Skip whitespace and comments

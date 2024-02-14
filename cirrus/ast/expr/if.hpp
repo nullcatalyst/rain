@@ -6,25 +6,37 @@
 
 namespace cirrus::ast {
 
-struct IfExpressionData : public ExpressionData {
-    Expression                condition;
-    Expression                then;
-    std::optional<Expression> else_;
-};
+class IfExpression : public Expression {
+    ExpressionPtr                _condition;
+    ExpressionPtr                _then;
+    std::optional<ExpressionPtr> _else;
 
-DECLARE_EXPRESSION(If) {
-    EXPRESSION_COMMON_IMPL(If);
+  public:
+    IfExpression(ExpressionPtr condition, ExpressionPtr then, std::optional<ExpressionPtr> else_)
+        : _condition(std::move(condition)), _then(std::move(then)), _else(std::move(else_)) {}
 
-    [[nodiscard]] static IfExpression alloc(Expression condition, Expression then,
-                                            std::optional<Expression> else_) noexcept;
-
-    [[nodiscard]] constexpr const Expression& condition() const noexcept {
-        return _data->condition;
+    [[nodiscard]] static std::shared_ptr<IfExpression> alloc(ExpressionPtr                condition,
+                                                             ExpressionPtr                then,
+                                                             std::optional<ExpressionPtr> else_) {
+        return std::make_shared<IfExpression>(std::move(condition), std::move(then),
+                                              std::move(else_));
     }
-    [[nodiscard]] constexpr const Expression& then() const noexcept { return _data->then; }
-    [[nodiscard]] constexpr const std::optional<Expression>& else_() const noexcept {
-        return _data->else_;
+
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::IfExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        if (!_else.has_value()) {
+            // Currently, we don't support compile-time evaluation of if expressions without an else
+            return false;
+        }
+
+        return _condition->compile_time_capable() && _then->compile_time_capable() &&
+               _else.value()->compile_time_capable();
     }
+
+    [[nodiscard]] const ExpressionPtr& condition() const noexcept { return _condition; }
+    [[nodiscard]] const ExpressionPtr& then() const noexcept { return _then; }
+    [[nodiscard]] const std::optional<ExpressionPtr>& else_() const noexcept { return _else; }
 };
 
 }  // namespace cirrus::ast

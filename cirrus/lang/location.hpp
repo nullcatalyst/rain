@@ -19,11 +19,8 @@ class Location {
              int line, int column)
         : _source(source), _begin(begin), _end(end), _line(line), _column(column) {}
 
-    [[nodiscard]] constexpr const util::String&        source() const noexcept { return _source; }
-    [[nodiscard]] constexpr const util::StringIterator begin() const noexcept { return _begin; }
-    [[nodiscard]] constexpr const util::StringIterator end() const noexcept { return _end; }
-    [[nodiscard]] constexpr int                        line() const noexcept { return _line; }
-    [[nodiscard]] constexpr int                        column() const noexcept { return _column; }
+    [[nodiscard]] constexpr int line() const noexcept { return _line; }
+    [[nodiscard]] constexpr int column() const noexcept { return _column; }
 
     [[nodiscard]] util::String substr() const noexcept {
         return _source.substr(_begin, _end - _begin);
@@ -41,6 +38,22 @@ class Location {
         const util::StringIterator end   = std::max(_end, other._end);
         return Location(_source, begin, end, std::min(_line, other._line),
                         std::min(_column, other._column));
+    }
+
+    [[nodiscard]] Location whole_line() const noexcept {
+        auto line_start = _source.rfind('\n', _begin);
+        if (line_start == -1) {
+            // The source location is at the start of the file
+            line_start = 0;
+        }
+
+        auto line_end = _source.find('\n', _begin);
+        if (line_end == -1) {
+            // The source location is at the end of the file
+            line_end = _source.size();
+        }
+
+        return Location(_source, line_start, line_end, _line, 1);
     }
 };
 

@@ -410,8 +410,7 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     // Resolve any variant symbols that were created due to signature mismatchs.
     symtab->handleSymbolVariants();
     if (errorCount()) {
-        return ERR_PTR(std::unique_ptr<llvm::MemoryBuffer>, err::SimpleError,
-                       "errors encountered during linking");
+        return ERR_PTR(err::SimpleError, "errors encountered during linking");
     }
 
     // Split WASM_SEG_FLAG_STRINGS sections into pieces in preparation for garbage collection.
@@ -426,14 +425,14 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     // Provide the indirect function table if needed.
     WasmSym::indirectFunctionTable = symtab->resolveIndirectFunctionTable(/*required =*/false);
 
-    return OK(std::unique_ptr<llvm::MemoryBuffer>, writeResult());
+    return writeResult();
 }
 
 util::Result<void> Linker::add(Module& mod) {
     auto obj = mod.emit_obj();
     FORWARD_ERROR(obj);
-    add(std::move(obj.unwrap()));
-    return OK(void);
+    add(std::move(obj).value());
+    return {};
 }
 
 }  // namespace cirrus::code

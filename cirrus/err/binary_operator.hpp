@@ -32,7 +32,7 @@ class BinaryOperatorError : public util::Error {
         ss << COUT_COLOR_BOLD(_lexer.file_name()
                               << ':' << _op_location.line() << ':' << _op_location.column())
            << ": " << COUT_COLOR_RED("error: ") << COUT_COLOR_BOLD(_msg) << '\n';
-        ss << _lexer.get_whole_line(_op_location).substr() << '\n';
+        ss << _op_location.whole_line().substr() << '\n';
 
         int column = 1;
         if (_lhs_location.line() == _op_location.line()) {

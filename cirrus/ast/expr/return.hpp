@@ -6,18 +6,24 @@
 
 namespace cirrus::ast {
 
-struct ReturnExpressionData : public ExpressionData {
-    std::optional<Expression> expr;
-};
+class ReturnExpression : public Expression {
+    std::optional<ExpressionPtr> _value;
 
-DECLARE_EXPRESSION(Return) {
-    EXPRESSION_COMMON_IMPL(Return);
+  public:
+    ReturnExpression(std::optional<ExpressionPtr> value) : _value(std::move(value)) {}
 
-    [[nodiscard]] static ReturnExpression alloc(const Expression expr) noexcept;
-
-    [[nodiscard]] constexpr const std::optional<Expression>& expr() const noexcept {
-        return _data->expr;
+    [[nodiscard]] static std::shared_ptr<ReturnExpression> alloc(
+        std::optional<ExpressionPtr> value) {
+        return std::make_shared<ReturnExpression>(std::move(value));
     }
+
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::ReturnExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        return !_value.has_value() || _value.value()->compile_time_capable();
+    }
+
+    [[nodiscard]] const std::optional<ExpressionPtr>& value() const noexcept { return _value; }
 };
 
 }  // namespace cirrus::ast

@@ -5,8 +5,10 @@
 #include <string>
 #include <variant>
 
-namespace cirrus::util {
+#include "tl/expected.hpp"
 
+namespace cirrus::util {
+/*
 #define OK(ResultType, ...) util::Result<ResultType>::ok(__VA_ARGS__)
 
 #define ERR(ResultType, ErrorType, ...) util::Result<ResultType>::error(__VA_ARGS__)
@@ -32,6 +34,27 @@ namespace cirrus::util {
         std::cerr << result.unwrap_error()->message() << std::endl; \
         ASSERT_EQ(result.is_ok(), true);                            \
     }
+*/
+
+#define ERR(ErrorType, ...) tl::unexpected(ErrorType{__VA_ARGS__})
+
+#define ERR_PTR(ErrorType, ...) tl::unexpected(std::make_unique<ErrorType>(__VA_ARGS__))
+
+#define FORWARD_ERROR(result)                                              \
+    do {                                                                   \
+        static_assert(!std::is_const_v<decltype(result)>,                  \
+                      "cannot forward an error with a const result type"); \
+        if (!result.has_value()) {                                         \
+            return tl::unexpected(std::move(result).error());              \
+        }                                                                  \
+    } while (0)
+
+// Assert that the result is not an error, and print the error message if it is, before failing
+#define ASSERT_NOT_ERROR(result)                                    \
+    if (!result.has_value()) {                                      \
+        std::cerr << result.unwrap_error()->message() << std::endl; \
+        ASSERT_EQ(result.has_value(), true);                        \
+    }
 
 class Error {
   public:
@@ -40,6 +63,10 @@ class Error {
     [[nodiscard]] virtual std::string message() const noexcept = 0;
 };
 
+template <typename T, typename E = std::unique_ptr<Error>>
+using Result = tl::expected<T, E>;
+
+/*
 template <typename T, typename E = std::unique_ptr<Error>>
 class Result {
     using Raw = std::variant<T, E>;
@@ -174,5 +201,5 @@ class Result<void, E> {
     [[nodiscard]] constexpr E&       unwrap_error() noexcept { return _raw.value(); }
     [[nodiscard]] constexpr const E& unwrap_error() const noexcept { return _raw.value(); }
 };
-
+*/
 }  // namespace cirrus::util

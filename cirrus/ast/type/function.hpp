@@ -1,38 +1,42 @@
 #pragma once
 
 #include <optional>
-#include <string_view>
 #include <vector>
 
 #include "cirrus/ast/type/type.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
 struct FunctionTypeArgumentData {
-    std::string_view name;
-    Type             type;
+    util::String name;
+    TypePtr      type;
 };
 
-struct FunctionTypeData : public TypeData {
-    std::vector<FunctionTypeArgumentData> arguments;
-    std::optional<Type>                   return_type;
-};
+class FunctionType : public Type {
+    std::vector<FunctionTypeArgumentData> _arguments;
+    std::optional<TypePtr>                _return_type;
 
-struct FunctionType : public IType<FunctionType, TypeVtbl, FunctionTypeData> {
-    using IType<FunctionType, TypeVtbl, FunctionTypeData>::IType;
+  public:
+    FunctionType(std::vector<FunctionTypeArgumentData> arguments,
+                 std::optional<TypePtr>                return_type)
+        : _arguments{std::move(arguments)}, _return_type{std::move(return_type)} {}
 
-    static const TypeVtbl _vtbl;
-
-    [[nodiscard]] static bool         is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-    [[nodiscard]] static FunctionType alloc(std::vector<FunctionTypeArgumentData> arguments,
-                                            std::optional<Type> return_type) noexcept;
-
-    [[nodiscard]] constexpr const std::optional<Type>& return_type() const noexcept {
-        return _data->return_type;
+    [[nodiscard]] static std::shared_ptr<FunctionType> alloc(
+        std::vector<FunctionTypeArgumentData> arguments, std::optional<TypePtr> return_type) {
+        return std::make_shared<FunctionType>(std::move(arguments), std::move(return_type));
     }
-    [[nodiscard]] constexpr const std::vector<FunctionTypeArgumentData>& arguments()
-        const noexcept {
-        return _data->arguments;
+
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FunctionType; }
+
+    [[nodiscard]] const std::optional<TypePtr>& return_type() const noexcept {
+        return _return_type;
+    }
+    [[nodiscard]] const std::vector<FunctionTypeArgumentData>& arguments() const& noexcept {
+        return _arguments;
+    }
+    [[nodiscard]] std::vector<FunctionTypeArgumentData>&& arguments() && noexcept {
+        return std::move(_arguments);
     }
 };
 

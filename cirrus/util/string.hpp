@@ -5,7 +5,7 @@
 #include "cirrus/util/twine.hpp"
 
 #if !defined(CIRRUS_USE_TWINE)
-#define CIRRUS_USE_TWINE 1
+#define CIRRUS_USE_TWINE 0
 #endif  // !defined(CIRRUS_USE_TWINE)
 
 namespace cirrus::util {

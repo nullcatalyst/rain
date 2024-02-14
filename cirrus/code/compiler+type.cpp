@@ -13,54 +13,54 @@
 
 namespace cirrus::code {
 
-util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::Type& type) {
-    switch (type.kind()) {
+util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::TypePtr& type) {
+    switch (type->kind()) {
         case ast::NodeKind::StructType: {
-            const auto struct_type = ast::StructType::from(type);
+            const ast::StructType& struct_type = *std::static_pointer_cast<ast::StructType>(type);
             if (const auto name = struct_type.name_or_empty(); name.empty()) {
                 auto llvm_struct_type = build(ctx, struct_type);
-                FORWARD_ERROR_WITH_TYPE(llvm::Type*, llvm_struct_type);
-                return OK(llvm::Type*, llvm_struct_type.unwrap());
+                FORWARD_ERROR(llvm_struct_type);
+                return std::move(llvm_struct_type).value();
             } else {
-                if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(name.str());
-                    llvm_type != nullptr) {
-                    return OK(llvm::Type*, llvm_type);
+                if (llvm::Type* llvm_type = ctx.scope.find_llvm_type(name); llvm_type != nullptr) {
+                    return llvm_type;
                 } else {
                     auto llvm_struct_type = build(ctx, struct_type);
-                    FORWARD_ERROR_WITH_TYPE(llvm::Type*, llvm_struct_type);
-                    ctx.scope.set_llvm_type(name.str(), llvm_struct_type.unwrap());
-                    return OK(llvm::Type*, llvm_struct_type.unwrap());
+                    FORWARD_ERROR(llvm_struct_type);
+                    llvm_type = std::move(llvm_struct_type).value();
+                    ctx.scope.set_llvm_type(name, llvm_type);
+                    return llvm_type;
                 }
             }
         }
 
         case ast::NodeKind::UnresolvedType: {
-            const auto unresolved_type = ast::UnresolvedType::from(type);
-            if (llvm::Type* const llvm_type =
-                    ctx.scope.find_llvm_type(unresolved_type.name().str());
+            const ast::UnresolvedType& unresolved_type =
+                *std::static_pointer_cast<ast::UnresolvedType>(type);
+            if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(unresolved_type.name());
                 llvm_type == nullptr) {
-                return ERR_PTR(llvm::Type*, err::SimpleError,
-                               absl::StrFormat("unknown type: %s", unresolved_type.name().str()));
+                return ERR_PTR(err::SimpleError,
+                               absl::StrFormat("unknown type: %s", unresolved_type.name()));
             } else {
-                return OK(llvm::Type*, llvm_type);
+                return llvm_type;
             }
         }
 
         default:
-            return ERR_PTR(llvm::Type*, err::SimpleError, "unknown type");
+            return ERR_PTR(err::SimpleError, "unknown type");
     }
 }
 
 util::Result<llvm::StructType*> Compiler::build(Context& ctx, const ast::StructType& struct_type) {
-    auto llvm_struct_type = llvm::StructType::create(*_llvm_ctx, struct_type.name_or_empty().str());
+    auto llvm_struct_type = llvm::StructType::create(*_llvm_ctx, struct_type.name_or_empty());
     std::vector<llvm::Type*> llvm_field_types;
     for (const auto& field : struct_type.fields()) {
-        auto llvm_argument_type_result = find_or_build_type(ctx, field.type);
-        FORWARD_ERROR_WITH_TYPE(llvm::StructType*, llvm_argument_type_result);
-        llvm_field_types.emplace_back(llvm_argument_type_result.unwrap());
+        auto llvm_argument_type = find_or_build_type(ctx, field.type);
+        FORWARD_ERROR(llvm_argument_type);
+        llvm_field_types.emplace_back(std::move(llvm_argument_type).value());
     }
     llvm_struct_type->setBody(llvm_field_types);
-    return OK(llvm::StructType*, llvm_struct_type);
+    return llvm_struct_type;
 }
 
 }  // namespace cirrus::code

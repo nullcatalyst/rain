@@ -1,23 +1,23 @@
 #pragma once
 
 #include "cirrus/ast/type/type.hpp"
-#include "cirrus/util/twine.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
-struct UnresolvedTypeData : public TypeData {
-    util::Twine name;
-};
+struct UnresolvedType : public Type {
+    util::String _name;
 
-struct UnresolvedType : public IType<UnresolvedType, TypeVtbl, UnresolvedTypeData> {
-    using IType<UnresolvedType, TypeVtbl, UnresolvedTypeData>::IType;
+  public:
+    UnresolvedType(util::String name) : _name{std::move(name)} {}
 
-    static const TypeVtbl _vtbl;
+    [[nodiscard]] static std::shared_ptr<UnresolvedType> alloc(util::String name) {
+        return std::make_shared<UnresolvedType>(std::move(name));
+    }
 
-    [[nodiscard]] static bool is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-    [[nodiscard]] static UnresolvedType alloc(util::Twine name) noexcept;
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::UnresolvedType; }
 
-    [[nodiscard]] constexpr const util::Twine& name() const noexcept { return _data->name; }
+    [[nodiscard]] util::String name() const noexcept { return _name; }
 };
 
 }  // namespace cirrus::ast

@@ -4,16 +4,25 @@
 
 namespace cirrus::ast {
 
-struct ParenthesisExpressionData : public ExpressionData {
-    Expression expr;
-};
+class ParenthesisExpression : public Expression {
+    ExpressionPtr _expression;
 
-DECLARE_EXPRESSION(Parenthesis) {
-    EXPRESSION_COMMON_IMPL(Parenthesis);
+  public:
+    ParenthesisExpression(ExpressionPtr expression) : _expression(std::move(expression)) {}
 
-    [[nodiscard]] static ParenthesisExpression alloc(const Expression expr) noexcept;
+    [[nodiscard]] static std::shared_ptr<ParenthesisExpression> alloc(ExpressionPtr expression) {
+        return std::make_shared<ParenthesisExpression>(std::move(expression));
+    }
 
-    [[nodiscard]] constexpr const Expression& expr() const noexcept { return _data->expr; }
+    [[nodiscard]] NodeKind kind() const noexcept override {
+        return NodeKind::ParenthesisExpression;
+    }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        return _expression->compile_time_capable();
+    }
+
+    [[nodiscard]] const ExpressionPtr& expression() const noexcept { return _expression; }
 };
 
 }  // namespace cirrus::ast

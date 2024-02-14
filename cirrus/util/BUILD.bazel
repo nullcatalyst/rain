@@ -17,6 +17,7 @@ cc_library(
         "//cirrus:__subpackages__",
     ],
     deps = [
+        "//third_party/tl_expected",
         "@llvm-project//llvm:Support",
     ],
 )

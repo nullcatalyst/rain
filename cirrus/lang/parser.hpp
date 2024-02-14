@@ -13,8 +13,8 @@ class Parser {
     Parser()  = default;
     ~Parser() = default;
 
-    [[nodiscard]] util::Result<ast::Type>       parse_type(Lexer& lexer);
-    [[nodiscard]] util::Result<ast::Expression> parse_expression(Lexer& lexer);
+    [[nodiscard]] util::Result<ast::TypePtr>       parse_type(Lexer& lexer);
+    [[nodiscard]] util::Result<ast::ExpressionPtr> parse_expression(Lexer& lexer);
 
     [[nodiscard]] util::Result<ParsedModule> parse(Lexer& lexer);
 };

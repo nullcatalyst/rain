@@ -70,7 +70,7 @@ util::Result<std::string> Module::emit_ir() const {
     std::string              str;
     llvm::raw_string_ostream os(str);
     _llvm_mod->print(os, nullptr);
-    return OK(std::string, os.str());
+    return os.str();
 }
 
 util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
@@ -86,8 +86,7 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
     // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
     // always up to date, so there is no need to call flush().
     // ostream.flush();
-    return OK(std::unique_ptr<llvm::MemoryBuffer>,
-              llvm::MemoryBuffer::getMemBufferCopy(code.str()));
+    return llvm::MemoryBuffer::getMemBufferCopy(code.str());
 }
 
 }  // namespace cirrus::code

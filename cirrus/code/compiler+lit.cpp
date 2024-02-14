@@ -11,21 +11,19 @@ util::Result<llvm::Value*> Compiler::build(Context&                         ctx,
                                            const ast::IdentifierExpression& identifier_expression) {
     const Variable* const var = ctx.scope.find_variable(identifier_expression.name());
     if (var == nullptr) {
-        return ERR_PTR(llvm::Value*, err::SimpleError,
+        return ERR_PTR(err::SimpleError,
                        absl::StrFormat("unknown variable: %s", identifier_expression.name()));
     }
 
     if (var->_alloca) {
-        return OK(llvm::Value*,
-                  _llvm_ir.CreateLoad(llvm::Type::getInt32Ty(*_llvm_ctx), var->_value));
+        return _llvm_ir.CreateLoad(llvm::Type::getInt32Ty(*_llvm_ctx), var->_value);
     }
-    return OK(llvm::Value*, var->_value);
+    return var->_value;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                      ctx,
                                            const ast::IntegerExpression& integer_expression) {
-    return OK(llvm::Value*,
-              llvm::ConstantInt::get(*_llvm_ctx, llvm::APInt(32, integer_expression.value())));
+    return llvm::ConstantInt::get(*_llvm_ctx, llvm::APInt(32, integer_expression.value()));
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
@@ -42,18 +40,17 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
         llvm::FunctionType::get(llvm_i32_type, llvm_argument_types, false);
 
     auto callee = build(ctx, call_expression.callee());
-    FORWARD_ERROR_WITH_TYPE(llvm::Value*, callee);
+    FORWARD_ERROR(callee);
 
     llvm::SmallVector<llvm::Value*, 4> llvm_arguments;
     llvm_arguments.reserve(call_expression.arguments().size());
     for (const auto& argument : call_expression.arguments()) {
-        auto llvm_argument_result = build(ctx, argument);
-        FORWARD_ERROR_WITH_TYPE(llvm::Value*, llvm_argument_result);
-        llvm_arguments.emplace_back(llvm_argument_result.unwrap());
+        auto llvm_argument = build(ctx, argument);
+        FORWARD_ERROR(llvm_argument);
+        llvm_arguments.emplace_back(std::move(llvm_argument).value());
     }
 
-    return OK(llvm::Value*,
-              _llvm_ir.CreateCall(llvm_function_type, callee.unwrap(), llvm_arguments));
+    return _llvm_ir.CreateCall(llvm_function_type, std::move(callee).value(), llvm_arguments);
 }
 
 }  // namespace cirrus::code

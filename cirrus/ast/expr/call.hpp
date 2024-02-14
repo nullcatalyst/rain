@@ -6,20 +6,29 @@
 
 namespace cirrus::ast {
 
-struct CallExpressionData : public ExpressionData {
-    Expression              callee;
-    std::vector<Expression> arguments;
-};
+class CallExpression : public Expression {
+    ExpressionPtr              _callee;
+    std::vector<ExpressionPtr> _arguments;
 
-DECLARE_EXPRESSION(Call) {
-    EXPRESSION_COMMON_IMPL(Call);
+  public:
+    CallExpression(ExpressionPtr callee, std::vector<ExpressionPtr> arguments)
+        : _callee(std::move(callee)), _arguments(std::move(arguments)) {}
 
-    [[nodiscard]] static CallExpression alloc(Expression              callee,
-                                              std::vector<Expression> expressions) noexcept;
+    [[nodiscard]] static std::shared_ptr<CallExpression> alloc(
+        ExpressionPtr callee, std::vector<ExpressionPtr> arguments) noexcept {
+        return std::make_shared<CallExpression>(std::move(callee), std::move(arguments));
+    }
 
-    [[nodiscard]] constexpr const Expression& callee() const noexcept { return _data->callee; }
-    [[nodiscard]] constexpr const std::vector<Expression>& arguments() const noexcept {
-        return _data->arguments;
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::CallExpression; }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] const ExpressionPtr&              callee() const noexcept { return _callee; }
+    [[nodiscard]] const std::vector<ExpressionPtr>& arguments() const& noexcept {
+        return _arguments;
+    }
+    [[nodiscard]] std::vector<ExpressionPtr>&& arguments() && noexcept {
+        return std::move(_arguments);
     }
 };
 

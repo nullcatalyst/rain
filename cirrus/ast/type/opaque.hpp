@@ -1,24 +1,23 @@
 #pragma once
 
-#include <string_view>
-
 #include "cirrus/ast/type/type.hpp"
+#include "cirrus/util/string.hpp"
 
 namespace cirrus::ast {
 
-struct OpaqueTypeData : public TypeData {
-    std::string_view name;
-};
+struct OpaqueType : public Type {
+    util::String _name;
 
-struct OpaqueType : public IType<OpaqueType, TypeVtbl, OpaqueTypeData> {
-    using IType<OpaqueType, TypeVtbl, OpaqueTypeData>::IType;
+  public:
+    OpaqueType(util::String name) : _name{std::move(name)} {}
 
-    static const TypeVtbl _vtbl;
+    [[nodiscard]] static std::shared_ptr<OpaqueType> alloc(util::String name) {
+        return std::make_shared<OpaqueType>(std::move(name));
+    }
 
-    [[nodiscard]] static bool       is(const Type type) noexcept { return type.vtbl() == &_vtbl; }
-    [[nodiscard]] static OpaqueType alloc(std::string_view name) noexcept;
+    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::OpaqueType; }
 
-    [[nodiscard]] constexpr std::string_view name() const noexcept { return _data->name; }
+    [[nodiscard]] util::String name() const noexcept { return _name; }
 };
 
 }  // namespace cirrus::ast
