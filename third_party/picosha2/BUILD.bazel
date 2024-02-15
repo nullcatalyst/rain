@@ -1,0 +1,12 @@
+cc_library(
+    name = "picosha2",
+    hdrs = [
+        "picosha2.h",
+    ],
+    includes = [
+        ".",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+)
