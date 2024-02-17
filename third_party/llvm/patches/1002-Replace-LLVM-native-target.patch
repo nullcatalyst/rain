@@ -1,0 +1,47 @@
+diff --git a/llvm/config.bzl b/llvm/config.bzl
+index b15ec9e..0f7f3e2 100644
+--- a/llvm/config.bzl
++++ b/llvm/config.bzl
+@@ -11,19 +11,31 @@ load(
+     "LLVM_VERSION_MINOR",
+     "LLVM_VERSION_PATCH",
+ )
++load(
++    "//llvm:targets.bzl",
++    "llvm_targets",
++)
+ 
+ def native_arch_defines(arch, triple):
+-    return [
+-        r'LLVM_NATIVE_ARCH=\"{}\"'.format(arch),
+-        "LLVM_NATIVE_ASMPARSER=LLVMInitialize{}AsmParser".format(arch),
+-        "LLVM_NATIVE_ASMPRINTER=LLVMInitialize{}AsmPrinter".format(arch),
+-        "LLVM_NATIVE_DISASSEMBLER=LLVMInitialize{}Disassembler".format(arch),
+-        "LLVM_NATIVE_TARGET=LLVMInitialize{}Target".format(arch),
+-        "LLVM_NATIVE_TARGETINFO=LLVMInitialize{}TargetInfo".format(arch),
+-        "LLVM_NATIVE_TARGETMC=LLVMInitialize{}TargetMC".format(arch),
+-        "LLVM_NATIVE_TARGETMCA=LLVMInitialize{}TargetMCA".format(arch),
+-        r'LLVM_HOST_TRIPLE=\"{}\"'.format(triple),
+-        r'LLVM_DEFAULT_TARGET_TRIPLE=\"{}\"'.format(triple),
++    include_native_target = arch in llvm_targets
++    llvm_native_target_defines = []
++    if include_native_target:
++        # Not having these defined for the project is useful when building a compiler that can _only_ cross-compile.
++        llvm_native_target_defines = [
++            "LLVM_NATIVE_ASMPARSER=LLVMInitialize{}AsmParser".format(arch),
++            "LLVM_NATIVE_ASMPRINTER=LLVMInitialize{}AsmPrinter".format(arch),
++            "LLVM_NATIVE_DISASSEMBLER=LLVMInitialize{}Disassembler".format(arch),
++            "LLVM_NATIVE_TARGET=LLVMInitialize{}Target".format(arch),
++            "LLVM_NATIVE_TARGETINFO=LLVMInitialize{}TargetInfo".format(arch),
++            "LLVM_NATIVE_TARGETMC=LLVMInitialize{}TargetMC".format(arch),
++            "LLVM_NATIVE_TARGETMCA=LLVMInitialize{}TargetMCA".format(arch),
++        ]
++
++    return llvm_native_target_defines + [
++        # These are required to be defined, otherwise the build will fail.
++        r'LLVM_NATIVE_ARCH=\"{}\"'.format(arch if include_native_target else ""),
++        r'LLVM_HOST_TRIPLE=\"{}\"'.format(triple if include_native_target else ""),
++        r'LLVM_DEFAULT_TARGET_TRIPLE=\"{}\"'.format(triple if include_native_target else ""),
+     ]
+ 
+ posix_defines = [

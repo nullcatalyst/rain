@@ -43,9 +43,9 @@ cc_library(
     deps = [
         "//cirrus/ast",
         "//cirrus/lang",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
         "@llvm-project//lld:Common",
         "@llvm-project//lld:Wasm",
         "@llvm-project//llvm:CodeGen",

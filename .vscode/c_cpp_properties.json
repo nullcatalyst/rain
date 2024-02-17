@@ -4,11 +4,11 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/external/llvm-project/lld/include",
-                "${workspaceFolder}/external/llvm-project/llvm/include",
-                "${workspaceFolder}/external/com_google_absl",
-                "${workspaceFolder}/external/com_google_googletest/googletest/include",
-                "${workspaceFolder}/external/com_github_google_benchmark/benchmark/include",
+                "${workspaceFolder}/external/llvm-project~override/lld/include",
+                "${workspaceFolder}/external/llvm-project~override/llvm/include",
+                "${workspaceFolder}/external/abseil-cpp~20240116.1",
+                "${workspaceFolder}/external/googletest~1.14.0/googletest/include",
+                "${workspaceFolder}/external/google_benchmark~1.8.3/benchmark/include",
             ],
             "defines": [],
             "macFrameworkPath": [

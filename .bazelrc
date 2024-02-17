@@ -39,6 +39,22 @@ build:windows --cxxopt=/Zc:rvalueCast --host_cxxopt=/Zc:rvalueCast
 # Use the more flexible bigobj format for C++ files that have lots of symbols.
 build:windows --cxxopt=/bigobj --host_cxxopt=/bigobj
 
+# Use our custom-configured c++ toolchain for building wasm.
+build:wasm --platforms=@wasm_toolchain//:wasm
+
+# Disable some warnings that exist in LLVM that we don't want to fix.
+build:wasm --cxxopt=-Wno-deprecated-this-capture
+build:wasm --cxxopt=-Wno-deprecated-anon-enum-enum-conversion
+build:wasm --cxxopt=-Wno-deprecated-enum-compare-conditional
+
+# Disable some features (set by the LLVM bazel implementation) that are not available in wasm.
+build:wasm --cxxopt=-UHAVE_MACH_MACH_H
+build:wasm --cxxopt=-UHAVE_MALLOC_MALLOC_H
+build:wasm --cxxopt=-UHAVE_BACKTRACE
+build:wasm --cxxopt=-UHAVE_PROC_PID_RUSAGE
+build:wasm --cxxopt=-DFE_INEXACT=0x0010
+
 # Reuse the posix config, since most platforms (not Windows) reuse all the same flags.
 build:macos --config=posix
 build:linux --config=posix
+build:wasm --config=posix
