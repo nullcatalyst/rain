@@ -76,7 +76,7 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
 
     auto target_machine = wasm_target_machine();
     if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-                                            llvm::CodeGenFileType::ObjectFile)) {
+                                            llvm::CodeGenFileType::CGFT_ObjectFile)) {
         std::abort();
     }
     pass_manager.run(*_llvm_mod);

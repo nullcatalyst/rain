@@ -22,7 +22,7 @@ std::unique_ptr<llvm::TargetMachine> wasm_target_machine() {
         "+simd128,+sign-ext,+bulk-memory,+mutable-globals,+nontrapping-fptoint,+multivalue";
     return std::unique_ptr<llvm::TargetMachine>(
         target->createTargetMachine(target_triple, cpu, features, llvm::TargetOptions(),
-                                    std::nullopt, std::nullopt, llvm::CodeGenOptLevel::Default));
+                                    std::nullopt, std::nullopt, llvm::CodeGenOpt::Default));
 }
 
 }  // namespace cirrus::code

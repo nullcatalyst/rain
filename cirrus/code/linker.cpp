@@ -50,10 +50,10 @@ void init_config() {
     config->stripDebug          = true;
     config->stackFirst =
         true;  // Put the stack before the static const data, which is before the heap
-    config->trace             = false;
-    config->tableBase         = 0;
-    config->globalBase        = 0;
-    config->initialHeap       = 0;
+    config->trace      = false;
+    config->tableBase  = 0;
+    config->globalBase = 0;
+    // config->initialHeap       = 0;
     config->initialMemory     = 0;
     config->maxMemory         = 0;
     config->zStackSize        = WasmPageSize;
@@ -148,7 +148,7 @@ void createSyntheticSymbols() {
 
     bool is64 = config->is64.value_or(false);
 
-    if (ctx.isPic) {
+    if (config->isPic) {
         WasmSym::stackPointer = createUndefinedGlobal(
             "__stack_pointer",
             config->is64.value_or(false) ? &mutableGlobalTypeI64 : &mutableGlobalTypeI32);
@@ -183,7 +183,7 @@ void createSyntheticSymbols() {
             make<SyntheticFunction>(is64 ? i64ArgSignature : i32ArgSignature, "__wasm_init_tls"));
     }
 
-    if (ctx.isPic || config->unresolvedSymbols == UnresolvedPolicy::ImportDynamic) {
+    if (config->isPic || config->unresolvedSymbols == UnresolvedPolicy::ImportDynamic) {
         // For PIC code, or when dynamically importing addresses, we create
         // synthetic functions that apply relocations.  These get called from
         // __wasm_call_ctors before the user-level constructors.
@@ -202,7 +202,7 @@ void createOptionalSymbols() {
         WasmSym::dataEnd = symtab->addOptionalDataSymbol("__data_end");
     }
 
-    if (!ctx.isPic) {
+    if (!config->isPic) {
         WasmSym::stackLow          = symtab->addOptionalDataSymbol("__stack_low");
         WasmSym::stackHigh         = symtab->addOptionalDataSymbol("__stack_high");
         WasmSym::globalBase        = symtab->addOptionalDataSymbol("__global_base");
@@ -230,7 +230,7 @@ void createOptionalSymbols() {
 
 void processStubLibrariesPreLTO() {
     log("-- processStubLibrariesPreLTO");
-    for (auto& stub_file : ctx.stubFiles) {
+    for (auto& stub_file : symtab->stubFiles) {
         // LLVM_DEBUG(llvm::dbgs() << "processing stub file: " << stub_file->getName() << "\n");
         for (auto [name, deps] : stub_file->symbolDependencies) {
             auto* sym = symtab->find(name);
@@ -251,57 +251,48 @@ void processStubLibrariesPreLTO() {
 
 void processStubLibraries() {
     log("-- processStubLibraries");
-    bool depsAdded = false;
-    do {
-        depsAdded = false;
-        for (auto& stub_file : ctx.stubFiles) {
-            // LLVM_DEBUG(llvm::dbgs() << "processing stub file: " << stub_file->getName() << "\n");
-            for (auto [name, deps] : stub_file->symbolDependencies) {
-                auto* sym = symtab->find(name);
-                if (!sym || !sym->isUndefined()) {
-                    if (sym && sym->traced)
-                        message(toString(stub_file) + ": stub symbol not needed: " + name);
+    for (auto& stub_file : symtab->stubFiles) {
+        // LLVM_DEBUG(llvm::dbgs() << "processing stub file: " << stub_file->getName() << "\n");
+        for (auto [name, deps] : stub_file->symbolDependencies) {
+            auto* sym = symtab->find(name);
+            if (!sym || !sym->isUndefined()) {
+                // LLVM_DEBUG(llvm::dbgs() << "stub symbol not needed: " << name << "\n");
+                continue;
+            }
+            // The first stub library to define a given symbol sets this and
+            // definitions in later stub libraries are ignored.
+            if (sym->forceImport) continue;  // Already handled
+            sym->forceImport = true;
+            if (sym->traced) message(toString(stub_file) + ": importing " + name);
+            // else
+            //     LLVM_DEBUG(llvm::dbgs() << toString(stub_file) << ": importing " << name <<
+            //     "\n");
+            for (const auto dep : deps) {
+                auto* needed = symtab->find(dep);
+                if (!needed) {
+                    error(toString(stub_file) + ": undefined symbol: " + dep + ". Required by " +
+                          toString(*sym));
+                } else if (needed->isUndefined()) {
+                    error(toString(stub_file) + ": undefined symbol: " + toString(*needed) +
+                          ". Required by " + toString(*sym));
+                } else {
+                    if (needed->traced)
+                        message(toString(stub_file) + ": exported " + toString(*needed) +
+                                " due to import of " + name);
                     // else
-                    //     LLVM_DEBUG(llvm::dbgs() << "stub symbol not needed: `" << name << "`\n");
-                    continue;
-                }
-                // The first stub library to define a given symbol sets this and
-                // definitions in later stub libraries are ignored.
-                if (sym->forceImport) continue;  // Already handled
-                sym->forceImport = true;
-                if (sym->traced) message(toString(stub_file) + ": importing " + name);
-                // else
-                //     LLVM_DEBUG(llvm::dbgs()
-                //                << toString(stub_file) << ": importing " << name << "\n");
-                for (const auto dep : deps) {
-                    auto* needed = symtab->find(dep);
-                    if (!needed) {
-                        error(toString(stub_file) + ": undefined symbol: " + dep +
-                              ". Required by " + toString(*sym));
-                    } else if (needed->isUndefined()) {
-                        error(toString(stub_file) + ": undefined symbol: " + toString(*needed) +
-                              ". Required by " + toString(*sym));
-                    } else {
-                        if (needed->traced)
-                            message(toString(stub_file) + ": exported " + toString(*needed) +
-                                    " due to import of " + name);
-                        // else
-                        //     LLVM_DEBUG(llvm::dbgs()
-                        //                << "force export: " << toString(*needed) << "\n");
-                        needed->forceExport = true;
-                        if (auto* lazy = dyn_cast<LazySymbol>(needed)) {
-                            depsAdded = true;
-                            lazy->extract();
-                            if (!config->whyExtract.empty())
-                                ctx.whyExtractRecords.emplace_back(stub_file->getName(),
+                    //     LLVM_DEBUG(llvm::dbgs() << "force export: " << toString(*needed) <<
+                    //     "\n");
+                    needed->forceExport = true;
+                    if (auto* lazy = dyn_cast<LazySymbol>(needed)) {
+                        lazy->fetch();
+                        if (!config->whyExtract.empty())
+                            config->whyExtractRecords.emplace_back(stub_file->getName(),
                                                                    sym->getFile(), *sym);
-                        }
                     }
                 }
             }
         }
-    } while (depsAdded);
-
+    }
     log("-- done processStubLibraries");
 }
 
@@ -353,7 +344,7 @@ void splitSections() {
     // splitIntoPieces needs to be called on each MergeInputChunk before calling finalizeContents().
     // LLVM_DEBUG(llvm::dbgs() << "splitSections\n");
     // parallelForEach(ctx.objectFiles, [](ObjFile* file) {
-    for (ObjFile* file : ctx.objectFiles) {
+    for (ObjFile* file : symtab->objectFiles) {
         for (InputChunk* seg : file->segments) {
             if (auto* s = dyn_cast<MergeInputChunk>(seg)) s->splitIntoPieces();
         }
@@ -375,7 +366,7 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     lld::wasm::config                = _config.get();
     lld::wasm::symtab                = _symtab.get();
     init_config();
-    ctx.reset();
+    // ctx.reset();
 
     {
         lld::wasm::config->zStackSize = _stack_size != 0 ? _stack_size : WasmPageSize;
