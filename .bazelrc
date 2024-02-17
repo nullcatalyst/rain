@@ -1,5 +1,5 @@
 # Automatically use a flag like --config=windows, --config=linux, etc.
-common --enable_platform_specific_config
+# common --enable_platform_specific_config
 
 # Enable runfiles support for all targets. This is off by default on Windows.
 build --enable_runfiles=yes

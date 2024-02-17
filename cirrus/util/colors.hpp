@@ -3,7 +3,11 @@
 #include <string_view>
 
 #if !defined(CIRRUS_OUTPUT_COLORS)
+#if defined(__wasm__)
+#define CIRRUS_OUTPUT_COLORS 0
+#else
 #define CIRRUS_OUTPUT_COLORS 1
+#endif
 #endif  // !defined(CIRRUS_OUTPUT_COLORS)
 
 #if CIRRUS_OUTPUT_COLORS

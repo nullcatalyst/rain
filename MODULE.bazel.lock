@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "6f1c4d63a4c62c0196d20de996c4558e4b44d5e61479505af93e48d17c006d06",
+  "moduleFileHash": "7086dba08a824ce56098bf032268916b140f9d498f1295ef76a9fed44928c051",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -74,7 +74,9 @@
       "key": "wasm_toolchain@_",
       "repoName": "wasmtoolchain_macos_arm64",
       "executionPlatformsToRegister": [],
-      "toolchainsToRegister": [],
+      "toolchainsToRegister": [
+        "//:toolchain"
+      ],
       "extensionUsages": [],
       "deps": {
         "platforms": "platforms@0.0.8",

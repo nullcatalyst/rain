@@ -3,8 +3,15 @@
 
 #include "cirrus/cirrus.hpp"
 #include "cirrus/util/colors.hpp"
+#include "cirrus/util/wasm.hpp"
 #include "llvm/ExecutionEngine/GenericValue.h"
 #include "llvm/Support/MemoryBuffer.h"
+
+#define ABORT_ON_ERROR(result, msg)                                            \
+    if (!result.has_value()) {                                                 \
+        std::cerr << COUT_COLOR_RED(msg) << result.error()->message() << '\n'; \
+        __builtin_unreachable();                                               \
+    }
 
 extern "C" {
 
@@ -24,17 +31,65 @@ static llvm::GenericValue lle_X_sqrt(llvm::FunctionType*                llvm_fun
 
 }  // extern "C"
 
-int main(const int argc, const char* const argv[]) {
-    using namespace cirrus;
-    code::Compiler::initialize_llvm();
-    code::Compiler::use_external_function("sqrt", lle_X_sqrt);
+namespace {
 
-#define ABORT_ON_ERROR(result, msg)                                            \
-    if (!result.has_value()) {                                                 \
-        std::cerr << COUT_COLOR_RED(msg) << result.error()->message() << '\n'; \
-        return 1;                                                              \
+cirrus::code::Module compile_from_source(const std::string_view source) {
+    using namespace cirrus;
+
+    lang::Lexer  lexer(source);
+    lang::Parser parser;
+
+    auto parse_result = parser.parse(lexer);
+    ABORT_ON_ERROR(parse_result, "Failed to parse: ");
+
+    code::Compiler compiler;
+
+    {
+        auto sqrt_type =
+            compiler.get_function_type(std::vector<ast::TypePtr>{ast::UnresolvedType::alloc("f64")},
+                                       ast::UnresolvedType::alloc("f64"));
+        compiler.declare_external_function("sqrt", std::move(sqrt_type).value());
     }
 
+    auto compile_result = compiler.build(std::move(parse_result).value());
+    ABORT_ON_ERROR(compile_result, "Failed to compile: ");
+
+    cirrus::code::Module mod = std::move(compile_result).value();
+
+    // Optimize the LLVM module. This is done in place.
+    mod.optimize();
+
+    return mod;
+}
+
+}  // namespace
+
+WASM_EXPORT("malloc") void* memory_allocate(size_t size) { return malloc(size); }
+
+WASM_EXPORT("free") void memory_free(void* ptr) { return free(ptr); }
+
+WASM_EXPORT("initialize") void initialize() {
+    cirrus::code::Compiler::initialize_llvm();
+    cirrus::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
+}
+
+struct Buffer {
+    const void* start;
+    const void* end;
+};
+
+WASM_EXPORT("compile") void compile(const char* source_start, const char* source_end) {
+    auto mod = compile_from_source(std::string_view{source_start, source_end});
+
+    // Print the LLVM IR. This is useful for debugging.
+    auto ir = mod.emit_ir();
+    ABORT_ON_ERROR(ir, "Failed to emit IR");
+    std::cout << std::move(ir).value() << "\n";
+
+    // return Buffer{source_start, source_end};
+}
+
+int main(const int argc, const char* const argv[]) {
     const std::string source = R"(
 fn fib(n: i32) -> i32 {
     if n <= 1 {
@@ -68,43 +123,8 @@ export fn run() -> i32 {
 )";
     std::cout << COUT_COLOR_CYAN("\nSource code:\n") << source << "\n\n";
 
-    code::Module mod;
-    {
-        lang::Lexer  lexer(source);
-        lang::Parser parser;
-
-        auto parse_result = parser.parse(lexer);
-        ABORT_ON_ERROR(parse_result, "Failed to parse: ");
-
-        code::Compiler compiler;
-
-        {
-            auto sqrt_type = compiler.get_function_type(
-                std::vector<ast::TypePtr>{ast::UnresolvedType::alloc("f64")},
-                ast::UnresolvedType::alloc("f64"));
-            compiler.declare_external_function("sqrt", std::move(sqrt_type).value());
-        }
-
-        auto compile_result = compiler.build(std::move(parse_result).value());
-        ABORT_ON_ERROR(compile_result, "Failed to compile: ");
-
-        mod = std::move(compile_result).value();
-    }
-
-    // auto result = compile(source);
-    // ABORT_ON_ERROR(result, "Failed to compile");
-
-    {
-        // Optimize the LLVM module. This is done in place.
-        mod.optimize();
-    }
-
-    {
-        // Print the LLVM IR. This is useful for debugging.
-        auto ir = mod.emit_ir();
-        ABORT_ON_ERROR(ir, "Failed to emit IR");
-        std::cout << std::move(ir).value() << "\n";
-    }
+    initialize();
+    compile(&*source.cbegin(), &*source.cend());
 
     // auto obj = result.unwrap().emit_obj();
     // ABORT_ON_ERROR(obj, "Failed to emit object file");
@@ -122,6 +142,6 @@ export fn run() -> i32 {
     // }
 
     return 0;
+}
 
 #undef ABORT_ON_ERROR
-}
