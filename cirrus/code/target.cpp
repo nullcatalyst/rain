@@ -1,7 +1,7 @@
 #include "cirrus/code/target.hpp"
 
-#include <iostream>
-
+#include "cirrus/util/colors.hpp"
+#include "cirrus/util/log.hpp"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
 
@@ -13,7 +13,7 @@ std::unique_ptr<llvm::TargetMachine> wasm_target_machine() {
     std::string         target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
     const llvm::Target* target        = llvm::TargetRegistry::lookupTarget(target_triple, error);
     if (target == nullptr) {
-        std::cerr << "failed to lookup target: " << error << '\n';
+        util::console_error(ANSI_RED, "failed to lookup target: ", ANSI_RESET, error);
         std::abort();
     }
 

@@ -28,7 +28,6 @@ class Compiler {
     Scope                                  _builtin_scope;
 
   public:
-    static void initialize_llvm();
     static void use_external_function(const std::string_view function_name,
                                       llvm::GenericValue (*external_function)(
                                           llvm::FunctionType*, llvm::ArrayRef<llvm::GenericValue>));

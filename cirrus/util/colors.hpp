@@ -3,11 +3,7 @@
 #include <string_view>
 
 #if !defined(CIRRUS_OUTPUT_COLORS)
-#if defined(__wasm__)
-#define CIRRUS_OUTPUT_COLORS 0
-#else
 #define CIRRUS_OUTPUT_COLORS 1
-#endif
 #endif  // !defined(CIRRUS_OUTPUT_COLORS)
 
 #if CIRRUS_OUTPUT_COLORS
@@ -29,10 +25,3 @@ constexpr std::string_view ANSI_BLUE  = "";
 constexpr std::string_view ANSI_CYAN  = "";
 
 #endif  // CIRRUS_OUTPUT_COLORS
-
-// Example usage: std::cout << COUT_COLOR_RED("Hello, " << name << "!") << std::endl;
-#define COUT_COLOR_BOLD(text) ANSI_BOLD << text << ANSI_RESET
-#define COUT_COLOR_RED(text) ANSI_RED << text << ANSI_RESET
-#define COUT_COLOR_GREEN(text) ANSI_GREEN << text << ANSI_RESET
-#define COUT_COLOR_BLUE(text) ANSI_BLUE << text << ANSI_RESET
-#define COUT_COLOR_CYAN(text) ANSI_CYAN << text << ANSI_RESET

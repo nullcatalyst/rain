@@ -1,7 +1,7 @@
 #pragma once
 
-#include <iostream>
-
+#include "cirrus/util/colors.hpp"
+#include "cirrus/util/log.hpp"
 #include "cirrus/util/string.hpp"
 
 namespace cirrus::lang {
@@ -29,7 +29,8 @@ class Location {
     [[nodiscard]] Location merge(const Location& other) const noexcept {
 #if !defined(NDEBUG) && !CIRRUS_USE_TWINE
         if (_source != other._source) {
-            std::cerr << "cannot merge locations from different sources" << std::endl;
+            util::console_error(ANSI_RED, "cannot merge locations from different sources",
+                                ANSI_RESET);
             std::abort();
         }
 #endif  // !defined(NDEBUG)

@@ -1,8 +1,6 @@
 #include "cirrus/lang/parser.hpp"
 
 #include <array>
-#include <iostream>
-#include <sstream>
 
 #include "absl/strings/numbers.h"
 #include "cirrus/ast/expr/all.hpp"

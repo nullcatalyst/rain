@@ -69,22 +69,22 @@ util::Result<std::string> Module::emit_ir() const {
     return os.str();
 }
 
-util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
-    llvm::SmallString<0>      code;
-    llvm::raw_svector_ostream ostream(code);
-    llvm::legacy::PassManager pass_manager;
+// util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
+//     llvm::SmallString<0>      code;
+//     llvm::raw_svector_ostream ostream(code);
+//     llvm::legacy::PassManager pass_manager;
 
-    auto target_machine = wasm_target_machine();
-    if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-                                            llvm::CodeGenFileType::CGFT_ObjectFile)) {
-        std::abort();
-    }
-    pass_manager.run(*_llvm_mod);
+//     auto target_machine = wasm_target_machine();
+//     if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+//                                             llvm::CodeGenFileType::CGFT_ObjectFile)) {
+//         std::abort();
+//     }
+//     pass_manager.run(*_llvm_mod);
 
-    // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
-    // always up to date, so there is no need to call flush().
-    // ostream.flush();
-    return llvm::MemoryBuffer::getMemBufferCopy(code.str());
-}
+//     // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
+//     // always up to date, so there is no need to call flush().
+//     // ostream.flush();
+//     return llvm::MemoryBuffer::getMemBufferCopy(code.str());
+// }
 
 }  // namespace cirrus::code

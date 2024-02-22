@@ -36,8 +36,8 @@ class Module {
 
     void optimize();
 
-    [[nodiscard]] util::Result<std::string>                         emit_ir() const;
-    [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> emit_obj() const;
+    [[nodiscard]] util::Result<std::string> emit_ir() const;
+    // [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> emit_obj() const;
 };
 
 }  // namespace cirrus::code

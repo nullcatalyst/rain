@@ -31,7 +31,8 @@ class Linker {
     void add(std::unique_ptr<llvm::MemoryBuffer> memory_buffer) {
         _files.emplace_back(std::move(memory_buffer));
     }
-    util::Result<void> add(Module& mod);
+    util::Result<void> add(llvm::Module& llvm_mod);
+    util::Result<void> add(Module& mod) { return add(mod.llvm_module()); }
 
     [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> link();
 };

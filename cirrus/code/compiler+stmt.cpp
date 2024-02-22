@@ -11,7 +11,7 @@
 #include "cirrus/ast/expr/all.hpp"
 #include "cirrus/ast/type/all.hpp"
 #include "cirrus/err/simple.hpp"
-#include "cirrus/util/before_return.hpp"
+#include "cirrus/util/defer.hpp"
 
 // Always export all functions, even if they are not used.
 // TODO: This is temporary, and should be removed. It's here for easier debugging.
@@ -93,9 +93,9 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
         }
     }
 
-    auto               llvm_prev_insert_block = _llvm_ir.GetInsertBlock();
-    auto               llvm_prev_insert_point = _llvm_ir.GetInsertPoint();
-    util::BeforeReturn reset_ir_position([&]() {
+    auto        llvm_prev_insert_block = _llvm_ir.GetInsertBlock();
+    auto        llvm_prev_insert_point = _llvm_ir.GetInsertPoint();
+    util::Defer reset_ir_position([&]() {
         if (llvm_prev_insert_block != nullptr) {
             _llvm_ir.SetInsertPoint(llvm_prev_insert_block, llvm_prev_insert_point);
         }

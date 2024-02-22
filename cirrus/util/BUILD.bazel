@@ -1,14 +1,10 @@
 cc_library(
     name = "util",
-    srcs = [
-        "retain.cpp",
-    ],
     hdrs = [
-        "before_return.hpp",
         "colors.hpp",
-        "ptr.hpp",
+        "defer.hpp",
+        "log.hpp",
         "result.hpp",
-        "retain.hpp",
         "string.hpp",
         "twine.hpp",
         "wasm.hpp",
@@ -18,6 +14,7 @@ cc_library(
     ],
     deps = [
         "//third_party/tl_expected",
+        "@abseil-cpp//absl/strings",
         "@llvm-project//llvm:Support",
     ],
 )

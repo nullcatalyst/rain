@@ -3,12 +3,12 @@
 namespace cirrus::util {
 
 template <typename T>
-class BeforeReturn {
+class Defer {
     T _value;
 
   public:
-    BeforeReturn(T value) : _value(std::move(value)) {}
-    ~BeforeReturn() { _value(); }
+    Defer(T value) : _value(std::move(value)) {}
+    ~Defer() { _value(); }
 };
 
 }  // namespace cirrus::util

@@ -2,7 +2,6 @@
 
 #include "cirrus/lang/location.hpp"
 #include "cirrus/util/result.hpp"
-#include "cirrus/util/retain.hpp"
 
 namespace cirrus::ast {
 

@@ -7,7 +7,7 @@
 #include "cirrus/ast/type/all.hpp"
 #include "cirrus/code/compiler.hpp"
 #include "cirrus/err/simple.hpp"
-#include "cirrus/util/before_return.hpp"
+#include "cirrus/util/defer.hpp"
 
 namespace cirrus::code {
 
@@ -61,9 +61,9 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
     llvm::Function* llvm_function = llvm::Function::Create(
         llvm_function_type, llvm::Function::InternalLinkage, "#exec", ctx.llvm_mod);
 
-    auto               llvm_prev_insert_block = _llvm_ir.GetInsertBlock();
-    auto               llvm_prev_insert_point = _llvm_ir.GetInsertPoint();
-    util::BeforeReturn reset_ir_position([&]() {
+    auto        llvm_prev_insert_block = _llvm_ir.GetInsertBlock();
+    auto        llvm_prev_insert_point = _llvm_ir.GetInsertPoint();
+    util::Defer reset_ir_position([&]() {
         if (llvm_prev_insert_block != nullptr) {
             _llvm_ir.SetInsertPoint(llvm_prev_insert_block, llvm_prev_insert_point);
         }

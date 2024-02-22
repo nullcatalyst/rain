@@ -1,5 +1,6 @@
 #include "cirrus/code/linker.hpp"
 
+#include "cirrus/code/target.hpp"
 #include "cirrus/err/simple.hpp"
 #include "lld/Common/CommonLinkerContext.h"
 #include "lld/Common/Memory.h"
@@ -419,10 +420,22 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     return writeResult();
 }
 
-util::Result<void> Linker::add(Module& mod) {
-    auto obj = mod.emit_obj();
-    FORWARD_ERROR(obj);
-    add(std::move(obj).value());
+util::Result<void> Linker::add(llvm::Module& llvm_mod) {
+    llvm::SmallString<0>      code;
+    llvm::raw_svector_ostream ostream(code);
+    llvm::legacy::PassManager pass_manager;
+
+    auto target_machine = wasm_target_machine();
+    if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                            llvm::CodeGenFileType::CGFT_ObjectFile)) {
+        return ERR_PTR(err::SimpleError, "failed to emit object file");
+    }
+    pass_manager.run(llvm_mod);
+
+    // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
+    // always up to date, so there is no need to call flush().
+    // ostream.flush();
+    add(llvm::MemoryBuffer::getMemBufferCopy(code.str()));
     return {};
 }
 

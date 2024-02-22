@@ -22,37 +22,18 @@ namespace {
 llvm::ExecutionEngine* create_interpreter(
     llvm::Module* llvm_mod, std::unique_ptr<llvm::TargetMachine> llvm_target_machine) {
     llvm::EngineBuilder builder{std::unique_ptr<llvm::Module>(llvm_mod)};
+    std::string         error;
+    builder.setErrorStr(&error);
     builder.setEngineKind(llvm::EngineKind::Interpreter);
     auto* engine = builder.create(llvm_target_machine.release());
     if (engine == nullptr) {
-        std::cerr << "failed to create interpreter\n";
+        cirrus::util::console_error(ANSI_RED, "failed to create interpreter: ", ANSI_RESET, error);
         std::abort();
     }
     return engine;
 }
 
 }  // namespace
-
-void Compiler::initialize_llvm() {
-    static bool initialized = false;
-    if (!initialized) {
-        initialized = true;
-        // llvm::InitializeNativeTarget();
-        // llvm::InitializeNativeTargetAsmPrinter();
-        // llvm::InitializeNativeTargetAsmParser();
-
-        // llvm::InitializeAllTargets();
-        // llvm::InitializeAllAsmPrinters();
-        // llvm::InitializeAllAsmParsers();
-
-        LLVMInitializeWebAssemblyTargetInfo();
-        LLVMInitializeWebAssemblyTarget();
-        LLVMInitializeWebAssemblyTargetMC();
-        LLVMInitializeWebAssemblyAsmPrinter();
-        LLVMInitializeWebAssemblyAsmParser();
-        LLVMLinkInInterpreter();
-    }
-}
 
 void Compiler::use_external_function(const std::string_view function_name,
                                      llvm::GenericValue (*external_function)(

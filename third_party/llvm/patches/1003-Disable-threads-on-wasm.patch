@@ -1,0 +1,67 @@
+diff --git a/llvm/include/llvm/Config/config.h b/llvm/include/llvm/Config/config.h
+index b4fb237..a38f74f 100644
+--- a/llvm/include/llvm/Config/config.h
++++ b/llvm/include/llvm/Config/config.h
+@@ -132,6 +132,7 @@
+ /* Define to 1 if you have the `psapi' library (-lpsapi). */
+ /* #undef HAVE_LIBPSAPI */
+ 
++#if !defined(__wasm__)
+ /* Define to 1 if you have the `pthread' library (-lpthread). */
+ #define HAVE_LIBPTHREAD 1
+ 
+@@ -140,6 +141,7 @@
+ 
+ /* Define to 1 if you have the `pthread_setname_np' function. */
+ #define HAVE_PTHREAD_SETNAME_NP 1
++#endif
+ 
+ /* Define to 1 if you have the <link.h> header file. */
+ /* HAVE_LINK_H defined in Bazel */
+@@ -165,6 +167,7 @@
+ /* Define to 1 if you have the `pread' function. */
+ #define HAVE_PREAD 1
+ 
++#if !defined(__wasm__)
+ /* Define to 1 if you have the <pthread.h> header file. */
+ /* HAVE_PTHREAD_H defined in Bazel */
+ 
+@@ -173,6 +176,7 @@
+ 
+ /* Have pthread_rwlock_init */
+ #define HAVE_PTHREAD_RWLOCK_INIT 1
++#endif // !defined(__wasm__)
+ 
+ /* Define to 1 if you have the `sbrk' function. */
+ /* HAVE_SBRK defined in Bazel */
+diff --git a/llvm/include/llvm/Config/llvm-config.h b/llvm/include/llvm/Config/llvm-config.h
+index 5240b82..3130edd 100644
+--- a/llvm/include/llvm/Config/llvm-config.h
++++ b/llvm/include/llvm/Config/llvm-config.h
+@@ -14,7 +14,6 @@
+    into Bazel defines, but it is by no means complete, so if you see something
+    that looks wrong, it probably is. */
+ 
+-
+ /* This file enumerates variables from the LLVM configuration so that they
+    can be in exported headers and won't override package specific directives.
+    This is a C header that can be included in the llvm-c headers. */
+@@ -29,10 +28,18 @@
+ /* LLVM_DEFAULT_TARGET_TRIPLE defined in Bazel */
+ 
+ /* Define if threads enabled */
++#if !defined(__wasm__)
+ #define LLVM_ENABLE_THREADS 1
++#else
++#define LLVM_ENABLE_THREADS 0
++#endif
+ 
+ /* Has gcc/MSVC atomic intrinsics */
++#if !defined(__wasm__)
+ #define LLVM_HAS_ATOMICS 1
++#else
++#define LLVM_HAS_ATOMICS 0
++#endif
+ 
+ /* Host triple LLVM will be executed on */
+ /* LLVM_HOST_TRIPLE defined in Bazel */

@@ -9,7 +9,6 @@
 #include "cirrus/ast/type/all.hpp"
 #include "cirrus/code/compiler.hpp"
 #include "cirrus/err/simple.hpp"
-#include "cirrus/util/before_return.hpp"
 
 namespace cirrus::code {
 

@@ -16,20 +16,20 @@ bazel_dep(name = "bazel_skylib", version = "1.5.0")
 
 # https://github.com/nullcatalyst/wasmtoolchain_macos_arm64
 bazel_dep(name = "wasm_toolchain", version = "0.0.1")
-# local_path_override(
-#     module_name = "wasm_toolchain",
-#     path = "../wasmtoolchain_macos_arm64",
-# )
-
-_WASM_TOOLCHAIN_COMMIT = "fb5eedccde3073c337bade259f22ea5d354736a0"
-archive_override(
+local_path_override(
     module_name = "wasm_toolchain",
-    urls = [
-        "https://github.com/nullcatalyst/wasmtoolchain_macos_arm64/archive/{}.tar.gz".format(_WASM_TOOLCHAIN_COMMIT),
-    ],
-    integrity = "sha256-dToS5Ez7BMsYMEi8oYbt2iLcRVR+YsWPFKgK7Emq2kM=",
-    strip_prefix = "wasmtoolchain_macos_arm64-{}".format(_WASM_TOOLCHAIN_COMMIT),
+    path = "../wasmtoolchain_macos_arm64",
 )
+
+# _WASM_TOOLCHAIN_COMMIT = "fb5eedccde3073c337bade259f22ea5d354736a0"
+# archive_override(
+#     module_name = "wasm_toolchain",
+#     urls = [
+#         "https://github.com/nullcatalyst/wasmtoolchain_macos_arm64/archive/{}.tar.gz".format(_WASM_TOOLCHAIN_COMMIT),
+#     ],
+#     integrity = "sha256-dToS5Ez7BMsYMEi8oYbt2iLcRVR+YsWPFKgK7Emq2kM=",
+#     strip_prefix = "wasmtoolchain_macos_arm64-{}".format(_WASM_TOOLCHAIN_COMMIT),
+# )
 
 register_toolchains(
     "@wasm_toolchain//:toolchain",
@@ -87,9 +87,15 @@ archive_override(
         # This removes the definition of the LLVM native target, since we are not including it in
         # the list of built targets.
         "//third_party/llvm/patches:1002-Replace-LLVM-native-target.patch",
+        # Disable threads on WebAssembly, since they are not supported everywhere.
+        "//third_party/llvm/patches:1003-Disable-threads-on-wasm.patch",
 
         # Add the ability to call additional functions from the interpreter.
         "//third_party/llvm/patches:2001-Add-interpreter-functions.patch",
+        # We plan on only ever using the interpreter, so remove the check that would cause the JIT
+        # engine to pre-emprively try to load the current executable's symbols, which happens before
+        # the interpreter is even initialized.
+        "//third_party/llvm/patches:2002-Remove-jit-dylib-check.patch",
     ],
     patch_strip = 1,
 )

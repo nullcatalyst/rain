@@ -1,7 +1,5 @@
 #include "cirrus/lang/lexer.hpp"
 
-#include <iostream>
-
 #include "cirrus/lang/lexer+util.hpp"
 #include "cirrus/lang/location.hpp"
 #include "cirrus/lang/token.hpp"
@@ -90,10 +88,6 @@ Token Lexer::next() {
     if (operator_kind != TokenKind::Undefined) {
         _it += length;
         _column += length;
-
-        // std::cout << " Operator: " << std::string_view(token_start, _index - token_start)
-        //           << " Kind: " << static_cast<int>(operator_kind) << " Length: " << length
-        //           << std::endl;
 
         return Token{
             .kind     = operator_kind,

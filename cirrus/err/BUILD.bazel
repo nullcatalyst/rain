@@ -12,5 +12,6 @@ cc_library(
     deps = [
         "//cirrus/lang:hdrs",
         "//cirrus/util",
+        "@abseil-cpp//absl/strings",
     ],
 )

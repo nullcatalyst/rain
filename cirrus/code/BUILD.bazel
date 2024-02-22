@@ -24,6 +24,7 @@ cc_library(
         "compiler+op.cpp",
         "compiler+stmt.cpp",
         "compiler+type.cpp",
+        "initialize.cpp",
         "linker.cpp",
         "module.cpp",
         "scope.cpp",
@@ -32,6 +33,7 @@ cc_library(
     ],
     hdrs = [
         "compiler.hpp",
+        "initialize.hpp",
         "linker.hpp",
         "module.hpp",
         "scope.hpp",
