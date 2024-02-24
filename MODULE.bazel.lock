@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "170e39ff482608fac1028f5aa568f4b6bc76de5ee33006ffddc530fcf1bac034",
+  "moduleFileHash": "307fb9081f1abfe323774f7f5471f0b3ffb2f4ef30f5d1423c7abdde875710dd",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -26,7 +26,44 @@
       "toolchainsToRegister": [
         "@wasm_toolchain//:toolchain"
       ],
-      "extensionUsages": [],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "//:MODULE.bazel",
+          "extensionName": "_repo_rules",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 0,
+            "column": 0
+          },
+          "imports": {
+            "wabt": "wabt"
+          },
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+              "attributeValues": {
+                "urls": [
+                  "https://github.com/WebAssembly/wabt/archive/refs/tags/1.0.34.tar.gz"
+                ],
+                "integrity": "sha256-DX2ooGYUHUohECxC/WsFm/7nwDIgw++pABvXgb8fQzA=",
+                "strip_prefix": "wabt-1.0.34",
+                "build_file": "@//third_party/wabt:wabt.BUILD",
+                "name": "wabt"
+              },
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 108,
+                "column": 13
+              }
+            }
+          ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        }
+      ],
       "deps": {
         "bazel_skylib": "bazel_skylib@1.5.0",
         "wasm_toolchain": "wasm_toolchain@_",
@@ -1238,6 +1275,29 @@
     }
   },
   "moduleExtensions": {
+    "//:MODULE.bazel%_repo_rules": {
+      "general": {
+        "bzlTransitiveDigest": "nSp+oEsTv5DYy1r8s+aEwKWUHoJDhXelRNB5mFkZmdU=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "wabt": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/WebAssembly/wabt/archive/refs/tags/1.0.34.tar.gz"
+              ],
+              "integrity": "sha256-DX2ooGYUHUohECxC/WsFm/7nwDIgw++pABvXgb8fQzA=",
+              "strip_prefix": "wabt-1.0.34",
+              "build_file": "@@//third_party/wabt:wabt.BUILD",
+              "name": "_main~_repo_rules~wabt"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@apple_support~1.5.0//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "pMLFCYaRPkgXPQ8vtuNkMfiHfPmRBy6QJfnid4sWfv0=",

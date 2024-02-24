@@ -3,6 +3,8 @@ module(
     repo_name = "com_nullcatalyst_cirrus",
 )
 
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 ################################
 ####       Utilities        ####
 ################################
@@ -98,4 +100,17 @@ archive_override(
         "//third_party/llvm/patches:2002-Remove-jit-dylib-check.patch",
     ],
     patch_strip = 1,
+)
+
+#### WebAssembly Binary Toolkit ####
+
+# https://github.com/WebAssembly/wabt/releases/tag/1.0.34
+http_archive(
+    name = "wabt",
+    urls = [
+        "https://github.com/WebAssembly/wabt/archive/refs/tags/1.0.34.tar.gz",
+    ],
+    integrity = "sha256-DX2ooGYUHUohECxC/WsFm/7nwDIgw++pABvXgb8fQzA=",
+    strip_prefix = "wabt-1.0.34",
+    build_file = "@//third_party/wabt:wabt.BUILD",
 )

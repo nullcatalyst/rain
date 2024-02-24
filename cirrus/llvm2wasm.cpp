@@ -8,10 +8,10 @@
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
 
-WASM_IMPORT("env", "throw_error")
+WASM_IMPORT("env", "error")
 void throw_error(const char* msg_start, const char* msg_end);
 
-WASM_IMPORT("env", "compile_callback")
+WASM_IMPORT("env", "callback")
 void compile_callback(const char* buffer_start, const char* buffer_end);
 
 WASM_EXPORT("malloc")
@@ -34,7 +34,6 @@ void initialize() {
     // cirrus::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
 }
 
-/// @returns true if the source code was successfully compiled.
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
     static std::unique_ptr<llvm::MemoryBuffer> prev_result;
@@ -77,64 +76,6 @@ void compile(const char* source_start, const char* source_end) {
 
     compile_callback(prev_result->getBufferStart(), prev_result->getBufferEnd());
 }
-
-// WASM_EXPORT("demo") void demo() {
-//     const std::string_view source = R"(
-// ; ModuleID = 'cirrus'
-// source_filename = "cirrus"
-// target datalayout = "e-m:e-p:32:32-p10:8:8-p20:8:8-i64:64-n32:64-S128-ni:1:10:20"
-// target triple = "wasm32-unknown-unknown"
-
-// ; Function Attrs: nofree nosync nounwind memory(none)
-// define internal fastcc i32 @fib(i32 %n) unnamed_addr #0 {
-// entry:
-//   %0 = icmp slt i32 %n, 2
-//   br i1 %0, label %common.ret, label %merge
-
-// common.ret:                                       ; preds = %merge, %entry
-//   %accumulator.tr.lcssa = phi i32 [ 0, %entry ], [ %4, %merge ]
-//   %n.tr.lcssa = phi i32 [ %n, %entry ], [ %3, %merge ]
-//   %accumulator.ret.tr = add i32 %n.tr.lcssa, %accumulator.tr.lcssa
-//   ret i32 %accumulator.ret.tr
-
-// merge:                                            ; preds = %entry, %merge
-//   %n.tr2 = phi i32 [ %3, %merge ], [ %n, %entry ]
-//   %accumulator.tr1 = phi i32 [ %4, %merge ], [ 0, %entry ]
-//   %1 = add nsw i32 %n.tr2, -1
-//   %2 = tail call fastcc i32 @fib(i32 %1)
-//   %3 = add nsw i32 %n.tr2, -2
-//   %4 = add i32 %2, %accumulator.tr1
-//   %5 = icmp ult i32 %n.tr2, 4
-//   br i1 %5, label %common.ret, label %merge
-// }
-
-// ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-// define dso_local i32 @double(i32 %n) local_unnamed_addr #1 {
-// entry:
-//   %0 = shl i32 %n, 1
-//   ret i32 %0
-// }
-
-// ; Function Attrs: nofree nosync nounwind memory(none)
-// define dso_local i32 @run() local_unnamed_addr #2 {
-// entry:
-//   %0 = tail call fastcc i32 @fib(i32 6)
-//   ret i32 %0
-// }
-
-// attributes #0 = { nofree nosync nounwind memory(none) }
-// attributes #1 = { mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-// "wasm-export-name"="double" } attributes #2 = { nofree nosync nounwind memory(none)
-// "wasm-export-name"="run" }
-// )";
-//     cirrus::util::console_log(source);
-//     cirrus::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
-
-//     initialize();
-//     const auto ir_buffer = compile(&*source.cbegin(), &*source.cend());
-//     cirrus::util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET,
-//                               std::string_view{ir_buffer.start, ir_buffer.end}, "\n");
-// }
 
 #if !defined(__wasm__)
 

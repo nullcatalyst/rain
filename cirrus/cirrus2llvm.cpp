@@ -35,10 +35,10 @@ static llvm::GenericValue lle_X_sqrt(llvm::FunctionType*                llvm_fun
 
 }  // extern "C"
 
-WASM_IMPORT("env", "throw_error")
+WASM_IMPORT("env", "error")
 void throw_error(const char* msg_start, const char* msg_end);
 
-WASM_IMPORT("env", "compile_callback")
+WASM_IMPORT("env", "callback")
 void compile_callback(const char* msg_start, const char* msg_end);
 
 WASM_EXPORT("malloc")
@@ -61,7 +61,6 @@ void initialize() {
     // cirrus::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
 }
 
-/// @returns true if the source code was successfully compiled.
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
     static std::string prev_result;
@@ -98,22 +97,6 @@ void compile(const char* source_start, const char* source_end) {
 
     compile_callback(prev_result.c_str(), prev_result.c_str() + prev_result.size());
 }
-
-// WASM_EXPORT("demo") void demo() {
-//     const std::string_view source = R"(
-// export fn double(n: i32) -> i32 {
-//     let n = n * 2
-//     return n
-// }
-// )";
-//     cirrus::util::console_log(source);
-//     cirrus::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
-
-//     initialize();
-//     const auto ir_buffer = compile(&*source.cbegin(), &*source.cend());
-//     cirrus::util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET,
-//                               std::string_view{ir_buffer.start, ir_buffer.end}, "\n");
-// }
 
 #if !defined(__wasm__)
 

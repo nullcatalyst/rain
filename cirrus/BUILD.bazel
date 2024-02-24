@@ -45,6 +45,7 @@ cc_binary(
         "wasm2wat.cpp",
     ],
     deps = [
-        "@com_github_webassembly_wabt//:wabt",
+        "//cirrus/util",
+        "@wabt",
     ],
 )

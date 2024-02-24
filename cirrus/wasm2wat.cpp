@@ -1,24 +1,4 @@
-/*
- * Copyright 2016 WebAssembly Community Group participants
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#include <cassert>
-#include <cinttypes>
-#include <cstdio>
-#include <cstdlib>
-
+#include "cirrus/util/wasm.hpp"
 #include "wabt/apply-names.h"
 #include "wabt/binary-reader-ir.h"
 #include "wabt/binary-reader.h"
@@ -32,117 +12,78 @@
 #include "wabt/wast-lexer.h"
 #include "wabt/wat-writer.h"
 
-using namespace wabt;
+WASM_IMPORT("env", "throw")
+void throw_error(const char* msg_start, const char* msg_end);
 
-static int                         s_verbose;
-static std::string                 s_infile;
-static std::string                 s_outfile;
-static Features                    s_features;
-static bool                        s_generate_names;
-static bool                        s_fold_exprs;
-static bool                        s_inline_import;
-static bool                        s_inline_export;
-static bool                        s_read_debug_names             = true;
-static bool                        s_fail_on_custom_section_error = true;
-static std::unique_ptr<FileStream> s_log_stream;
-static bool                        s_validate = true;
+inline void throw_error(const std::string_view msg) { throw_error(msg.begin(), msg.end()); }
 
-static const char s_description[] =
-    R"(  Read a file in the WebAssembly binary format, and convert it to
-  the WebAssembly text format.
+WASM_IMPORT("env", "callback")
+void decompile_callback(const char* buffer_start, const char* buffer_end);
 
-examples:
-  # parse binary file test.wasm and write text file test.wast
-  $ wasm2wat test.wasm -o test.wat
+WASM_EXPORT("malloc")
+void* memory_allocate(size_t size) { return malloc(size); }
 
-  # parse test.wasm, write test.wat, but ignore the debug names, if any
-  $ wasm2wat test.wasm --no-debug-names -o test.wat
-)";
+WASM_EXPORT("free")
+void memory_free(void* ptr) { return free(ptr); }
 
-static void ParseOptions(const int argc, const char* const argv[]) {
-    OptionParser parser("wasm2wat", s_description);
+#if defined(__wasm__)
+extern "C" void __wasm_call_ctors();
+#endif  // defined(__wasm__)
 
-    parser.AddOption('v', "verbose", "Use multiple times for more info", []() {
-        s_verbose++;
-        s_log_stream = FileStream::CreateStderr();
-    });
-    parser.AddOption('o', "output", "FILENAME",
-                     "Output file for the generated wast file, by default use stdout",
-                     [](const char* argument) {
-                         s_outfile = argument;
-                         ConvertBackslashToSlash(&s_outfile);
-                     });
-    parser.AddOption('f', "fold-exprs", "Write folded expressions where possible",
-                     []() { s_fold_exprs = true; });
-    s_features.AddOptions(&parser);
-    parser.AddOption("inline-exports", "Write all exports inline",
-                     []() { s_inline_export = true; });
-    parser.AddOption("inline-imports", "Write all imports inline",
-                     []() { s_inline_import = true; });
-    parser.AddOption("no-debug-names", "Ignore debug names in the binary file",
-                     []() { s_read_debug_names = false; });
-    parser.AddOption("ignore-custom-section-errors", "Ignore errors in custom sections",
-                     []() { s_fail_on_custom_section_error = false; });
-    parser.AddOption("generate-names",
-                     "Give auto-generated names to non-named functions, types, etc.",
-                     []() { s_generate_names = true; });
-    parser.AddOption("no-check", "Don't check for invalid modules", []() { s_validate = false; });
-    parser.AddArgument("filename", OptionParser::ArgumentCount::One, [](const char* argument) {
-        s_infile = argument;
-        ConvertBackslashToSlash(&s_infile);
-    });
-    parser.Parse(argc, const_cast<char**>(argv));
+WASM_EXPORT("init")
+void initialize() {
+#if defined(__wasm__)
+    __wasm_call_ctors();
+#endif  // defined(__wasm__)
 }
 
-int ProgramMain(const int argc, const char* const argv[]) {
-    Result result;
+WASM_EXPORT("decompile")
+void decompile(const char* source_start, const char* source_end) {
+    static std::unique_ptr<wabt::OutputBuffer> prev_result;
+    prev_result.reset();
 
-    InitStdio();
-    ParseOptions(argc, argv);
+    wabt::Features features;
 
-    std::vector<uint8_t> file_data;
-    result = ReadFile(s_infile.c_str(), &file_data);
-    if (Succeeded(result)) {
-        Errors            errors;
-        Module            module;
-        const bool        kStopOnFirstError = true;
-        ReadBinaryOptions options(s_features, s_log_stream.get(), s_read_debug_names,
-                                  kStopOnFirstError, s_fail_on_custom_section_error);
-        result = ReadBinaryIr(s_infile.c_str(), file_data.data(), file_data.size(), options,
-                              &errors, &module);
-        if (Succeeded(result)) {
-            if (Succeeded(result) && s_validate) {
-                ValidateOptions options(s_features);
-                result = ValidateModule(&module, &errors, options);
-            }
+    constexpr bool          read_debug_names             = true;
+    constexpr bool          stop_on_first_error          = true;
+    constexpr bool          fail_on_custom_section_error = true;
+    wabt::ReadBinaryOptions options(features, nullptr, read_debug_names, stop_on_first_error,
+                                    fail_on_custom_section_error);
 
-            if (s_generate_names) {
-                result = GenerateNames(&module);
-            }
-
-            if (Succeeded(result)) {
-                /* TODO(binji): This shouldn't fail; if a name can't be applied
-                 * (because the index is invalid, say) it should just be skipped. */
-                Result dummy_result = ApplyNames(&module);
-                WABT_USE(dummy_result);
-            }
-
-            if (Succeeded(result)) {
-                WriteWatOptions wat_options(s_features);
-                wat_options.fold_exprs    = s_fold_exprs;
-                wat_options.inline_import = s_inline_import;
-                wat_options.inline_export = s_inline_export;
-                FileStream stream(!s_outfile.empty() ? FileStream(s_outfile) : FileStream(stdout));
-                result = WriteWat(&stream, &module, wat_options);
-            }
-        }
-        FormatErrorsToFile(errors, Location::Type::Binary);
+    wabt::Errors errors;
+    wabt::Module wasm_module;
+    if (const auto result =
+            wabt::ReadBinaryIr("<wasm>", reinterpret_cast<const uint8_t*>(source_start),
+                               source_end - source_start, options, &errors, &wasm_module);
+        !wabt::Succeeded(result)) {
+        wabt::Color color(nullptr);
+        std::string error_message =
+            FormatErrorsToString(errors, wabt::Location::Type::Binary, nullptr, color);
+        throw_error(error_message);
     }
-    return result != Result::Ok;
+
+    if (const auto result = wabt::GenerateNames(&wasm_module); !Succeeded(result)) {
+        throw_error("Failed to generate names");
+    }
+
+    [[maybe_unused]] auto _result = wabt::ApplyNames(&wasm_module);
+
+    wabt::WriteWatOptions wat_options(features);
+    wat_options.fold_exprs    = false;
+    wat_options.inline_import = false;
+    wat_options.inline_export = false;
+
+    wabt::MemoryStream stream(std::make_unique<wabt::OutputBuffer>());
+    _result     = wabt::WriteWat(&stream, &wasm_module, wat_options);
+    prev_result = stream.ReleaseOutputBuffer();
+
+    decompile_callback(
+        reinterpret_cast<const char*>(prev_result->data.data()),
+        reinterpret_cast<const char*>(prev_result->data.data() + prev_result->data.size()));
 }
 
-int main(const int argc, const char* const argv[]) {
-    WABT_TRY
-    return ProgramMain(argc, argv);
-    WABT_CATCH_BAD_ALLOC_AND_EXIT
-}
+#if !defined(__wasm__)
+
+int main(const int argc, const char* const argv[]) {}
+
+#endif  // !defined(__wasm__)
