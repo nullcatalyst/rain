@@ -6,3 +6,6 @@
 
 # Examples
 /examples/*.wasm
+
+# VSCode
+.vscode/settings.json
