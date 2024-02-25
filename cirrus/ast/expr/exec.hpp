@@ -12,11 +12,13 @@ class ExecExpression : public Expression {
   public:
     ExecExpression(ExpressionPtr expression) : _expression(std::move(expression)) {}
 
-    [[nodiscard]] static std::shared_ptr<ExecExpression> alloc(ExpressionPtr expression) {
-        return std::make_shared<ExecExpression>(std::move(expression));
+    [[nodiscard]] static std::unique_ptr<ExecExpression> alloc(ExpressionPtr expression) {
+        return std::make_unique<ExecExpression>(std::move(expression));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::ExecExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::ExecExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         return _expression->compile_time_capable();

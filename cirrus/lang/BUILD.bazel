@@ -1,12 +1,7 @@
 cc_library(
-    name = "hdrs",
+    name = "location",
     hdrs = [
-        "lexer.hpp",
-        "lexer+util.hpp",
         "location.hpp",
-        "module.hpp",
-        "parser.hpp",
-        "token.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",
@@ -20,11 +15,18 @@ cc_library(
         "module.cpp",
         "parser.cpp",
     ],
+    hdrs = [
+        "lexer.hpp",
+        "lexer+util.hpp",
+        "module.hpp",
+        "parser.hpp",
+        "token.hpp",
+    ],
     visibility = [
         "//cirrus:__subpackages__",
     ],
     deps = [
-        ":hdrs",
+        ":location",
         "//cirrus/ast",
         "//cirrus/err",
         "//cirrus/util",

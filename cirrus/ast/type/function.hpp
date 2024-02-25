@@ -21,7 +21,9 @@ class FunctionType : public Type {
         return std::make_shared<FunctionType>(std::move(argument_types), std::move(return_type));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FunctionType; }
+    [[nodiscard]] constexpr TypeKind kind() const noexcept override {
+        return TypeKind::FunctionType;
+    }
 
     [[nodiscard]] const std::optional<TypePtr>& return_type() const noexcept {
         return _return_type;

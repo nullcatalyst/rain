@@ -10,11 +10,13 @@ class FloatExpression : public Expression {
   public:
     FloatExpression(const double value) : _value(value) {}
 
-    [[nodiscard]] static std::shared_ptr<FloatExpression> alloc(const double value) {
-        return std::make_shared<FloatExpression>(value);
+    [[nodiscard]] static std::unique_ptr<FloatExpression> alloc(const double value) {
+        return std::make_unique<FloatExpression>(value);
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FloatExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::FloatExpression;
+    }
 
     [[nodiscard]] constexpr bool compile_time_capable() const noexcept override { return true; }
 

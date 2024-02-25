@@ -80,6 +80,8 @@ util::Result<void> Compiler::declare_external_function(
         auto llvm_found_type = find_or_build_type(ctx, function_type->return_type().value());
         FORWARD_ERROR(llvm_found_type);
         llvm_return_type = std::move(llvm_found_type).value();
+        // llvm_return_type =
+        //     FORWARD_OR_UNWRAP(find_or_build_type(ctx, function_type->return_type().value()));
     }
 
     std::vector<llvm::Type*> llvm_argument_types;
@@ -111,24 +113,34 @@ util::Result<Module> Compiler::build(const lang::Module& lang_mod) {
     Scope   scope(&_builtin_scope);
     Context ctx(*_llvm_mod, *_llvm_engine, scope);
 
-    for (const auto& node : lang_mod.nodes()) {
-        switch (node->kind()) {
-            case ast::NodeKind::StructType: {
-                auto llvm_struct_type =
-                    build(ctx, *std::static_pointer_cast<ast::StructType>(node));
-                FORWARD_ERROR(llvm_struct_type);
+    for (const auto& expression : lang_mod.expressions()) {
+        switch (expression->kind()) {
+            case ast::ExpressionKind::TypeDeclarationExpression: {
+                auto llvm_type = build(
+                    ctx, *static_cast<const ast::TypeDeclarationExpression*>(expression.get()));
+                FORWARD_ERROR(llvm_type);
                 break;
             }
 
-            case ast::NodeKind::ExportExpression: {
-                auto llvm_function_type =
-                    build(ctx, *std::static_pointer_cast<ast::ExportExpression>(node));
-                FORWARD_ERROR(llvm_function_type);
+            case ast::ExpressionKind::ExportExpression: {
+                auto llvm_type =
+                    build(ctx, *static_cast<const ast::ExportExpression*>(expression.get()));
+                FORWARD_ERROR(llvm_type);
+                break;
+            }
+
+            case ast::ExpressionKind::FunctionExpression: {
+                auto llvm_type =
+                    build(ctx, *static_cast<const ast::FunctionExpression*>(expression.get()));
+                FORWARD_ERROR(llvm_type);
                 break;
             }
 
             default: {
-                auto llvm_value = build(ctx, std::static_pointer_cast<ast::Expression>(node));
+                cirrus::util::console_error(ANSI_RED, "cannot compile expression: unknown kind",
+                                            ANSI_RESET);
+                std::abort();
+                break;
             }
         }
     }
@@ -149,38 +161,38 @@ util::Result<Module> Compiler::build(const lang::Module& lang_mod) {
 
 util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPtr& expression) {
     switch (expression->kind()) {
-        case ast::NodeKind::FunctionExpression:
-            return build(ctx, *std::static_pointer_cast<ast::FunctionExpression>(expression));
+        case ast::ExpressionKind::FunctionExpression:
+            return build(ctx, *static_cast<const ast::FunctionExpression*>(expression.get()));
 
-        case ast::NodeKind::LetExpression:
-            return build(ctx, *std::static_pointer_cast<ast::LetExpression>(expression));
+        case ast::ExpressionKind::LetExpression:
+            return build(ctx, *static_cast<const ast::LetExpression*>(expression.get()));
 
-        case ast::NodeKind::ReturnExpression:
-            return build(ctx, *std::static_pointer_cast<ast::ReturnExpression>(expression));
+        case ast::ExpressionKind::ReturnExpression:
+            return build(ctx, *static_cast<const ast::ReturnExpression*>(expression.get()));
 
-        case ast::NodeKind::IntegerExpression:
-            return build(ctx, *std::static_pointer_cast<ast::IntegerExpression>(expression));
+        case ast::ExpressionKind::IntegerExpression:
+            return build(ctx, *static_cast<const ast::IntegerExpression*>(expression.get()));
 
-        case ast::NodeKind::FloatExpression:
-            return build(ctx, *std::static_pointer_cast<ast::FloatExpression>(expression));
+        case ast::ExpressionKind::FloatExpression:
+            return build(ctx, *static_cast<const ast::FloatExpression*>(expression.get()));
 
-        case ast::NodeKind::IdentifierExpression:
-            return build(ctx, *std::static_pointer_cast<ast::IdentifierExpression>(expression));
+        case ast::ExpressionKind::IdentifierExpression:
+            return build(ctx, *static_cast<const ast::IdentifierExpression*>(expression.get()));
 
-        case ast::NodeKind::BinaryOperatorExpression:
-            return build(ctx, *std::static_pointer_cast<ast::BinaryOperatorExpression>(expression));
+        case ast::ExpressionKind::BinaryOperatorExpression:
+            return build(ctx, *static_cast<const ast::BinaryOperatorExpression*>(expression.get()));
 
-        case ast::NodeKind::CallExpression:
-            return build(ctx, *std::static_pointer_cast<ast::CallExpression>(expression));
+        case ast::ExpressionKind::CallExpression:
+            return build(ctx, *static_cast<const ast::CallExpression*>(expression.get()));
 
-        case ast::NodeKind::ExecExpression:
-            return build(ctx, *std::static_pointer_cast<ast::ExecExpression>(expression));
+        case ast::ExpressionKind::ExecExpression:
+            return build(ctx, *static_cast<const ast::ExecExpression*>(expression.get()));
 
-        case ast::NodeKind::BlockExpression:
-            return build(ctx, *std::static_pointer_cast<ast::BlockExpression>(expression));
+        case ast::ExpressionKind::BlockExpression:
+            return build(ctx, *static_cast<const ast::BlockExpression*>(expression.get()));
 
-        case ast::NodeKind::IfExpression:
-            return build(ctx, *std::static_pointer_cast<ast::IfExpression>(expression));
+        case ast::ExpressionKind::IfExpression:
+            return build(ctx, *static_cast<const ast::IfExpression*>(expression.get()));
 
         default:
             return ERR_PTR(err::SimpleError, "cannot compile expression: unknown expression kind");

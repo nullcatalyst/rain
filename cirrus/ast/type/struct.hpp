@@ -26,7 +26,7 @@ class StructType : public Type {
         return std::make_shared<StructType>(std::move(name), std::move(fields));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::StructType; }
+    [[nodiscard]] constexpr TypeKind kind() const noexcept override { return TypeKind::StructType; }
 
     [[nodiscard]] constexpr bool is_named() const noexcept { return _name.has_value(); }
     [[nodiscard]] util::String   name_or_empty() const noexcept {

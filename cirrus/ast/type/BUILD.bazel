@@ -21,7 +21,7 @@ cc_library(
         "//cirrus:__subpackages__",
     ],
     deps = [
-        "//cirrus/ast:node",
+        "//cirrus/lang:location",
         "//cirrus/util",
     ],
 )

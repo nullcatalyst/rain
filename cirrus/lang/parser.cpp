@@ -96,7 +96,7 @@ util::Result<ast::TypePtr> parse_whole_type(Lexer& lexer) {
 
 util::Result<ast::ExpressionPtr> parse_whole_expression(Lexer& lexer);
 
-util::Result<std::shared_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Integer) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected integer literal");
@@ -122,7 +122,7 @@ util::Result<std::shared_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer
     return ast::IntegerExpression::alloc(value);
 }
 
-util::Result<std::shared_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Float) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected floating point literal");
@@ -136,7 +136,7 @@ util::Result<std::shared_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
     return ast::FloatExpression::alloc(value);
 }
 
-util::Result<std::shared_ptr<ast::IdentifierExpression>> parse_identifier(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Identifier) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected identifier");
@@ -145,7 +145,7 @@ util::Result<std::shared_ptr<ast::IdentifierExpression>> parse_identifier(Lexer&
     return ast::IdentifierExpression::alloc(token.location.substr());
 }
 
-util::Result<std::shared_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexer& lexer) {
     const auto lround_token = lexer.next();
     if (lround_token.kind != TokenKind::LRoundBracket) {
         return ERR_PTR(err::SyntaxError, lexer, lround_token.location, "expected '('");
@@ -162,7 +162,7 @@ util::Result<std::shared_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexe
     return ast::ParenthesisExpression::alloc(std::move(expr).value());
 }
 
-util::Result<std::shared_ptr<ast::MemberExpression>> parse_member(Lexer&             lexer,
+util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(Lexer&             lexer,
                                                                   ast::ExpressionPtr owner) {
     const auto period_token = lexer.next();
     if (period_token.kind != TokenKind::Period) {
@@ -178,7 +178,7 @@ util::Result<std::shared_ptr<ast::MemberExpression>> parse_member(Lexer&        
     return ast::MemberExpression::alloc(std::move(owner), member_token.location.substr());
 }
 
-util::Result<std::shared_ptr<ast::CallExpression>> parse_call(Lexer&             lexer,
+util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&             lexer,
                                                               ast::ExpressionPtr callee) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != TokenKind::LRoundBracket) {
@@ -230,7 +230,7 @@ util::Result<std::shared_ptr<ast::CallExpression>> parse_call(Lexer&            
     __builtin_unreachable();
 }
 
-util::Result<std::shared_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != TokenKind::LCurlyBracket) {
         return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location, "expected '{'");
@@ -253,7 +253,7 @@ util::Result<std::shared_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
     __builtin_unreachable();
 }
 
-util::Result<std::shared_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::If) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'if'");
@@ -281,7 +281,7 @@ util::Result<std::shared_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {
                                     std::move(opt_else_));
 }
 
-util::Result<std::shared_ptr<ast::FunctionExpression>> parse_function(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Fn) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'fn'");
@@ -357,10 +357,10 @@ util::Result<std::shared_ptr<ast::FunctionExpression>> parse_function(Lexer& lex
 
     return ast::FunctionExpression::alloc(std::move(fn_name), std::move(return_type),
                                           std::move(arguments),
-                                          std::move(body).value()->expressions());
+                                          std::move(*std::move(body).value()).expressions());
 }
 
-util::Result<std::shared_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {
     const auto let_token = lexer.next();
     if (let_token.kind != TokenKind::Let) {
         return ERR_PTR(err::SyntaxError, lexer, let_token.location, "expected keyword 'let'");
@@ -387,7 +387,7 @@ util::Result<std::shared_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {
     return ast::LetExpression::alloc(std::move(let_name), std::move(value).value(), mutable_);
 }
 
-util::Result<std::shared_ptr<ast::ReturnExpression>> parse_return(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::ReturnExpression>> parse_return(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Return) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'return'");
@@ -400,7 +400,7 @@ util::Result<std::shared_ptr<ast::ReturnExpression>> parse_return(Lexer& lexer) 
 }
 
 util::Result<ast::ExpressionPtr>                   parse_lhs(Lexer& lexer);
-util::Result<std::shared_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Hash) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "expected '#'");
@@ -599,7 +599,7 @@ util::Result<ast::ExpressionPtr> parse_whole_expression(Lexer& lexer) {
     }
 }
 
-util::Result<std::shared_ptr<ast::ExportExpression>> parse_export(Lexer& lexer) {
+util::Result<std::unique_ptr<ast::ExportExpression>> parse_export(Lexer& lexer) {
     const auto export_token = lexer.next();
     if (export_token.kind != TokenKind::Export) {
         return ERR_PTR(err::SyntaxError, lexer, export_token.location, "expected keyword 'export'");
@@ -627,7 +627,7 @@ util::Result<ast::ExpressionPtr> Parser::parse_expression(Lexer& lexer) {
 }
 
 util::Result<ParsedModule> Parser::parse(Lexer& lexer) {
-    std::vector<ast::NodePtr> nodes;
+    std::vector<ast::ExpressionPtr> expressions;
 
     for (;;) {
         const auto token = lexer.peek();
@@ -635,26 +635,27 @@ util::Result<ParsedModule> Parser::parse(Lexer& lexer) {
             case TokenKind::Struct: {
                 auto result = parse_type(lexer);
                 FORWARD_ERROR(result);
-                nodes.emplace_back(std::move(result).value());
+                expressions.emplace_back(
+                    ast::TypeDeclarationExpression::alloc(std::move(result).value()));
                 break;
             }
 
             case TokenKind::Export: {
                 auto result = parse_export(lexer);
                 FORWARD_ERROR(result);
-                nodes.emplace_back(std::move(result).value());
+                expressions.emplace_back(std::move(result).value());
                 break;
             }
 
             case TokenKind::Fn: {
                 auto result = parse_function(lexer);
                 FORWARD_ERROR(result);
-                nodes.emplace_back(std::move(result).value());
+                expressions.emplace_back(std::move(result).value());
                 break;
             }
 
             case TokenKind::Eof: {
-                return ParsedModule{std::move(nodes)};
+                return ParsedModule{std::move(expressions)};
             }
 
             default: {

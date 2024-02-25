@@ -34,15 +34,15 @@ class BinaryOperatorExpression : public Expression {
                              BinaryOperatorKind op_kind) noexcept
         : _lhs(std::move(lhs)), _rhs(std::move(rhs)), _op_kind(op_kind) {}
 
-    [[nodiscard]] static std::shared_ptr<BinaryOperatorExpression> alloc(
+    [[nodiscard]] static std::unique_ptr<BinaryOperatorExpression> alloc(
         ExpressionPtr lhs, ExpressionPtr rhs, BinaryOperatorKind op_kind) {
-        return std::make_shared<BinaryOperatorExpression>(std::move(lhs), std::move(rhs), op_kind);
+        return std::make_unique<BinaryOperatorExpression>(std::move(lhs), std::move(rhs), op_kind);
     }
 
     ~BinaryOperatorExpression() override = default;
 
-    [[nodiscard]] NodeKind kind() const noexcept override {
-        return NodeKind::BinaryOperatorExpression;
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::BinaryOperatorExpression;
     }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {

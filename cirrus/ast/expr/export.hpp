@@ -12,11 +12,13 @@ class ExportExpression : public Expression {
   public:
     ExportExpression(ExpressionPtr expression) : _expression(std::move(expression)) {}
 
-    [[nodiscard]] static std::shared_ptr<ExportExpression> alloc(ExpressionPtr expression) {
-        return std::make_shared<ExportExpression>(std::move(expression));
+    [[nodiscard]] static std::unique_ptr<ExportExpression> alloc(ExpressionPtr expression) {
+        return std::make_unique<ExportExpression>(std::move(expression));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::ExportExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::ExportExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override { return false; }
 

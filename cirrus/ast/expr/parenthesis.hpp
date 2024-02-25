@@ -10,12 +10,12 @@ class ParenthesisExpression : public Expression {
   public:
     ParenthesisExpression(ExpressionPtr expression) : _expression(std::move(expression)) {}
 
-    [[nodiscard]] static std::shared_ptr<ParenthesisExpression> alloc(ExpressionPtr expression) {
-        return std::make_shared<ParenthesisExpression>(std::move(expression));
+    [[nodiscard]] static std::unique_ptr<ParenthesisExpression> alloc(ExpressionPtr expression) {
+        return std::make_unique<ParenthesisExpression>(std::move(expression));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override {
-        return NodeKind::ParenthesisExpression;
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::ParenthesisExpression;
     }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {

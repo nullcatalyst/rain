@@ -15,7 +15,7 @@ struct OpaqueType : public Type {
         return std::make_shared<OpaqueType>(std::move(name));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::OpaqueType; }
+    [[nodiscard]] constexpr TypeKind kind() const noexcept override { return TypeKind::OpaqueType; }
 
     [[nodiscard]] util::String name() const noexcept { return _name; }
 };

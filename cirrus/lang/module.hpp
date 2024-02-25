@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "cirrus/ast/node.hpp"
+#include "cirrus/ast/expr/expression.hpp"
 
 namespace cirrus::lang {
 
@@ -10,17 +10,17 @@ class Validator;
 class Compiler;
 
 class Module {
-    std::vector<ast::NodePtr> _nodes;
+    std::vector<ast::ExpressionPtr> _expressions;
 
   public:
     Module() = default;
-    Module(std::vector<ast::NodePtr> nodes) : _nodes(std::move(nodes)) {}
+    Module(std::vector<ast::ExpressionPtr> expressions) : _expressions(std::move(expressions)) {}
 
-    [[nodiscard]] constexpr const std::vector<ast::NodePtr>& nodes() const& noexcept {
-        return _nodes;
+    [[nodiscard]] constexpr const std::vector<ast::ExpressionPtr>& expressions() const& noexcept {
+        return _expressions;
     }
-    [[nodiscard]] constexpr std::vector<ast::NodePtr>&& nodes() && noexcept {
-        return std::move(_nodes);
+    [[nodiscard]] constexpr std::vector<ast::ExpressionPtr>&& expressions() && noexcept {
+        return std::move(_expressions);
     }
 };
 

@@ -2,13 +2,37 @@
 
 #include <memory>
 
-#include "cirrus/ast/node.hpp"
+#include "cirrus/lang/location.hpp"
 
 namespace cirrus::ast {
 
-class Type : public Node {
+/**
+ * A list of all type kinds.
+ */
+enum class TypeKind {
+    Unknown,
+
+    // <keep-sorted>
+    FunctionType,
+    InterfaceType,
+    OpaqueType,
+    StructType,
+    TupleType,
+    UnresolvedType,
+    // </keep-sorted>
+
+    Count,
+};
+
+class Type : public std::enable_shared_from_this<Type> {
+  protected:
+    lang::Location _location;
+
   public:
-    ~Type() override = default;
+    virtual ~Type() = default;
+
+    [[nodiscard]] virtual constexpr TypeKind      kind() const noexcept = 0;
+    [[nodiscard]] constexpr const lang::Location& location() const noexcept { return _location; }
 };
 
 using TypePtr = std::shared_ptr<Type>;

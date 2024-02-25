@@ -80,7 +80,7 @@ void compile(const char* source_start, const char* source_end) {
         auto sqrt_type =
             compiler.get_function_type(std::vector<ast::TypePtr>{ast::UnresolvedType::alloc("f64")},
                                        ast::UnresolvedType::alloc("f64"));
-        compiler.declare_external_function("sqrt", std::move(sqrt_type).value());
+        // compiler.declare_external_function("sqrt", std::move(sqrt_type).value());
     }
 
     auto compile_result = compiler.build(std::move(parse_result).value());
@@ -100,6 +100,19 @@ void compile(const char* source_start, const char* source_end) {
 
 #if !defined(__wasm__)
 
+WASM_IMPORT("env", "error")
+void throw_error(const char* msg_start, const char* msg_end) {
+    cirrus::util::console_error(ANSI_RED, "error: ", ANSI_RESET,
+                                std::string_view{msg_start, msg_end});
+    std::abort();
+}
+
+WASM_IMPORT("env", "callback")
+void compile_callback(const char* msg_start, const char* msg_end) {
+    cirrus::util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET,
+                              std::string_view{msg_start, msg_end}, "\n");
+}
+
 int main(const int argc, const char* const argv[]) {
     const std::string source = R"(fn fib(n: i32) -> i32 {
     if n <= 1 {
@@ -115,18 +128,13 @@ export fn double(n: i32) -> i32 {
 
 export fn run() -> i32 {
     let i = double(42)
-    sqrt(16.0)
-    return fib(6)
+    return #fib(6)
 }
 )";
     cirrus::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
 
     initialize();
-
-    const auto ir_buffer = compile(&*source.cbegin(), &*source.cend());
-    cirrus::util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET,
-                              std::string_view{ir_buffer.start, ir_buffer.end}, "\n");
-
+    compile(&*source.cbegin(), &*source.cend());
     return 0;
 }
 

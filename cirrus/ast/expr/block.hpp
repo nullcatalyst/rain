@@ -13,12 +13,14 @@ class BlockExpression : public Expression {
     BlockExpression(std::vector<ExpressionPtr> expressions)
         : _expressions(std::move(expressions)) {}
 
-    [[nodiscard]] static std::shared_ptr<BlockExpression> alloc(
+    [[nodiscard]] static std::unique_ptr<BlockExpression> alloc(
         std::vector<ExpressionPtr> expressions) {
-        return std::make_shared<BlockExpression>(std::move(expressions));
+        return std::make_unique<BlockExpression>(std::move(expressions));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::BlockExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::BlockExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override;
 

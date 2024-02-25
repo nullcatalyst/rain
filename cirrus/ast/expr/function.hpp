@@ -28,14 +28,16 @@ class FunctionExpression : public Expression {
           _arguments{std::move(arguments)},
           _expressions{std::move(expressions)} {}
 
-    [[nodiscard]] static std::shared_ptr<FunctionExpression> alloc(
+    [[nodiscard]] static std::unique_ptr<FunctionExpression> alloc(
         std::optional<util::String> name, std::optional<TypePtr> return_type,
         std::vector<FunctionArgumentData> arguments, std::vector<ExpressionPtr> expressions) {
-        return std::make_shared<FunctionExpression>(std::move(name), std::move(return_type),
+        return std::make_unique<FunctionExpression>(std::move(name), std::move(return_type),
                                                     std::move(arguments), std::move(expressions));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::FunctionExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::FunctionExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         // TODO: Should this always return true?

@@ -14,7 +14,7 @@ namespace cirrus::code {
 
 util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::TypePtr& type) {
     switch (type->kind()) {
-        case ast::NodeKind::StructType: {
+        case ast::TypeKind::StructType: {
             const ast::StructType& struct_type = *std::static_pointer_cast<ast::StructType>(type);
             if (const auto name = struct_type.name_or_empty(); name.empty()) {
                 auto llvm_struct_type = build(ctx, struct_type);
@@ -33,7 +33,7 @@ util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::
             }
         }
 
-        case ast::NodeKind::UnresolvedType: {
+        case ast::TypeKind::UnresolvedType: {
             const ast::UnresolvedType& unresolved_type =
                 *std::static_pointer_cast<ast::UnresolvedType>(type);
             if (llvm::Type* const llvm_type = ctx.scope.find_llvm_type(unresolved_type.name());
@@ -60,6 +60,22 @@ util::Result<llvm::StructType*> Compiler::build(Context& ctx, const ast::StructT
     }
     llvm_struct_type->setBody(llvm_field_types);
     return llvm_struct_type;
+}
+
+util::Result<llvm::Type*> Compiler::build(
+    Context& ctx, const ast::TypeDeclarationExpression& type_declaration_expresion) {
+    const ast::TypePtr& type = type_declaration_expresion.type();
+    switch (type->kind()) {
+        case ast::TypeKind::StructType: {
+            const ast::StructType& struct_type = *static_cast<const ast::StructType*>(type.get());
+            auto                   llvm_type   = build(ctx, struct_type);
+            FORWARD_ERROR(llvm_type);
+            return std::move(llvm_type).value();
+        }
+
+        default:
+            return ERR_PTR(err::SimpleError, "unknown type");
+    }
 }
 
 }  // namespace cirrus::code

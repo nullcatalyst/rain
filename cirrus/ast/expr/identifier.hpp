@@ -11,11 +11,13 @@ class IdentifierExpression : public Expression {
   public:
     IdentifierExpression(util::String name) : _name(std::move(name)) {}
 
-    [[nodiscard]] static std::shared_ptr<IdentifierExpression> alloc(util::String name) {
-        return std::make_shared<IdentifierExpression>(std::move(name));
+    [[nodiscard]] static std::unique_ptr<IdentifierExpression> alloc(util::String name) {
+        return std::make_unique<IdentifierExpression>(std::move(name));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::IdentifierExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::IdentifierExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         // TODO: This must be determined based on the variable's declaration

@@ -14,12 +14,14 @@ class LetExpression : public Expression {
     LetExpression(util::String name, ExpressionPtr value, bool mutable_)
         : _name(name), _value(std::move(value)), _mutable(mutable_) {}
 
-    [[nodiscard]] static std::shared_ptr<LetExpression> alloc(util::String  name,
+    [[nodiscard]] static std::unique_ptr<LetExpression> alloc(util::String  name,
                                                               ExpressionPtr value, bool mutable_) {
-        return std::make_shared<LetExpression>(name, std::move(value), mutable_);
+        return std::make_unique<LetExpression>(name, std::move(value), mutable_);
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::LetExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::LetExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         return _value->compile_time_capable();

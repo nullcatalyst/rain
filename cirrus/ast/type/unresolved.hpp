@@ -15,7 +15,9 @@ struct UnresolvedType : public Type {
         return std::make_shared<UnresolvedType>(std::move(name));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::UnresolvedType; }
+    [[nodiscard]] constexpr TypeKind kind() const noexcept override {
+        return TypeKind::UnresolvedType;
+    }
 
     [[nodiscard]] util::String name() const noexcept { return _name; }
 };

@@ -14,12 +14,14 @@ class CallExpression : public Expression {
     CallExpression(ExpressionPtr callee, std::vector<ExpressionPtr> arguments)
         : _callee(std::move(callee)), _arguments(std::move(arguments)) {}
 
-    [[nodiscard]] static std::shared_ptr<CallExpression> alloc(
+    [[nodiscard]] static std::unique_ptr<CallExpression> alloc(
         ExpressionPtr callee, std::vector<ExpressionPtr> arguments) noexcept {
-        return std::make_shared<CallExpression>(std::move(callee), std::move(arguments));
+        return std::make_unique<CallExpression>(std::move(callee), std::move(arguments));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::CallExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::CallExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override;
 

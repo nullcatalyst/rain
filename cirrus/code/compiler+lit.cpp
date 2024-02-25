@@ -57,7 +57,7 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
     auto callee = build(ctx, call_expression.callee());
     FORWARD_ERROR(callee);
 
-    if (call_expression.callee()->kind() != ast::NodeKind::IdentifierExpression) {
+    if (call_expression.callee()->kind() != ast::ExpressionKind::IdentifierExpression) {
         return ERR_PTR(err::SimpleError,
                        "cannot call non-identifier expression: currently not implemented");
     }

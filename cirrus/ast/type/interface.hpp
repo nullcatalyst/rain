@@ -26,7 +26,9 @@ struct InterfaceType : public Type {
         return std::make_shared<InterfaceType>(std::move(name), std::move(fields));
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::InterfaceType; }
+    [[nodiscard]] constexpr TypeKind kind() const noexcept override {
+        return TypeKind::InterfaceType;
+    }
 
     [[nodiscard]] util::String name() const noexcept { return _name; }
     [[nodiscard]] const std::vector<InterfaceTypeMethodData>& fields() const& noexcept {

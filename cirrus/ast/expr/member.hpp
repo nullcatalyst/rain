@@ -13,12 +13,14 @@ class MemberExpression : public Expression {
     MemberExpression(ExpressionPtr expression, util::String member)
         : _expression(std::move(expression)), _member(member) {}
 
-    [[nodiscard]] static std::shared_ptr<MemberExpression> alloc(ExpressionPtr expression,
+    [[nodiscard]] static std::unique_ptr<MemberExpression> alloc(ExpressionPtr expression,
                                                                  util::String  member) {
-        return std::make_shared<MemberExpression>(std::move(expression), member);
+        return std::make_unique<MemberExpression>(std::move(expression), member);
     }
 
-    [[nodiscard]] NodeKind kind() const noexcept override { return NodeKind::MemberExpression; }
+    [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {
+        return ExpressionKind::MemberExpression;
+    }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         return _expression->compile_time_capable();

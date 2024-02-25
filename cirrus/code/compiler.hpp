@@ -65,6 +65,8 @@ class Compiler {
     util::Result<llvm::Type*> find_or_build_type(Context& ctx, const ast::TypePtr& type);
 
     util::Result<llvm::StructType*> build(Context& ctx, const ast::StructType& struct_type);
+    util::Result<llvm::Type*>       build(
+              Context& ctx, const ast::TypeDeclarationExpression& type_declaration_expresion);
 
     // Expressions
     util::Result<llvm::Value*> build(Context& ctx, const ast::ExpressionPtr& expression);

@@ -10,7 +10,7 @@ cc_library(
         "//cirrus:__subpackages__",
     ],
     deps = [
-        "//cirrus/lang:hdrs",
+        "//cirrus/lang:location",
         "//cirrus/util",
         "@abseil-cpp//absl/strings",
     ],

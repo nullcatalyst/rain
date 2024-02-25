@@ -22,7 +22,7 @@ namespace cirrus::code {
 util::Result<llvm::Function*> Compiler::build(Context&                     ctx,
                                               const ast::ExportExpression& export_expression) {
     const ast::FunctionExpression& function_expression =
-        *std::static_pointer_cast<ast::FunctionExpression>(export_expression.expression());
+        *static_cast<const ast::FunctionExpression*>(export_expression.expression().get());
     auto llvm_function = build(ctx, function_expression);
     FORWARD_ERROR(llvm_function);
 

@@ -9,7 +9,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "cirrus/ast/expr/all.hpp"
-#include "cirrus/ast/node.hpp"
 #include "cirrus/ast/type/all.hpp"
 #include "cirrus/lang/module.hpp"
 #include "cirrus/util/result.hpp"

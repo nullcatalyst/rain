@@ -14,3 +14,4 @@
 #include "cirrus/ast/expr/member.hpp"
 #include "cirrus/ast/expr/parenthesis.hpp"
 #include "cirrus/ast/expr/return.hpp"
+#include "cirrus/ast/expr/type_declaration.hpp"

@@ -34,13 +34,14 @@ cc_library(
         "member.hpp",
         "parenthesis.hpp",
         "return.hpp",
+        "type_declaration.hpp",
     ],
     visibility = [
         "//cirrus:__subpackages__",
     ],
     deps = [
-        "//cirrus/ast:node",
         "//cirrus/ast/type",
+        "//cirrus/lang:location",
         "//cirrus/util",
     ],
 )
