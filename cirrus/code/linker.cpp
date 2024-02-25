@@ -143,9 +143,10 @@ void createSyntheticSymbols() {
     static WasmGlobalType globalTypeI64        = {WASM_TYPE_I64, false};
     static WasmGlobalType mutableGlobalTypeI32 = {WASM_TYPE_I32, true};
     static WasmGlobalType mutableGlobalTypeI64 = {WASM_TYPE_I64, true};
-    WasmSym::callCtors =
-        symtab->addSyntheticFunction("__wasm_call_ctors", WASM_SYMBOL_VISIBILITY_HIDDEN,
-                                     make<SyntheticFunction>(nullSignature, "__wasm_call_ctors"));
+    // WasmSym::callCtors =
+    //     symtab->addSyntheticFunction("__wasm_call_ctors", WASM_SYMBOL_VISIBILITY_HIDDEN,
+    //                                  make<SyntheticFunction>(nullSignature,
+    //                                  "__wasm_call_ctors"));
 
     bool is64 = config->is64.value_or(false);
 
@@ -199,21 +200,21 @@ void createOptionalSymbols() {
 
     // WasmSym::dsoHandle = symtab->addOptionalDataSymbol("__dso_handle");
 
-    if (!config->shared) {
-        WasmSym::dataEnd = symtab->addOptionalDataSymbol("__data_end");
-    }
+    // if (!config->shared) {
+    //     WasmSym::dataEnd = symtab->addOptionalDataSymbol("__data_end");
+    // }
 
-    if (!config->isPic) {
-        WasmSym::stackLow          = symtab->addOptionalDataSymbol("__stack_low");
-        WasmSym::stackHigh         = symtab->addOptionalDataSymbol("__stack_high");
-        WasmSym::globalBase        = symtab->addOptionalDataSymbol("__global_base");
-        WasmSym::heapBase          = symtab->addOptionalDataSymbol("__heap_base");
-        WasmSym::heapEnd           = symtab->addOptionalDataSymbol("__heap_end");
-        WasmSym::definedMemoryBase = symtab->addOptionalDataSymbol("__memory_base");
-        WasmSym::definedTableBase  = symtab->addOptionalDataSymbol("__table_base");
-        if (config->is64.value_or(false))
-            WasmSym::definedTableBase32 = symtab->addOptionalDataSymbol("__table_base32");
-    }
+    // if (!config->isPic) {
+    //     WasmSym::stackLow          = symtab->addOptionalDataSymbol("__stack_low");
+    //     WasmSym::stackHigh         = symtab->addOptionalDataSymbol("__stack_high");
+    //     WasmSym::globalBase        = symtab->addOptionalDataSymbol("__global_base");
+    //     WasmSym::heapBase          = symtab->addOptionalDataSymbol("__heap_base");
+    //     WasmSym::heapEnd           = symtab->addOptionalDataSymbol("__heap_end");
+    //     WasmSym::definedMemoryBase = symtab->addOptionalDataSymbol("__memory_base");
+    //     WasmSym::definedTableBase  = symtab->addOptionalDataSymbol("__table_base");
+    //     if (config->is64.value_or(false))
+    //         WasmSym::definedTableBase32 = symtab->addOptionalDataSymbol("__table_base32");
+    // }
 
     // For non-shared memory programs we still need to define __tls_base since we
     // allow object files built with TLS to be linked into single threaded
@@ -224,9 +225,9 @@ void createOptionalSymbols() {
     //
     // __tls_size and __tls_align are not needed in this case since they are only
     // needed for __wasm_init_tls (which we do not create in this case).
-    if (!config->sharedMemory) {
-        WasmSym::tlsBase = createOptionalGlobal("__tls_base", false);
-    }
+    // if (!config->sharedMemory) {
+    //     WasmSym::tlsBase = createOptionalGlobal("__tls_base", false);
+    // }
 }
 
 void processStubLibrariesPreLTO() {
