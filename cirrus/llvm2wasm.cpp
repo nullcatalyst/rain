@@ -43,13 +43,11 @@ void compile(const char* source_start, const char* source_end) {
     std::shared_ptr<llvm::LLVMContext> llvm_ctx = std::make_shared<llvm::LLVMContext>();
     std::unique_ptr<llvm::Module>      llvm_mod;
 
-    std::string_view source{source_start, source_end};
-    cirrus::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
-
     {
         llvm::SMDiagnostic llvm_err;
-        auto               llvm_buffer = llvm::MemoryBuffer::getMemBufferCopy(source);
-        llvm_mod                       = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
+        auto               llvm_buffer =
+            llvm::MemoryBuffer::getMemBufferCopy(std::string_view{source_start, source_end});
+        llvm_mod = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
         if (llvm_mod == nullptr) {
             cirrus::util::console_error(ANSI_RED, "failed to parse IR: ", ANSI_RESET,
                                         llvm_err.getMessage().str());

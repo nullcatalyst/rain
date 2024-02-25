@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>demo</title>
+</head>
+
+<body>
+    <script>
+        async function load_wasm(url, callback) {
+            let memory;
+            const wasm = await WebAssembly.instantiateStreaming(fetch(url), {
+                "console": {
+                    "log": (msg_start, msg_end) => {
+                        const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                        console.log(text);
+                    },
+                    "error": (msg_start, msg_end) => {
+                        const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                        console.error(text);
+                    },
+                },
+                "math": Math,
+                "time": {
+                    "now_perf": () => performance.now(),
+                    "now_unix": () => Date.now(),
+                },
+                "env": {
+                    "throw_error": (msg_start, msg_end) => {
+                        const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                        throw new Error(text);
+                    },
+                    "compile_callback": (msg_start, msg_end) => {
+                        if (callback) {
+                            callback(msg_start, msg_end);
+                        } else {
+                            const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                            console.log(text);
+                        }
+                    },
+                    "throw": (msg_start, msg_end) => {
+                        const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                        throw new Error(text);
+                    },
+                    "callback": (msg_start, msg_end) => {
+                        if (callback) {
+                            callback(msg_start, msg_end);
+                        } else {
+                            const text = new TextDecoder('utf8').decode(memory.buffer.slice(msg_start, msg_end));
+                            console.log(text);
+                        }
+                    },
+                }
+            });
+            memory = wasm.instance.exports.memory;
+            return {
+                do_with_copy: (uint8_array, callback) => {
+                    const len = uint8_array.length;
+                    const ptr = wasm.instance.exports.malloc(len);
+                    const buffer = new Uint8Array(memory.buffer, ptr, len);
+                    buffer.set(uint8_array);
+                    callback(ptr, ptr + len, buffer);
+                    wasm.instance.exports.malloc(ptr);
+                },
+                ...wasm.instance.exports,
+            };
+        }
+
+        (async () => {
+            const cirrus = await load_wasm('cirrus2llvm.wasm', (msg_start, msg_end) => {
+                const data = new Uint8Array(cirrus.memory.buffer, msg_start, msg_end - msg_start);
+                const text = new TextDecoder('utf8').decode(data);
+                console.log(text);
+
+                llvm.do_with_copy(data, (msg_start, msg_end, llvm_uint8_array) => {
+                    llvm.compile(msg_start, msg_end);
+                });
+            });
+
+            const llvm = await load_wasm('llvm2wasm.wasm', (msg_start, msg_end) => {
+                const data = new Uint8Array(llvm.memory.buffer, msg_start, msg_end - msg_start);
+                console.log(data);
+                // const a = document.createElement('a');
+                // a.href = URL.createObjectURL(new Blob([data], { type: 'application/wasm' }));
+                // a.download = 'output.wasm';
+                // a.click();
+
+                wat.do_with_copy(data, (msg_start, msg_end, wat_uint8_array) => {
+                    wat.decompile(msg_start, msg_end);
+                });
+            });
+
+            const wat = await load_wasm('wasm2wat.wasm', (msg_start, msg_end) => {
+                const data = new Uint8Array(wat.memory.buffer, msg_start, msg_end - msg_start);
+                const text = new TextDecoder('utf8').decode(data);
+                console.log(text);
+            });
+
+            cirrus.init();
+            llvm.init();
+            wat.init();
+
+            function compile(src) {
+                const bin = cirrus;
+
+                const encoder = new TextEncoder();
+                const encoded = encoder.encode(src);
+                const len = encoded.length;
+                const ptr = bin.malloc(len);
+                new Uint8Array(bin.memory.buffer, ptr, len).set(new Uint8Array(encoded));
+                bin.compile(ptr, ptr + len);
+                bin.free(ptr);
+            }
+
+            compile(`
+export fn double(n: i32) -> i32 {
+    let n = n * 2
+    return n
+}
+`);
+        })();
+    </script>
+</body>
+
+</html>
