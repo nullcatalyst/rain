@@ -1,0 +1,34 @@
+cc_library(
+    name = "util",
+    hdrs = [
+        "colors.hpp",
+        "defer.hpp",
+        "log.hpp",
+        "result.hpp",
+        "string.hpp",
+        "twine.hpp",
+        "wasm.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//third_party/tl_expected",
+        "@abseil-cpp//absl/strings",
+        "@llvm-project//llvm:Support",
+    ],
+)
+
+cc_test(
+    name = "test",
+    srcs = [
+        "twine.test.cpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        ":util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

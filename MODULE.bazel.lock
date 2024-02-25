@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "307fb9081f1abfe323774f7f5471f0b3ffb2f4ef30f5d1423c7abdde875710dd",
+  "moduleFileHash": "9fa66d1b98babb7aec75d2e419c37bb21588f4363667e55d6bd607b052eab760",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,10 +18,10 @@
   },
   "moduleDepGraph": {
     "<root>": {
-      "name": "cirrus",
+      "name": "rain",
       "version": "",
       "key": "<root>",
-      "repoName": "com_nullcatalyst_cirrus",
+      "repoName": "com_nullcatalyst_rain",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [
         "@wasm_toolchain//:toolchain"

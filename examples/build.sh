@@ -6,14 +6,14 @@ set -e
 cd $(dirname $0)/..
 
 # Build the tools
-bazel build --config wasm -c opt //cirrus:cirrus2llvm //cirrus:llvm2wasm //cirrus:wasm2wat
+bazel build --config wasm -c opt //rain:rain2llvm //rain:llvm2wasm //rain:wasm2wat
 
 # Copy the tools to the examples directory
 # (-f is used to overwrite the files if they already exist, due to the permissions set on the file
 # by bazel)
-cp -f bazel-bin/cirrus/cirrus2llvm.wasm examples/.
-cp -f bazel-bin/cirrus/llvm2wasm.wasm examples/.
-cp -f bazel-bin/cirrus/wasm2wat.wasm examples/.
+cp -f bazel-bin/rain/rain2llvm.wasm examples/.
+cp -f bazel-bin/rain/llvm2wasm.wasm examples/.
+cp -f bazel-bin/rain/wasm2wat.wasm examples/.
 
 cd examples
 

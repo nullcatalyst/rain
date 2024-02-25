@@ -1,0 +1,51 @@
+alias(
+    name = "rain",
+    actual = ":rain2wasm",
+)
+
+# These flags aren't turned on by default in the toolchain, because doing so seems to cause clang to
+# crash when compiling/linking libraries. But it seems to work fine for executables. Which is fine,
+# because we only really care about this for the exported functions.
+_FLAGS = [
+    # "-Xclang",
+    # "-target-abi",
+    # "-Xclang",
+    # "experimental-mv",
+]
+
+cc_binary(
+    name = "rain2llvm",
+    srcs = [
+        "rain2llvm.cpp",
+    ],
+    copts = _FLAGS,
+    deps = [
+        "//rain/code",
+        "//rain/lang",
+        "//rain/util",
+    ],
+)
+
+cc_binary(
+    name = "llvm2wasm",
+    srcs = [
+        "llvm2wasm.cpp",
+    ],
+    copts = _FLAGS,
+    deps = [
+        "//rain/code",
+        "//rain/util",
+        "@llvm-project//llvm:IRReader",
+    ],
+)
+
+cc_binary(
+    name = "wasm2wat",
+    srcs = [
+        "wasm2wat.cpp",
+    ],
+    deps = [
+        "//rain/util",
+        "@wabt",
+    ],
+)

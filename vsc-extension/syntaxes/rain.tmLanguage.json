@@ -1,0 +1,154 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Rain",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#constants"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"comment": "documentation comments",
+					"name": "comment.line.documentation.rain",
+					"match": "(///).*$",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.comment.rain"
+						}
+					}
+				},
+				{
+					"comment": "line comments",
+					"name": "comment.line.rain",
+					"match": "(//).*$",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.comment.rain"
+						}
+					}
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"comment": "control keywords",
+					"name": "keyword.control.rain",
+					"match": "\\b(await|break|continue|else|for|if|loop|return|while)\\b"
+				},
+				{
+					"comment": "declaration keywords",
+					"name": "keyword.declaration.rain",
+					"match": "\\b(export|fn|import|interface|let|struct|var)\\b"
+				},
+				{
+					"comment": "operator keywords",
+					"name": "keyword.operator.rain",
+					"match": "\\b(as|is)\\b"
+				},
+				{
+					"comment": "self keyword",
+					"name": "keyword.self.rain",
+					"match": "\\b(self)\\b"
+				},
+				{
+					"comment": "boolean keywords",
+					"name": "keyword.declaration.bool.rain",
+					"match": "\\b(false|true)\\b"
+				},
+				{
+					"comment": "compile time execution operator",
+					"name": "keyword.operator.hash.rain",
+					"match": "(#)"
+				},
+				{
+					"comment": "logical operators",
+					"name": "keyword.operator.logical.rain",
+					"match": "(\\^|\\||\\|\\||&&|!)"
+				},
+				{
+					"comment": "math operators",
+					"name": "keyword.operator.math.rain",
+					"match": "(\\+|-|\\*|/|%)"
+				},
+				{
+					"comment": "single equal",
+					"name": "keyword.operator.assignment.rain",
+					"match": "(?<![<>])=(?!=|>)"
+				},
+				{
+					"comment": "return type operator",
+					"name": "keyword.operator.returntype.rain",
+					"match": "(->)"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.rain",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.rain",
+					"match": "\\\\."
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+					"comment": "null keyword",
+					"name": "constant.language.null.rain",
+					"match": "\\b(null)\\b"
+				},
+				{
+					"comment": "boolean keywords",
+					"name": "constant.language.bool.rain",
+					"match": "\\b(false|true)\\b"
+				},
+				{
+					"comment": "ALL CAPS constants",
+					"name": "constant.other.caps.rain",
+					"match": "\\b[A-Z][A-Z0-9_]*\\b"
+				},
+				{
+					"comment": "decimals and floats",
+					"name": "constant.numeric.decimal.rain",
+					"match": "\\b\\d[\\d_]*(\\.?)[\\d_]*\\b"
+				},
+				{
+					"comment": "integers",
+					"name": "constant.numeric.integer.rain",
+					"match": "\\b\\d[\\d_]*\\b"
+				},
+				{
+					"comment": "hexadecimal integers",
+					"name": "constant.numeric.hex.rain",
+					"match": "\\b0x[\\dA-Fa-f_]+\\b"
+				},
+				{
+					"comment": "octal integers",
+					"name": "constant.numeric.oct.rain",
+					"match": "\\b0o[0-7_]+\\b"
+				},
+				{
+					"comment": "binary integers",
+					"name": "constant.numeric.bin.rain",
+					"match": "\\b0b[01_]+\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.rain"
+}

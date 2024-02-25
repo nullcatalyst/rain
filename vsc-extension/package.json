@@ -1,6 +1,6 @@
 {
-  "name": "cirrus",
-  "displayName": "cirrus",
+  "name": "rain",
+  "displayName": "rain",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -11,15 +11,15 @@
   ],
   "contributes": {
     "languages": [{
-      "id": "cirrus",
-      "aliases": ["Cirrus", "cirrus"],
-      "extensions": [".cirrus"],
+      "id": "rain",
+      "aliases": ["Rain", "rain"],
+      "extensions": [".rain"],
       "configuration": "./language-configuration.json"
     }],
     "grammars": [{
-      "language": "cirrus",
-      "scopeName": "source.cirrus",
-      "path": "./syntaxes/cirrus.tmLanguage.json"
+      "language": "rain",
+      "scopeName": "source.rain",
+      "path": "./syntaxes/rain.tmLanguage.json"
     }]
   }
 }

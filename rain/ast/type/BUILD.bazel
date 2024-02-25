@@ -1,0 +1,27 @@
+cc_library(
+    name = "type",
+    srcs = [
+        "function.cpp",
+        "interface.cpp",
+        "opaque.cpp",
+        "struct.cpp",
+        "type.cpp",
+        "unresolved.cpp",
+    ],
+    hdrs = [
+        "all.hpp",
+        "function.hpp",
+        "interface.hpp",
+        "opaque.hpp",
+        "struct.hpp",
+        "type.hpp",
+        "unresolved.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang:location",
+        "//rain/util",
+    ],
+)

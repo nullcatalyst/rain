@@ -1,0 +1,10 @@
+cc_library(
+    name = "ast",
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/ast/expr",
+        "//rain/ast/type",
+    ],
+)
