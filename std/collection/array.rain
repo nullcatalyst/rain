@@ -1,0 +1,71 @@
+let default_capacity = 8;
+
+export struct Array<T> {
+    elements: []T,
+    count: usize,
+}
+
+export fn Array<T>.new() -> Array<T> {
+    return Array{
+        elements: [],
+        count: 0,
+    };
+}
+
+export fn Array<T>.new(elements: []T) -> Array<T> {
+    return Array{
+        elements,
+        count: elements.length,
+    };
+}
+
+export fn Array<T>.length(&self) -> usize {
+    return self.count;
+}
+
+export fn Array<T>.capacity(&self) -> usize {
+    return self.elements.length;
+}
+
+export fn Array<T>.resize(&mut self, new_capacity: usize) {
+    if new_capacity < self.count {
+        return;
+    }
+
+    let new_elements = [T; self.capacity];
+    for i in 0..self.count {
+        new_elements[i] = self.elements[i];
+    }
+    self.elements = new_elements;
+}
+
+export fn Array<T>.push(&mut self, element: T) {
+    if self.count == self.elements.length {
+        let new_capacity = if self.count == 0 {
+            default_capacity
+        } else {
+            self.count * 2
+        };
+
+        self.resize(new_capacity);
+    }
+
+    self.elements[self.count] = element;
+    self.count += 1;
+}
+
+export fn Array<T>.pop(&mut self) -> ?T {
+    if self.count == 0 {
+        return null;
+    }
+    self.count -= 1;
+    return self.elements[self.count];
+}
+
+export fn Array<T>.at(&self, index: usize) -> &T {
+    return &self.elements[index];
+}
+
+export fn Array<T>.at(&mut self, index: usize) -> &mut T {
+    return &mut self.elements[index];
+}

@@ -1,0 +1,94 @@
+
+/// A 128bit SIMD vector of 4 f32 values.
+export struct Vec4 {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+}
+
+/// Create a new Vec4, setting all of the components
+export fn Vec4.new(x: f32, y: f32, z: f32, w: f32) -> Vec4 {
+    return Vec4{ x, y, z, w };
+}
+
+export fn Vec4.splat(value: f32) -> Vec4 {
+    return Vec4.new(value, value, value, value);
+}
+
+export fn Vec4.zero() -> Vec4 {
+    return Vec4.splat(0.0);
+}
+
+export fn Vec4.x() -> Vec4 {
+    return Vec4{ x: 1.0, y: 0.0, z: 0.0, w: 0.0 };
+}
+
+export fn Vec4.y() -> Vec4 {
+    return Vec4{ x: 0.0, y: 1.0, z: 0.0, w: 0.0 };
+}
+
+export fn Vec4.z() -> Vec4 {
+    return Vec4{ x: 0.0, y: 0.0, z: 1.0, w: 0.0 };
+}
+
+export fn Vec4.w() -> Vec4 {
+    return Vec4{ x: 0.0, y: 0.0, z: 0.0, w: 1.0 };
+}
+
+export fn Vec4.dot(self, other: Vec4) -> f32 {
+    return self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w;
+}
+
+export fn Vec4.cross(self, other: Vec4) -> f32 {
+    return Vec4.new(
+        self.y * other.z - self.z * other.y,
+        self.z * other.x - self.x * other.z,
+        self.x * other.y - self.y * other.x,
+        1.0,
+    );
+}
+
+export fn Vec4.length_sqr(self) -> f32 {
+    return self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w;
+}
+
+export fn Vec4.length(self) -> f32 {
+    return self.length_sqr().sqrt();
+}
+
+export fn Vec4.add(self, other: Vec4) -> Vec4 {
+    return Vec4.new(
+        self.x + other.x,
+        self.y + other.y,
+        self.z + other.z,
+        self.w + other.w,
+    );
+}
+
+export fn Vec4.sub(self, other: Vec4) -> Vec4 {
+    return Vec4.new(
+        self.x - other.x,
+        self.y - other.y,
+        self.z - other.z,
+        self.w - other.w,
+    );
+}
+
+export fn Vec4.mul(self, other: Vec4) -> Vec4 {
+    return Vec4.new(
+        self.x * other.x,
+        self.y * other.y,
+        self.z * other.z,
+        self.w * other.w,
+    );
+}
+
+export fn Vec4.div(self, other: Vec4) -> Vec4 {
+    return Vec4.new(
+        self.x / other.x,
+        self.y / other.y,
+        self.z / other.z,
+        self.w / other.w,
+    );
+}
