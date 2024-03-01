@@ -1,0 +1,26 @@
+diff --git a/llvm/BUILD.bazel b/llvm/BUILD.bazel
+index 836d404..0ea10a1 100644
+--- a/llvm/BUILD.bazel
++++ b/llvm/BUILD.bazel	
+@@ -280,9 +280,9 @@ cc_library(
+             "-lm",
+         ],
+         "//conditions:default": [
+-            "-pthread",
+-            "-ldl",
+-            "-lm",
++            # "-pthread",
++            # "-ldl",
++            # "-lm",
+         ],
+     }),
+     textual_hdrs = glob([
+@@ -2742,7 +2742,7 @@ cc_library(
+         "@platforms//os:freebsd": [],
+         "@platforms//os:macos": [],
+         "//conditions:default": [
+-            "-lrt",
++            # "-lrt",
+         ],
+     }),
+     deps = [

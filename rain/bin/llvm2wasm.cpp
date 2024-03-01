@@ -1,18 +1,15 @@
-#include "rain/common.hpp"
+#include "rain/bin/common.hpp"
+#include "rain/code/initialize.hpp"
 
 #define RAIN_INCLUDE_LINK
 #include "rain/rain.hpp"
 
-namespace rain::internal {
+namespace rain {
 
-void initialize() {
-    // Add external functions here.
-    // This is required if there are any external functions that will be called at compile time.
+WASM_EXPORT("init")
+void initialize() { code::initialize_llvm(); }
 
-    // rain::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
-}
-
-}  // namespace rain::internal
+}  // namespace rain
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {

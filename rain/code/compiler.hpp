@@ -48,6 +48,7 @@ class Compiler {
 
   private:
     void _initialize_builtins();
+    void _add_externref_support();
 
     struct Context {
         llvm::Module&          llvm_mod;

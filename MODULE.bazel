@@ -91,6 +91,9 @@ archive_override(
         "//third_party/llvm/patches:1002-Replace-LLVM-native-target.patch",
         # Disable threads on WebAssembly, since they are not supported everywhere.
         "//third_party/llvm/patches:1003-Disable-threads-on-wasm.patch",
+        # LLVM links to -lpthread, -ldl, -lm, and -lrt by default. Remove the link flags, so they
+        # can be explicitly added by the user if needed.
+        "//third_party/llvm/patches:1004-Remove-LLVM-standard-link-libs.patch",
 
         # Add the ability to call additional functions from the interpreter.
         "//third_party/llvm/patches:2001-Add-interpreter-functions.patch",

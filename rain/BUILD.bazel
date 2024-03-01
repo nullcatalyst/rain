@@ -1,3 +1,5 @@
+load("//tools:cc_rules.bzl", "cc_binary", "cc_library")
+
 # If you want to embed the rain compiler into your own binary, this is the library I'd recommend you
 # link to.
 cc_library(
@@ -15,9 +17,12 @@ cc_library(
 # These are split into separate parts to avoid having global ctors in some dependencies bloat the
 # size of binaries that don't need that part of the library.
 
+# For reference, linking the wasm2wat binary with LLVM (even though it is not used at all) increases
+# the binary size from 398KiB to 9.4MiB -- note the different order of magnitude, a 24x increase.
+
 cc_library(
     name = "lib_compile",
-    srcs = ["rain+compile.cpp"],
+    srcs = ["lib/rain+compile.cpp"],
     hdrs = ["rain.hpp"],
     deps = [
         "//rain/code",
@@ -29,7 +34,7 @@ cc_library(
 
 cc_library(
     name = "lib_link",
-    srcs = ["rain+link.cpp"],
+    srcs = ["lib/rain+link.cpp"],
     hdrs = ["rain.hpp"],
     deps = [
         "//rain/code",
@@ -42,7 +47,7 @@ cc_library(
 
 cc_library(
     name = "lib_decompile",
-    srcs = ["rain+decompile.cpp"],
+    srcs = ["lib/rain+decompile.cpp"],
     hdrs = ["rain.hpp"],
     deps = [
         "//rain/err",
@@ -54,12 +59,9 @@ cc_library(
 # Shared components between each of the standalone tools.
 # This is useful to avoid duplicating the framework to get the WASM binaries to be easily callable.
 cc_library(
-    name = "common",
-    hdrs = ["common.hpp"],
-    deps = [
-        "//rain/code",
-        "//rain/util",
-    ],
+    name = "bin_common",
+    hdrs = ["bin/common.hpp"],
+    deps = ["//rain/util"],
 )
 
 filegroup(
@@ -75,9 +77,9 @@ filegroup(
 # Standalone tool. This binary combines all the other tools into one.
 cc_binary(
     name = "rainc",
-    srcs = ["rainc.cpp"],
+    srcs = ["bin/rainc.cpp"],
     deps = [
-        ":common",
+        ":bin_common",
         ":lib",
     ],
 )
@@ -95,9 +97,9 @@ cc_binary(
 # A tool with the singular usecase of compiling Rain code to LLVM IR.
 cc_binary(
     name = "rain2llvm",
-    srcs = ["rain2llvm.cpp"],
+    srcs = ["bin/rain2llvm.cpp"],
     deps = [
-        ":common",
+        ":bin_common",
         ":lib_compile",
     ],
 )
@@ -105,9 +107,9 @@ cc_binary(
 # A tool with the singular usecase of compiling LLVM IR to WASM.
 cc_binary(
     name = "llvm2wasm",
-    srcs = ["llvm2wasm.cpp"],
+    srcs = ["bin/llvm2wasm.cpp"],
     deps = [
-        ":common",
+        ":bin_common",
         ":lib_link",
     ],
 )
@@ -115,9 +117,9 @@ cc_binary(
 # A tool with the singular usecase of decompiling WASM to its text format WAT.
 cc_binary(
     name = "wasm2wat",
-    srcs = ["wasm2wat.cpp"],
+    srcs = ["bin/wasm2wat.cpp"],
     deps = [
-        ":common",
+        ":bin_common",
         ":lib_decompile",
     ],
 )

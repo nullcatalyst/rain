@@ -1,6 +1,10 @@
 #include "rain/code/compiler.hpp"
 
+#include <array>
+
 #include "absl/strings/str_cat.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Type.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "rain/ast/expr/all.hpp"
 #include "rain/ast/type/all.hpp"
@@ -47,15 +51,50 @@ Compiler::Compiler()
       _llvm_target_machine(wasm_target_machine()),
       _llvm_ir(*_llvm_ctx),
       _builtin_scope(Scope::builtin_scope(*_llvm_ctx)) {
-    _llvm_mod    = new llvm::Module("rain", *_llvm_ctx);
-    _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
-        create_interpreter(_llvm_mod, wasm_target_machine()));
+    _initialize_builtins();
+    // _llvm_mod    = new llvm::Module("rain", *_llvm_ctx);
+    // _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
+    //     create_interpreter(_llvm_mod, wasm_target_machine()));
 }
 
 void Compiler::_initialize_builtins() {
     _llvm_mod    = new llvm::Module("rain", *_llvm_ctx);
     _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
         create_interpreter(_llvm_mod, wasm_target_machine()));
+
+    // _add_externref_support();
+}
+
+void Compiler::_add_externref_support() {
+    util::console_log("adding externref support");
+
+    llvm::Type* const           llvm_i32_type       = llvm::Type::getInt32Ty(*_llvm_ctx);
+    llvm::GlobalVariable* const llvm_global_next_id = new llvm::GlobalVariable(
+        *_llvm_mod, llvm_i32_type, false, llvm::GlobalValue::ExternalLinkage, nullptr, "$next_id");
+    llvm::Type* const llvm_externref_type = llvm::Type::getWasm_ExternrefTy(*_llvm_ctx);
+
+    {  // Create a function that stores the externref in a table and returns the ID.
+        const std::array<llvm::Type*, 1> llvm_argument_types{llvm_externref_type};
+        llvm::Function*                  llvm_function = llvm::Function::Create(
+            llvm::FunctionType::get(llvm_i32_type, llvm_argument_types, false),
+            llvm::Function::ExternalLinkage, "$store_externref", _llvm_mod);
+        llvm::BasicBlock* llvm_block = llvm::BasicBlock::Create(*_llvm_ctx, "entry", llvm_function);
+        _llvm_ir.SetInsertPoint(llvm_block);
+
+        auto* const llvm_next_id =
+            _llvm_ir.CreateAdd(_llvm_ir.CreateLoad(llvm_i32_type, llvm_global_next_id),
+                               llvm::ConstantInt::get(llvm::Type::getInt32Ty(*_llvm_ctx), 1));
+        _llvm_ir.CreateStore(llvm_next_id, llvm_global_next_id);
+
+        // const auto* llvm_arg = llvm_function->getArg(0);
+
+        _llvm_ir.CreateRet(llvm_next_id);
+
+        // Export the function, making it callable from JS (instead of just WASM).
+        llvm::Attribute wasm_export_attr = llvm::Attribute::get(
+            llvm_function->getContext(), "wasm-export-name", "store_externref");
+        llvm_function->addFnAttr(wasm_export_attr);
+    }
 }
 
 util::Result<std::shared_ptr<ast::FunctionType>> Compiler::get_function_type(

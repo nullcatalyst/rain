@@ -1,18 +1,16 @@
-#include "rain/common.hpp"
+#include "rain/bin/common.hpp"
 
 #define RAIN_INCLUDE_DECOMPILE
 #include "rain/rain.hpp"
 
-namespace rain::internal {
+namespace rain {
 
+WASM_EXPORT("init")
 void initialize() {
-    // Add external functions here.
-    // This is required if there are any external functions that will be called at compile time.
-
-    // rain::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
+    // Do nothing. Nothing additional to initialize.
 }
 
-}  // namespace rain::internal
+}  // namespace rain
 
 WASM_EXPORT("decompile")
 void decompile(const char* source_start, const char* source_end) {

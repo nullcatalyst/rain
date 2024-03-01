@@ -4,7 +4,6 @@
 #include <cstdlib>  // malloc, free
 #include <string_view>
 
-#include "rain/code/initialize.hpp"
 #include "rain/util/colors.hpp"
 #include "rain/util/log.hpp"
 #include "rain/util/wasm.hpp"
@@ -59,15 +58,5 @@ void initialize();
 #if defined(__wasm__)
 extern "C" void __wasm_call_ctors();
 #endif  // defined(__wasm__)
-
-WASM_EXPORT("init")
-void initialize() {
-#if defined(__wasm__)
-    __wasm_call_ctors();
-#endif  // defined(__wasm__)
-
-    rain::code::initialize_llvm();
-    internal::initialize();
-}
 
 }  // namespace rain

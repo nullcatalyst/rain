@@ -23,12 +23,12 @@ class LlvmBuffer : public Buffer {
     LlvmBuffer(std::unique_ptr<llvm::MemoryBuffer> buffer) : _buffer{std::move(buffer)} {}
     ~LlvmBuffer() override = default;
 
-    std::span<const uint8_t> data() const {
+    std::span<const uint8_t> data() const override {
         return std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(_buffer->getBufferStart()),
                                         _buffer->getBufferSize()};
     }
 
-    std::string_view string() const {
+    std::string_view string() const override {
         return std::string_view{_buffer->getBufferStart(), _buffer->getBufferSize()};
     }
 };

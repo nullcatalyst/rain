@@ -33,9 +33,9 @@ class WabtBuffer : public Buffer {
     WabtBuffer(std::vector<uint8_t> buffer) : _buffer{std::move(buffer)} {}
     ~WabtBuffer() override = default;
 
-    std::span<const uint8_t> data() const { return _buffer; }
+    std::span<const uint8_t> data() const override { return _buffer; }
 
-    std::string_view string() const {
+    std::string_view string() const override {
         return std::string_view{reinterpret_cast<const char*>(_buffer.data()),
                                 reinterpret_cast<const char*>(_buffer.data()) + _buffer.size()};
     }
