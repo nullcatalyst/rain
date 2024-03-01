@@ -1,51 +1,123 @@
-alias(
-    name = "rain",
-    actual = ":rain2wasm",
+# If you want to embed the rain compiler into your own binary, this is the library I'd recommend you
+# link to.
+cc_library(
+    name = "lib",
+    hdrs = ["rain.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":lib_compile",
+        ":lib_decompile",
+        ":lib_link",
+    ],
 )
 
-# These flags aren't turned on by default in the toolchain, because doing so seems to cause clang to
-# crash when compiling/linking libraries. But it seems to work fine for executables. Which is fine,
-# because we only really care about this for the exported functions.
-_FLAGS = [
-    # "-Xclang",
-    # "-target-abi",
-    # "-Xclang",
-    # "experimental-mv",
-]
+# The rain compiler is split into three parts: compile, link, and decompile.
+# These are split into separate parts to avoid having global ctors in some dependencies bloat the
+# size of binaries that don't need that part of the library.
 
-cc_binary(
-    name = "rain2llvm",
-    srcs = [
-        "rain2llvm.cpp",
-    ],
-    copts = _FLAGS,
+cc_library(
+    name = "lib_compile",
+    srcs = ["rain+compile.cpp"],
+    hdrs = ["rain.hpp"],
     deps = [
         "//rain/code",
+        "//rain/err",
         "//rain/lang",
         "//rain/util",
     ],
 )
 
-cc_binary(
-    name = "llvm2wasm",
-    srcs = [
-        "llvm2wasm.cpp",
-    ],
-    copts = _FLAGS,
+cc_library(
+    name = "lib_link",
+    srcs = ["rain+link.cpp"],
+    hdrs = ["rain.hpp"],
     deps = [
         "//rain/code",
+        "//rain/err",
+        "//rain/lang",
         "//rain/util",
         "@llvm-project//llvm:IRReader",
     ],
 )
 
-cc_binary(
-    name = "wasm2wat",
-    srcs = [
-        "wasm2wat.cpp",
-    ],
+cc_library(
+    name = "lib_decompile",
+    srcs = ["rain+decompile.cpp"],
+    hdrs = ["rain.hpp"],
     deps = [
+        "//rain/err",
         "//rain/util",
         "@wabt",
+    ],
+)
+
+# Shared components between each of the standalone tools.
+# This is useful to avoid duplicating the framework to get the WASM binaries to be easily callable.
+cc_library(
+    name = "common",
+    hdrs = ["common.hpp"],
+    deps = [
+        "//rain/code",
+        "//rain/util",
+    ],
+)
+
+filegroup(
+    name = "tools",
+    srcs = [
+        ":llvm2wasm",
+        ":rain2llvm",
+        ":rainc",
+        ":wasm2wat",
+    ],
+)
+
+# Standalone tool. This binary combines all the other tools into one.
+cc_binary(
+    name = "rainc",
+    srcs = ["rainc.cpp"],
+    deps = [
+        ":common",
+        ":lib",
+    ],
+)
+
+################################################################
+# Below are the standalone tools that are used to compile Rain code to various other formats.
+#
+# The benefit of having separate tools is that each of the WASM binaries can be cached separately if
+# only some are needed, or if individual parts are being updated.
+#
+# The tradeoff being the increased size -- each binary has to contain their own copy of common
+# functionality, like the malloc implementation, or the LLVM library.
+################################################################
+
+# A tool with the singular usecase of compiling Rain code to LLVM IR.
+cc_binary(
+    name = "rain2llvm",
+    srcs = ["rain2llvm.cpp"],
+    deps = [
+        ":common",
+        ":lib_compile",
+    ],
+)
+
+# A tool with the singular usecase of compiling LLVM IR to WASM.
+cc_binary(
+    name = "llvm2wasm",
+    srcs = ["llvm2wasm.cpp"],
+    deps = [
+        ":common",
+        ":lib_link",
+    ],
+)
+
+# A tool with the singular usecase of decompiling WASM to its text format WAT.
+cc_binary(
+    name = "wasm2wat",
+    srcs = ["wasm2wat.cpp"],
+    deps = [
+        ":common",
+        ":lib_decompile",
     ],
 )

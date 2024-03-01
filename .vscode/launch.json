@@ -20,7 +20,7 @@
             "name": "Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/rain/main",
+            "program": "${workspaceFolder}/bazel-bin/rain/rainc",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

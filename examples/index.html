@@ -35,7 +35,7 @@
               );
               throw new Error(text);
             },
-            callback: (msg_start, msg_end) => {
+            callback: (action, msg_start, msg_end) => {
               if (callback) {
                 callback(msg_start, msg_end);
               } else {

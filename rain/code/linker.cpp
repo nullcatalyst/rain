@@ -9,6 +9,7 @@
 #include "lld/wasm/SymbolTable.h"
 #include "rain/code/target.hpp"
 #include "rain/err/simple.hpp"
+#include "rain/util/defer.hpp"
 
 namespace rain::code {
 
@@ -19,6 +20,8 @@ using namespace llvm::wasm;
 
 namespace {
 
+constexpr const size_t DEFAULT_STACK_SIZE = 16 * WasmPageSize;  // 16 pages == 1MiB
+
 void init_config() {
     config->bsymbolic           = false;
     config->checkFeatures       = true;  // List the needed features in the wasm file
@@ -28,8 +31,8 @@ void init_config() {
     config->emitRelocs          = false;
     config->experimentalPic     = false;
     // config->entry               = "";
-    config->exportAll           = true;
-    config->exportTable         = true;
+    config->exportAll           = false;
+    config->exportTable         = false;
     config->growableTable       = false;
     config->memoryExport        = std::optional<llvm::StringRef>();
     config->sharedMemory        = false;
@@ -49,19 +52,26 @@ void init_config() {
     config->shared              = false;
     config->stripAll            = true;
     config->stripDebug          = true;
-    config->stackFirst =
-        true;  // Put the stack before the static const data, which is before the heap
+
+    // Put the stack before the static const data, which is before the heap.
+    // This is the better option, since as the stack grows (downwards), a stack overflow will result
+    // in an access of a negative address, which will be caught by the WASM runtime, rather than
+    // resulting in data corruption.
+    config->stackFirst = true;
+
     config->trace      = false;
     config->tableBase  = 0;
     config->globalBase = 0;
     // config->initialHeap       = 0;
     config->initialMemory     = 0;
     config->maxMemory         = 0;
-    config->zStackSize        = WasmPageSize;
+    config->zStackSize        = DEFAULT_STACK_SIZE;
     config->exportDynamic     = config->shared;
     config->is64              = false;
     config->importUndefined   = true;
     config->unresolvedSymbols = UnresolvedPolicy::Ignore;
+
+    config->isPic = config->pie || config->shared;
 }
 
 // // Force Sym to be entered in the output. Used for -u or equivalent.
@@ -143,10 +153,9 @@ void createSyntheticSymbols() {
     static WasmGlobalType globalTypeI64        = {WASM_TYPE_I64, false};
     static WasmGlobalType mutableGlobalTypeI32 = {WASM_TYPE_I32, true};
     static WasmGlobalType mutableGlobalTypeI64 = {WASM_TYPE_I64, true};
-    // WasmSym::callCtors =
-    //     symtab->addSyntheticFunction("__wasm_call_ctors", WASM_SYMBOL_VISIBILITY_HIDDEN,
-    //                                  make<SyntheticFunction>(nullSignature,
-    //                                  "__wasm_call_ctors"));
+    WasmSym::callCtors =
+        symtab->addSyntheticFunction("__wasm_call_ctors", WASM_SYMBOL_VISIBILITY_HIDDEN,
+                                     make<SyntheticFunction>(nullSignature, "__wasm_call_ctors"));
 
     bool is64 = config->is64.value_or(false);
 
@@ -216,15 +225,15 @@ void createOptionalSymbols() {
     //         WasmSym::definedTableBase32 = symtab->addOptionalDataSymbol("__table_base32");
     // }
 
-    // For non-shared memory programs we still need to define __tls_base since we
-    // allow object files built with TLS to be linked into single threaded
-    // programs, and such object files can contain references to this symbol.
-    //
-    // However, in this case __tls_base is immutable and points directly to the
-    // start of the `.tdata` static segment.
-    //
-    // __tls_size and __tls_align are not needed in this case since they are only
-    // needed for __wasm_init_tls (which we do not create in this case).
+    // // For non-shared memory programs we still need to define __tls_base since we
+    // // allow object files built with TLS to be linked into single threaded
+    // // programs, and such object files can contain references to this symbol.
+    // //
+    // // However, in this case __tls_base is immutable and points directly to the
+    // // start of the `.tdata` static segment.
+    // //
+    // // __tls_size and __tls_align are not needed in this case since they are only
+    // // needed for __wasm_init_tls (which we do not create in this case).
     // if (!config->sharedMemory) {
     //     WasmSym::tlsBase = createOptionalGlobal("__tls_base", false);
     // }
@@ -365,24 +374,30 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     lld::CommonLinkerContext _ctx;
     auto                     _config = std::make_unique<lld::wasm::Configuration>();
     auto                     _symtab = std::make_unique<lld::wasm::SymbolTable>();
-    lld::wasm::config                = _config.get();
-    lld::wasm::symtab                = _symtab.get();
+    assert(_symtab->symbols().empty() && "SzymbolTable should be empty");
+    assert(_symtab->find("__stack_pointer") == nullptr && "stack_pointer should not exist");
+    lld::wasm::config = _config.get();
+    lld::wasm::symtab = _symtab.get();
+    rain::util::Defer reset_lld_globals([] {
+        lld::wasm::config = nullptr;
+        lld::wasm::symtab = nullptr;
+    });
     init_config();
     // ctx.reset();
 
+    createSyntheticSymbols();
+
     {
-        lld::wasm::config->zStackSize = _stack_size != 0 ? _stack_size : WasmPageSize;
+        lld::wasm::config->zStackSize = _stack_size != 0 ? _stack_size : DEFAULT_STACK_SIZE;
 
         for (auto& file : _files) {
-            symtab->addFile(lld::wasm::createObjectFile(*file));
+            lld::wasm::symtab->addFile(lld::wasm::createObjectFile(*file));
         }
 
         for (auto& function_name : _force_export_symbols) {
-            config->exportedSymbols.insert(function_name);
+            lld::wasm::config->exportedSymbols.insert(function_name);
         }
     }
-
-    createSyntheticSymbols();
 
     // We process the stub libraries once beofore LTO to ensure that any possible
     // required exports are preserved by the LTO process.
