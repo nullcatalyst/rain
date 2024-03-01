@@ -1,0 +1,64 @@
+import { Vec4 } from "./vec4";
+
+export struct Mat4 {
+    x: Vec4,
+    y: Vec4,
+    z: Vec4,
+    w: Vec4,
+}
+
+export fn Mat4.new(
+    xx: f32, xy: f32, xz: f32, xw: f32,
+    yx: f32, yy: f32, yz: f32, yw: f32,
+    zx: f32, zy: f32, zz: f32, zw: f32,
+    wx: f32, wy: f32, wz: f32, ww: f32,
+) -> Mat4 {
+    return Mat4{
+        x: Vec4.new(xx, xy, xz, xw),
+        y: Vec4.new(yx, yy, yz, yw),
+        z: Vec4.new(zx, zy, zz, zw),
+        w: Vec4.new(wx, wy, wz, ww),
+    };
+}
+
+export fn Mat4.zero() {
+    return Mat4{
+        x: Vec4.zero(),
+        y: Vec4.zero(),
+        z: Vec4.zero(),
+        w: Vec4.zero(),
+    };
+}
+
+export fn Mat4.identity() {
+    return Mat4{
+        x: Vec4.x(),
+        y: Vec4.y(),
+        z: Vec4.z(),
+        w: Vec4.w(),
+    };
+}
+
+export fn Mat4.mul(self, other: Mat4) -> Mat4 {
+    let vx = Vec4.new(other.x.x, other.y.x, other.z.x, other.w.x);
+    let vy = Vec4.new(other.x.y, other.y.y, other.z.y, other.w.y);
+    let vz = Vec4.new(other.x.z, other.y.z, other.z.z, other.w.z);
+    let vw = Vec4.new(other.x.w, other.y.w, other.z.w, other.w.w);
+
+    return Mat4.new(
+        self.x.dot(vx), self.x.dot(vy), self.x.dot(vz), self.x.dot(vw),
+        self.y.dot(vx), self.y.dot(vy), self.y.dot(vz), self.y.dot(vw),
+        self.z.dot(vx), self.z.dot(vy), self.z.dot(vz), self.z.dot(vw),
+        self.w.dot(vx), self.w.dot(vy), self.w.dot(vz), self.w.dot(vw),
+    );
+}
+
+export fn Mat4.translate(self, x: f32, y: f32, z: f32) -> Mat4 {
+    let v = Vec4.new(x, y, z, 0.0);
+    let mut result = self;
+    result.x.w += v.dot(Vec4.new(other.x.x, other.y.x, other.z.x, other.w.x));
+    result.y.w += v.dot(Vec4.new(other.x.y, other.y.y, other.z.y, other.w.y));
+    result.z.w += v.dot(Vec4.new(other.x.z, other.y.z, other.z.z, other.w.z));
+    // No need to modify the last row (w-component) for translation
+    return result;
+}

@@ -1,0 +1,10 @@
+extern fn js_object_new() -> externref;
+extern fn 
+
+export struct Object {
+    raw: externref;
+}
+
+export function new(): Object {
+    return Object{ raw: js_object_new() };
+}

@@ -1,0 +1,36 @@
+/// Wraps a WebGPU GPUDevice.
+export struct Device {
+    device: externref,
+}
+
+export fn Device.create_bind_group_layout() -> BindGroupLayout {
+    // TODO: Implement
+}
+
+export fn Device.create_bind_group() -> BindGroup {
+    // TODO: Implement
+}
+
+export fn Device.create_buffer() -> Buffer {
+    // TODO: Implement
+}
+
+export fn Device.create_command_encoder() -> CommandEncoder {
+    // TODO: Implement
+}
+
+export fn Device.create_pipeline_layout() -> PipelineLayout {
+    // TODO: Implement
+}
+
+export fn Device.create_shader_module() -> ShaderModule {
+    // TODO: Implement
+}
+
+export fn Device.create_render_pipeline() -> RenderPipeline {
+    // TODO: Implement
+}
+
+export fn Device.create_compute_pipeline() -> ComputePipeline {
+    // TODO: Implement
+}
