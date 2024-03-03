@@ -23,8 +23,36 @@ class Lexer {
 
     [[nodiscard]] constexpr const util::String& file_name() const noexcept { return _file_name; }
 
+    class LexerState {
+        const Lexer&         _lexer;
+        util::StringIterator _it;
+        int                  _line;
+        int                  _column;
+
+        friend class Lexer;
+
+      public:
+        explicit LexerState(const Lexer& lexer)
+            : _lexer(lexer), _it(lexer._it), _line(lexer._line), _column(lexer._column) {}
+    };
+
+    LexerState save_state() const { return LexerState(*this); }
+
+    void restore_state(LexerState state) {
+        assert(this == &state._lexer);
+        _it     = state._it;
+        _line   = state._line;
+        _column = state._column;
+    }
+
     Token next();
-    Token peek();
+
+    Token peek() {
+        auto state = save_state();
+        auto token = next();
+        restore_state(state);
+        return token;
+    }
 };
 
 }  // namespace rain::lang

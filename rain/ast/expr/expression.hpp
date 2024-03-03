@@ -31,6 +31,7 @@ enum class ExpressionKind {
     MemberExpression,
     ParenthesisExpression,
     ReturnExpression,
+    StatementExpression,
     TypeDeclarationExpression,
     UnaryOperatorExpression,
     // </keep-sorted>

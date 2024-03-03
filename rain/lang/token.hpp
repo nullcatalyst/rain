@@ -29,6 +29,7 @@ enum TokenKind : uint32_t {
     Continue,
     Export,
     Struct,
+    Interface,
     Fn,
     Let,
 

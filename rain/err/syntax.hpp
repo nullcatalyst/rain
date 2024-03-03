@@ -31,6 +31,7 @@ class SyntaxError : public util::Error {
         for (int i = 0; i < _location.substr().size() - 1; ++i) {
             under_line += '~';
         }
+        under_line += ANSI_RESET;
 
         return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _location.line(), ":",
                             _location.column(), ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET,

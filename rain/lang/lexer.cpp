@@ -98,21 +98,4 @@ Token Lexer::next() {
     return Token();
 }
 
-Token Lexer::peek() {
-    // TODO: This can be implemented so much more efficiently
-    // Currently it just calls next() and then rewinds the lexer
-
-    const auto it     = _it;
-    const auto line   = _line;
-    const auto column = _column;
-
-    const auto token = next();
-
-    _it     = it;
-    _line   = line;
-    _column = column;
-
-    return token;
-}
-
 }  // namespace rain::lang

@@ -15,15 +15,15 @@ struct InterfaceTypeMethodData {
 
 struct InterfaceType : public Type {
     util::String                         _name;
-    std::vector<InterfaceTypeMethodData> _fields;
+    std::vector<InterfaceTypeMethodData> _methods;
 
   public:
-    InterfaceType(util::String name, std::vector<InterfaceTypeMethodData> fields)
-        : _name{std::move(name)}, _fields{std::move(fields)} {}
+    InterfaceType(util::String name, std::vector<InterfaceTypeMethodData> methods)
+        : _name{std::move(name)}, _methods{std::move(methods)} {}
 
     [[nodiscard]] static std::shared_ptr<InterfaceType> alloc(
-        util::String name, std::vector<InterfaceTypeMethodData> fields) {
-        return std::make_shared<InterfaceType>(std::move(name), std::move(fields));
+        util::String name, std::vector<InterfaceTypeMethodData> methods) {
+        return std::make_shared<InterfaceType>(std::move(name), std::move(methods));
     }
 
     [[nodiscard]] constexpr TypeKind kind() const noexcept override {
@@ -31,11 +31,11 @@ struct InterfaceType : public Type {
     }
 
     [[nodiscard]] util::String name() const noexcept { return _name; }
-    [[nodiscard]] const std::vector<InterfaceTypeMethodData>& fields() const& noexcept {
-        return _fields;
+    [[nodiscard]] const std::vector<InterfaceTypeMethodData>& methods() const& noexcept {
+        return _methods;
     }
-    [[nodiscard]] std::vector<InterfaceTypeMethodData>&& fields() && noexcept {
-        return std::move(_fields);
+    [[nodiscard]] std::vector<InterfaceTypeMethodData>&& methods() && noexcept {
+        return std::move(_methods);
     }
 };
 

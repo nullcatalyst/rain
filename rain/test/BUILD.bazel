@@ -1,0 +1,12 @@
+cc_test(
+    name = "test",
+    srcs = [
+        "function.test.cpp",
+        "struct.test.cpp",
+    ],
+    deps = [
+        "//rain/lang",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)

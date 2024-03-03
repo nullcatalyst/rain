@@ -14,4 +14,5 @@
 #include "rain/ast/expr/member.hpp"
 #include "rain/ast/expr/parenthesis.hpp"
 #include "rain/ast/expr/return.hpp"
+#include "rain/ast/expr/statement.hpp"
 #include "rain/ast/expr/type_declaration.hpp"

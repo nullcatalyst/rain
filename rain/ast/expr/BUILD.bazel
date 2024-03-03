@@ -16,6 +16,8 @@ cc_library(
         "member.cpp",
         "parenthesis.cpp",
         "return.cpp",
+        "statement.cpp",
+        "type_declaration.cpp",
     ],
     hdrs = [
         "all.hpp",
@@ -34,6 +36,7 @@ cc_library(
         "member.hpp",
         "parenthesis.hpp",
         "return.hpp",
+        "statement.hpp",
         "type_declaration.hpp",
     ],
     visibility = [

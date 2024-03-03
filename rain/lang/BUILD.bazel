@@ -13,6 +13,11 @@ cc_library(
     srcs = [
         "lexer.cpp",
         "module.cpp",
+        "parse+common.hpp",
+        "parse+ctrl.cpp",
+        "parse+lit.cpp",
+        "parse+op.cpp",
+        "parse+type.cpp",
         "parser.cpp",
     ],
     hdrs = [

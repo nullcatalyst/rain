@@ -46,6 +46,9 @@ class Location {
         if (line_start == -1) {
             // The source location is at the start of the file
             line_start = 0;
+        } else {
+            // Skip the newline character
+            ++line_start;
         }
 
         auto line_end = _source.find('\n', _begin);
@@ -54,6 +57,7 @@ class Location {
             line_end = _source.size();
         }
 
+        std::cout << "line_start: " << line_start << ", line_end: " << line_end << std::endl;
         return Location(_source, line_start, line_end, _line, 1);
     }
 };

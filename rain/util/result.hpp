@@ -23,11 +23,14 @@ namespace rain::util {
     } while (0)
 
 // Assert that the result is not an error, and print the error message if it is, before failing
-#define ASSERT_NOT_ERROR(result)                                    \
-    if (!result.has_value()) {                                      \
-        std::cerr << result.unwrap_error()->message() << std::endl; \
-        ASSERT_EQ(result.has_value(), true);                        \
+#define ASSERT_NOT_ERROR(result)                             \
+    if (!result.has_value()) {                               \
+        std::cerr << result.error()->message() << std::endl; \
+        ASSERT_EQ(result.has_value(), true);                 \
     }
+
+// Assert that the result is an error
+#define ASSERT_ERROR(result) ASSERT_EQ(result.has_value(), false)
 
 class Error {
   public:

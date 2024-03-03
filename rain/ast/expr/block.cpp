@@ -3,12 +3,13 @@
 namespace rain::ast {
 
 [[nodiscard]] bool BlockExpression::compile_time_capable() const noexcept {
-    for (const auto& expr : _expressions) {
-        if (!expr->compile_time_capable()) {
+    for (const auto& statement : _statements) {
+        if (!statement->compile_time_capable()) {
             return false;
         }
     }
-    return true;
+
+    return _expression != nullptr ? _expression->compile_time_capable() : true;
 }
 
 }  // namespace rain::ast
