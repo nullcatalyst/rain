@@ -10,9 +10,15 @@ class IdentifierExpression : public Expression {
 
   public:
     IdentifierExpression(util::String name) : _name(std::move(name)) {}
+    IdentifierExpression(util::String name, const lang::Location location)
+        : Expression(location), _name(std::move(name)) {}
 
     [[nodiscard]] static std::unique_ptr<IdentifierExpression> alloc(util::String name) {
         return std::make_unique<IdentifierExpression>(std::move(name));
+    }
+    [[nodiscard]] static std::unique_ptr<IdentifierExpression> alloc(
+        util::String name, const lang::Location location) {
+        return std::make_unique<IdentifierExpression>(std::move(name), location);
     }
 
     [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {

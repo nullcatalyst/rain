@@ -9,9 +9,15 @@ class IntegerExpression : public Expression {
 
   public:
     IntegerExpression(const uint64_t value) : _value(value) {}
+    IntegerExpression(const uint64_t value, const lang::Location location)
+        : Expression(location), _value(value) {}
 
     [[nodiscard]] static std::unique_ptr<IntegerExpression> alloc(const uint64_t value) {
         return std::make_unique<IntegerExpression>(value);
+    }
+    [[nodiscard]] static std::unique_ptr<IntegerExpression> alloc(const uint64_t       value,
+                                                                  const lang::Location location) {
+        return std::make_unique<IntegerExpression>(value, location);
     }
 
     [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "absl/strings/str_cat.h"
 #include "rain/lang/lexer.hpp"
 #include "rain/lang/location.hpp"
@@ -22,13 +24,13 @@ class SyntaxError : public util::Error {
         const auto  source_line = _location.whole_line().substr();
         std::string under_line;
         under_line.reserve(source_line.size() + ANSI_GREEN.size() + ANSI_RESET.size());
-        under_line += ANSI_GREEN;
 
+        under_line += ANSI_GREEN;
         for (int i = 0; i < _location.column() - 1; ++i) {
             under_line += ' ';
         }
         under_line += '^';
-        for (int i = 0; i < _location.substr().size() - 1; ++i) {
+        for (int i = 0; i < static_cast<ssize_t>(_location.substr().size()) - 1; ++i) {
             under_line += '~';
         }
         under_line += ANSI_RESET;

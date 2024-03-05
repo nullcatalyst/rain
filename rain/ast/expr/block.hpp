@@ -14,10 +14,21 @@ class BlockExpression : public Expression {
   public:
     BlockExpression(std::vector<StatementPtr> statements, ExpressionPtr expression)
         : _statements(std::move(statements)), _expression(std::move(expression)) {}
+    BlockExpression(std::vector<StatementPtr> statements, ExpressionPtr expression,
+                    const lang::Location location)
+        : Expression(location),
+          _statements(std::move(statements)),
+          _expression(std::move(expression)) {}
 
     [[nodiscard]] static std::unique_ptr<BlockExpression> alloc(
         std::vector<StatementPtr> statements, ExpressionPtr expression) {
         return std::make_unique<BlockExpression>(std::move(statements), std::move(expression));
+    }
+    [[nodiscard]] static std::unique_ptr<BlockExpression> alloc(
+        std::vector<StatementPtr> statements, ExpressionPtr expression,
+        const lang::Location location) {
+        return std::make_unique<BlockExpression>(std::move(statements), std::move(expression),
+                                                 location);
     }
 
     [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {

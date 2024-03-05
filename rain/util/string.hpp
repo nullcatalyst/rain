@@ -18,7 +18,7 @@ using StringIterator = util::Twine::Iterator;
 #else  // RAIN_USE_TWINE
 
 using String         = std::string_view;
-using StringIterator = size_t;
+using StringIterator = ssize_t;
 
 #endif  // !RAIN_USE_TWINE
 

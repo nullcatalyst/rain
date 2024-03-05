@@ -1,8 +1,10 @@
 cc_test(
-    name = "test",
+    name = "spec",
     srcs = [
-        "function.test.cpp",
-        "struct.test.cpp",
+        "expression.spec.cpp",
+        "function.spec.cpp",
+        "helpers.hpp",
+        "struct.spec.cpp",
     ],
     deps = [
         "//rain/lang",

@@ -19,6 +19,7 @@ enum class ExpressionKind {
     // <keep-sorted>
     BinaryOperatorExpression,
     BlockExpression,
+    BooleanExpression,
     CallExpression,
     ExecExpression,
     ExportExpression,
@@ -41,15 +42,16 @@ enum class ExpressionKind {
 
 class Expression {
   protected:
-    ExpressionKind _kind;
-    lang::Location _location;
     TypePtr        _type;
+    lang::Location _location;
 
   public:
+    Expression() = default;
+    Expression(const lang::Location location) : _location{std::move(location)} {}
     virtual ~Expression() = default;
 
     [[nodiscard]] virtual constexpr ExpressionKind kind() const noexcept = 0;
-    [[nodiscard]] constexpr const lang::Location&  location() const noexcept { return _location; }
+    [[nodiscard]] constexpr lang::Location         location() const noexcept { return _location; }
     [[nodiscard]] constexpr const TypePtr&         type() const noexcept { return _type; }
     // void set_type(TypePtr type) noexcept { _type = std::move(type); }
 

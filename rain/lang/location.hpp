@@ -7,6 +7,7 @@
 namespace rain::lang {
 
 class Location {
+  public:
     util::String         _source;
     util::StringIterator _begin  = 0;
     util::StringIterator _end    = 0;
@@ -42,8 +43,13 @@ class Location {
     }
 
     [[nodiscard]] Location whole_line() const noexcept {
-        auto line_start = _source.rfind('\n', _begin);
-        if (line_start == -1) {
+        if (_begin < 0) {
+            // The source location is past the end of the file
+            return *this;
+        }
+
+        auto line_start = _source.rfind('\n', _source[_begin] == '\n' ? _begin - 1 : _begin);
+        if (line_start < 0) {
             // The source location is at the start of the file
             line_start = 0;
         } else {
@@ -52,13 +58,19 @@ class Location {
         }
 
         auto line_end = _source.find('\n', _begin);
-        if (line_end == -1) {
+        if (line_end < 0) {
             // The source location is at the end of the file
             line_end = _source.size();
         }
 
-        std::cout << "line_start: " << line_start << ", line_end: " << line_end << std::endl;
         return Location(_source, line_start, line_end, _line, 1);
+    }
+
+    // Return the empty string after the location.
+    // This is useful for error messages where we want to say that a specific token needs to follow
+    // the previous token, or when encountering the end of the file.
+    [[nodiscard]] Location empty_string_after() const {
+        return Location(_source, _end, _end, _line, _column + 1);
     }
 };
 

@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "binary_operator.cpp",
         "block.cpp",
+        "boolean.cpp",
         "call.cpp",
         "exec.cpp",
         "export.cpp",
@@ -23,6 +24,7 @@ cc_library(
         "all.hpp",
         "binary_operator.hpp",
         "block.hpp",
+        "boolean.hpp",
         "call.hpp",
         "exec.hpp",
         "export.hpp",

@@ -7,46 +7,45 @@
 namespace rain::lang {
 
 util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
-    {
-        const auto lbracket_token = lexer.next();
-        if (lbracket_token.kind != TokenKind::LCurlyBracket) {
-            return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location, "expected '{'");
-        }
+    const auto lbracket_token = lexer.next();
+    if (lbracket_token.kind != TokenKind::LCurlyBracket) {
+        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location, "expected '{'");
     }
 
-    {
-        const auto next_token = lexer.peek();
-        if (next_token.kind == TokenKind::RCurlyBracket) {
-            lexer.next();  // Consume the '}' token
-            return ast::BlockExpression::alloc(std::vector<ast::StatementPtr>{}, nullptr);
-        }
+    if (const auto next_token = lexer.peek(); next_token.kind == TokenKind::RCurlyBracket) {
+        lexer.next();  // Consume the '}' token
+        return ast::BlockExpression::alloc(std::vector<ast::StatementPtr>{}, nullptr,
+                                           lbracket_token.location.merge(next_token.location));
     }
 
     std::vector<ast::StatementPtr> statements;
     for (;;) {
-        auto expression = parse_whole_expression(lexer);
-        FORWARD_ERROR(expression);
+        auto expression_result = parse_whole_expression(lexer);
+        FORWARD_ERROR(expression_result);
+        auto expression = std::move(expression_result).value();
 
         auto next_token = lexer.peek();
         if (next_token.kind == TokenKind::Semicolon) {
             lexer.next();  // Consume the ';' token
-            statements.emplace_back(ast::StatementExpression::alloc(std::move(expression).value()));
+            statements.emplace_back(ast::StatementExpression::alloc(std::move(expression)));
 
             next_token = lexer.peek();
             if (next_token.kind == TokenKind::RCurlyBracket) [[unlikely]] {
                 lexer.next();  // Consume the '}' token
-                return ast::BlockExpression::alloc(std::move(statements), nullptr);
+                return ast::BlockExpression::alloc(
+                    std::move(statements), nullptr,
+                    lbracket_token.location.merge(next_token.location));
             }
 
             continue;
         }
         if (next_token.kind == TokenKind::RCurlyBracket) {
             lexer.next();  // Consume the '}' token
-            return ast::BlockExpression::alloc(std::move(statements),
-                                               std::move(expression).value());
+            return ast::BlockExpression::alloc(std::move(statements), std::move(expression),
+                                               lbracket_token.location.merge(next_token.location));
         }
 
-        return ERR_PTR(err::SyntaxError, lexer, next_token.location,
+        return ERR_PTR(err::SyntaxError, lexer, expression->location().empty_string_after(),
                        "unexpected token; statements must be separated by ';', or the current "
                        "block can be closed with '}'");
     }
@@ -55,9 +54,10 @@ util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
 }
 
 util::Result<std::unique_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {
-    const auto token = lexer.next();
-    if (token.kind != TokenKind::If) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'if'");
+    const auto if_token = lexer.next();
+    if (if_token.kind != TokenKind::If) {
+        return ERR_PTR(err::SyntaxError, lexer, if_token.location,
+                       "expected keyword 'if'; this is an internal error");
     }
 
     auto condition = parse_whole_expression(lexer);
@@ -86,7 +86,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(Lexer& lex
     {
         const auto token = lexer.next();
         if (token.kind != TokenKind::Fn) {
-            return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'fn'");
+            return ERR_PTR(err::SyntaxError, lexer, token.location,
+                           "expected keyword 'fn'; this is an internal error");
         }
     }
 
@@ -186,7 +187,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(Lexer& lex
 util::Result<std::unique_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {
     const auto let_token = lexer.next();
     if (let_token.kind != TokenKind::Let) {
-        return ERR_PTR(err::SyntaxError, lexer, let_token.location, "expected keyword 'let'");
+        return ERR_PTR(err::SyntaxError, lexer, let_token.location,
+                       "expected keyword 'let'; this is an internal error");
     }
 
     const auto name_token = lexer.next();
@@ -213,7 +215,8 @@ util::Result<std::unique_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {
 util::Result<std::unique_ptr<ast::ReturnExpression>> parse_return(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Return) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected keyword 'return'");
+        return ERR_PTR(err::SyntaxError, lexer, token.location,
+                       "expected keyword 'return'; this is an internal error");
     }
 
     auto expr = parse_whole_expression(lexer);
@@ -240,7 +243,8 @@ util::Result<ast::ExpressionPtr> parse_whole_expression(Lexer& lexer) {
 util::Result<std::unique_ptr<ast::ExportExpression>> parse_export(Lexer& lexer) {
     const auto export_token = lexer.next();
     if (export_token.kind != TokenKind::Export) {
-        return ERR_PTR(err::SyntaxError, lexer, export_token.location, "expected keyword 'export'");
+        return ERR_PTR(err::SyntaxError, lexer, export_token.location,
+                       "expected keyword 'export'; this is an internal error");
     }
 
     const auto next_token = lexer.peek();
@@ -248,7 +252,7 @@ util::Result<std::unique_ptr<ast::ExportExpression>> parse_export(Lexer& lexer) 
         case TokenKind::Fn: {
             auto result = parse_function(lexer);
             FORWARD_ERROR(result);
-            return ast::ExportExpression::alloc(std::move(result).value());
+            return ast::ExportExpression::alloc(std::move(result).value(), export_token.location);
         }
 
         default:

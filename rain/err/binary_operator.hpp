@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "absl/strings/str_cat.h"
 #include "rain/lang/lexer.hpp"
 #include "rain/lang/location.hpp"

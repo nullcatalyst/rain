@@ -9,9 +9,15 @@ class FloatExpression : public Expression {
 
   public:
     FloatExpression(const double value) : _value(value) {}
+    FloatExpression(const double value, const lang::Location location)
+        : Expression(location), _value(value) {}
 
     [[nodiscard]] static std::unique_ptr<FloatExpression> alloc(const double value) {
         return std::make_unique<FloatExpression>(value);
+    }
+    [[nodiscard]] static std::unique_ptr<FloatExpression> alloc(const double         value,
+                                                                const lang::Location location) {
+        return std::make_unique<FloatExpression>(value, location);
     }
 
     [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {

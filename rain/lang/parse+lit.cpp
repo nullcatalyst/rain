@@ -9,7 +9,8 @@ namespace rain::lang {
 util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Integer) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected integer literal");
+        return ERR_PTR(err::SyntaxError, lexer, token.location,
+                       "expected integer literal; this is an internal error");
     }
 
     constexpr uint64_t MAX   = std::numeric_limits<uint64_t>::max() / 10;
@@ -29,13 +30,14 @@ util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(Lexer& lexer
         value += c - '0';
     }
 
-    return ast::IntegerExpression::alloc(value);
+    return ast::IntegerExpression::alloc(value, token.location);
 }
 
 util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Float) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected floating point literal");
+        return ERR_PTR(err::SyntaxError, lexer, token.location,
+                       "expected floating point literal; this is an internal error");
     }
 
     double value = 0.0;
@@ -43,22 +45,24 @@ util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(Lexer& lexer) {
         return ERR_PTR(err::SyntaxError, lexer, token.location, "invalid floating point literal");
     }
 
-    return ast::FloatExpression::alloc(value);
+    return ast::FloatExpression::alloc(value, token.location);
 }
 
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Identifier) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected identifier");
+        return ERR_PTR(err::SyntaxError, lexer, token.location,
+                       "expected identifier; this is an internal error");
     }
 
-    return ast::IdentifierExpression::alloc(token.location.substr());
+    return ast::IdentifierExpression::alloc(token.location.substr(), token.location);
 }
 
 util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexer& lexer) {
     const auto lround_token = lexer.next();
     if (lround_token.kind != TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, lround_token.location, "expected '('");
+        return ERR_PTR(err::SyntaxError, lexer, lround_token.location,
+                       "expected '('; this is an internal error");
     }
 
     auto expr = parse_whole_expression(lexer);
@@ -76,7 +80,8 @@ util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(Lexer&        
                                                                   ast::ExpressionPtr owner) {
     const auto period_token = lexer.next();
     if (period_token.kind != TokenKind::Period) {
-        return ERR_PTR(err::SyntaxError, lexer, period_token.location, "expected '.'");
+        return ERR_PTR(err::SyntaxError, lexer, period_token.location,
+                       "expected '.'; this is an internal error");
     }
 
     const auto member_token = lexer.next();
@@ -92,7 +97,8 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&            
                                                               ast::ExpressionPtr callee) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location, "expected '('");
+        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location,
+                       "expected '('; this is an internal error");
     }
 
     std::vector<ast::ExpressionPtr> arguments;
@@ -143,7 +149,8 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&            
 util::Result<std::unique_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {
     const auto token = lexer.next();
     if (token.kind != TokenKind::Hash) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location, "expected '#'");
+        return ERR_PTR(err::SyntaxError, lexer, token.location,
+                       "expected '#'; this is an internal error");
     }
 
     auto expr = parse_atom(lexer);
@@ -157,6 +164,16 @@ util::Result<ast::ExpressionPtr> parse_atom(Lexer& lexer) {
 
     const auto token = lexer.peek();
     switch (token.kind) {
+        case TokenKind::False:
+            lexer.next();
+            expression = ast::BooleanExpression::alloc(false, token.location);
+            break;
+
+        case TokenKind::True:
+            lexer.next();
+            expression = ast::BooleanExpression::alloc(true, token.location);
+            break;
+
         case TokenKind::Integer:
             expression = parse_integer(lexer);
             break;

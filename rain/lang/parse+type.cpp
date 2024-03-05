@@ -92,50 +92,6 @@ util::Result<std::shared_ptr<ast::InterfaceType>> parse_interface(Lexer& lexer) 
 
     // TODO: Parse the interface methods
     std::abort();
-
-    // std::vector<ast::StructTypeFieldData> struct_fields;
-    // for (;;) {
-    //     // Handle the struct fields
-    //     auto next_token = lexer.next();
-
-    //     switch (next_token.kind) {
-    //         case TokenKind::RCurlyBracket:
-    //             return ast::StructType::alloc(std::move(struct_name),
-    //             std::move(struct_fields));
-
-    //         case TokenKind::Identifier:
-    //             // Found a field name
-    //             break;
-
-    //         default:
-    //             return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-    //                            "expected identifier for struct field name");
-    //     }
-
-    //     const auto field_name = next_token.location.substr();
-
-    //     next_token = lexer.next();
-    //     if (next_token.kind != TokenKind::Colon) {
-    //         return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-    //                        "expected ':' after struct field name");
-    //     }
-
-    //     auto field_type = parse_whole_type(lexer);
-    //     FORWARD_ERROR(field_type);
-
-    //     struct_fields.emplace_back(ast::StructTypeFieldData{
-    //         .name = field_name,
-    //         .type = std::move(field_type).value(),
-    //     });
-
-    //     next_token = lexer.next();
-    //     if (next_token.kind != TokenKind::Semicolon) {
-    //         return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-    //                        "expected ';' after struct field definition");
-    //     }
-    // }
-
-    __builtin_unreachable();
 }
 
 util::Result<ast::TypePtr> parse_whole_type(Lexer& lexer) {

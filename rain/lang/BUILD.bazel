@@ -43,6 +43,7 @@ cc_test(
     name = "test",
     srcs = [
         "lexer.test.cpp",
+        "location.test.cpp",
         "parser.test.cpp",
     ],
     visibility = [
@@ -50,6 +51,6 @@ cc_test(
     ],
     deps = [
         ":lang",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

@@ -2,6 +2,7 @@
 
 #include "rain/ast/expr/binary_operator.hpp"
 #include "rain/ast/expr/block.hpp"
+#include "rain/ast/expr/boolean.hpp"
 #include "rain/ast/expr/call.hpp"
 #include "rain/ast/expr/exec.hpp"
 #include "rain/ast/expr/export.hpp"
