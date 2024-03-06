@@ -19,6 +19,13 @@
 
 namespace rain::code {
 
+util::Result<void> Compiler::build(Context&                        ctx,
+                                   const ast::StatementExpression& statement_expression) {
+    auto result = build(ctx, statement_expression.expression());
+    FORWARD_ERROR(result);
+    return {};
+}
+
 util::Result<llvm::Function*> Compiler::build(Context&                     ctx,
                                               const ast::ExportExpression& export_expression) {
     const ast::FunctionExpression& function_expression =
@@ -104,9 +111,9 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
     llvm::BasicBlock* llvm_entry_block =
         llvm::BasicBlock::Create(*_llvm_ctx, "entry", llvm_function);
     _llvm_ir.SetInsertPoint(llvm_entry_block);
-    for (const auto& expression : function_expression.expressions()) {
-        auto llvm_expression_result = build(function_ctx, expression);
-        FORWARD_ERROR(llvm_expression_result);
+    for (const auto& statement : function_expression.block()->statements()) {
+        auto result = build(function_ctx, *statement);
+        FORWARD_ERROR(result);
     }
 
     return llvm_function;
@@ -159,14 +166,21 @@ util::Result<llvm::Value*> Compiler::build(Context&                    ctx,
                                            const ast::BlockExpression& block_expression) {
     Scope   block_scope(ctx.scope);
     Context block_ctx(ctx, block_scope);
-    for (const auto& expression : block_expression.expressions()) {
-        auto llvm_expression_result = build(block_ctx, expression);
-        FORWARD_ERROR(llvm_expression_result);
+    for (const auto& statement : block_expression.statements()) {
+        auto result = build(block_ctx, *statement);
+        FORWARD_ERROR(result);
         if (block_ctx.returned) {
             ctx.returned = true;
-            return llvm_expression_result;
+            return nullptr;
         }
     }
+
+    if (block_expression.expression() != nullptr) {
+        auto result = build(block_ctx, block_expression.expression());
+        FORWARD_ERROR(result);
+        return result;
+    }
+
     return nullptr;
 }
 

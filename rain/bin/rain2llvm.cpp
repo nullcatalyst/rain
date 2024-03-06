@@ -24,19 +24,15 @@ llvm::GenericValue lle_X_sqrt(llvm::FunctionType*                llvm_function_t
 
 }  // namespace
 
-namespace rain {
-
 WASM_EXPORT("init")
 void initialize() {
-    code::initialize_llvm();
+    rain::code::initialize_llvm();
 
     // Add external functions here.
     // This is required if there are any external functions that will be called at compile time.
 
     // rain::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
 }
-
-}  // namespace rain
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {

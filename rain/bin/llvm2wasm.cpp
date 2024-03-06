@@ -4,12 +4,8 @@
 #define RAIN_INCLUDE_LINK
 #include "rain/rain.hpp"
 
-namespace rain {
-
 WASM_EXPORT("init")
 void initialize() { code::initialize_llvm(); }
-
-}  // namespace rain
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {

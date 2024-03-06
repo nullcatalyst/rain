@@ -32,28 +32,52 @@ util::Result<llvm::Value*> Compiler::build(Context&                    ctx,
     return llvm::ConstantFP::get(*_llvm_ctx, llvm::APFloat(float_expression.value()));
 }
 
+util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
+                                           const ast::MemberExpression& member_expression) {
+    auto owner_expression = build(ctx, member_expression.expression());
+    FORWARD_ERROR(owner_expression);
+
+    auto owner_type = member_expression.expression()->type();
+    if (owner_type == nullptr) {
+        return ERR_PTR(err::SimpleError, "cannot access member of unknown type");
+    }
+
+    if (owner_type->kind() == ast::TypeKind::UnresolvedType) {
+        owner_type = ctx.scope.resolve_type(owner_type);
+    }
+
+    if (owner_type->kind() != ast::TypeKind::StructType) {
+        return ERR_PTR(err::SimpleError, "cannot access member of non-struct type");
+    }
+
+    const auto llvm_type = ctx.scope.find_llvm_type(owner_type);
+    if (llvm_type == nullptr) {
+        return ERR_PTR(err::SimpleError, "cannot find llvm type for struct type");
+    }
+
+    const auto* const struct_type = static_cast<const ast::StructType*>(owner_type.get());
+    const auto        field_index = struct_type->find_field(member_expression.member());
+    if (!field_index.has_value()) {
+        if (struct_type->is_named()) {
+            return ERR_PTR(
+                err::SimpleError,
+                absl::StrCat("unknown member; \"", member_expression.member(),
+                             "\" not found in struct \"", struct_type->name_or_empty(), "\""));
+        } else {
+            return ERR_PTR(err::SimpleError,
+                           absl::StrCat("unknown member; \"", member_expression.member(),
+                                        "\" not found in unnamed struct"));
+        }
+    }
+
+    // member_expression->_type = struct_type->fields()[field_index.value()].type;
+
+    return _llvm_ir.CreateStructGEP(llvm_type, std::move(owner_expression).value(),
+                                    field_index.value());
+}
+
 util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
                                            const ast::CallExpression& call_expression) {
-    // // TODO: Get the proper function type instead of assuming all `i32`s.
-    // llvm::Type* const llvm_i32_type = llvm::Type::getInt32Ty(*_llvm_ctx);
-    // llvm::Type* const llvm_f64_type = llvm::Type::getDoubleTy(*_llvm_ctx);
-
-    // llvm::SmallVector<llvm::Type*, 4> llvm_argument_types;
-    // llvm_argument_types.reserve(call_expression.arguments().size());
-    // for (const auto& argument : call_expression.arguments()) {
-    //     // TODO: determine the type of the argument.
-
-    //     if (argument->kind() == ast::NodeKind::IntegerExpression) {
-    //         llvm_argument_types.emplace_back(llvm_i32_type);
-    //     } else if (argument->kind() == ast::NodeKind::FloatExpression) {
-    //         llvm_argument_types.emplace_back(llvm_f64_type);
-    //     } else {
-    //         llvm_argument_types.emplace_back(llvm_i32_type);
-    //     }
-    // }
-    // llvm::FunctionType* const llvm_function_type =
-    //     llvm::FunctionType::get(llvm_i32_type, llvm_argument_types, false);
-
     auto callee = build(ctx, call_expression.callee());
     FORWARD_ERROR(callee);
 
@@ -76,6 +100,49 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
     }
 
     return _llvm_ir.CreateCall(llvm_function_type, std::move(callee).value(), llvm_arguments);
+}
+
+util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
+                                           const ast::CtorExpression& ctor_expression) {
+    const auto type = ctx.scope.resolve_type(ctor_expression.type());
+    if (type == nullptr) {
+        return ERR_PTR(err::SimpleError, "unknown type");
+    }
+
+    if (type->kind() != ast::TypeKind::StructType) {
+        return ERR_PTR(err::SimpleError, "cannot construct non-struct type");
+    }
+    const auto* const struct_type = static_cast<const ast::StructType*>(type.get());
+
+    const auto llvm_type = ctx.scope.find_llvm_type(type);
+    if (llvm_type == nullptr) {
+        return ERR_PTR(err::SimpleError, "cannot find llvm type for struct type");
+    }
+
+    auto llvm_alloca = _llvm_ir.CreateAlloca(llvm_type);
+    _llvm_ir.CreateStore(llvm::Constant::getNullValue(llvm_type), llvm_alloca);
+
+    for (const auto& field : ctor_expression.fields()) {
+        auto llvm_value = build(ctx, field.value);
+        FORWARD_ERROR(llvm_value);
+
+        const auto field_index = struct_type->find_field(field.name);
+        if (!field_index.has_value()) {
+            if (struct_type->is_named()) {
+                return ERR_PTR(err::SimpleError, absl::StrCat("unknown member; \"", field.name,
+                                                              "\" not found in struct \"",
+                                                              struct_type->name_or_empty(), "\""));
+            } else {
+                return ERR_PTR(err::SimpleError, absl::StrCat("unknown member; \"", field.name,
+                                                              "\" not found in unnamed struct"));
+            }
+        }
+
+        auto llvm_field = _llvm_ir.CreateStructGEP(llvm_type, llvm_alloca, field_index.value());
+        _llvm_ir.CreateStore(std::move(llvm_value).value(), llvm_field);
+    }
+
+    return _llvm_ir.CreateLoad(llvm_type, llvm_alloca);
 }
 
 }  // namespace rain::code

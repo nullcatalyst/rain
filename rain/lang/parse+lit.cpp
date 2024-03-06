@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "rain/ast/expr/all.hpp"
 #include "rain/err/all.hpp"
 #include "rain/lang/lexer.hpp"
@@ -76,6 +78,81 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexe
     return ast::ParenthesisExpression::alloc(std::move(expr).value());
     // return ast::ParenthesisExpression::alloc(std::move(expr).value(),
     //                                          lround_token.location.merge(rround_token.location));
+}
+
+util::Result<std::unique_ptr<ast::CtorExpression>> parse_ctor(Lexer& lexer) {
+    auto type = parse_whole_type(lexer);
+    FORWARD_ERROR(type);
+
+    const auto lcurly_token = lexer.next();
+    if (lcurly_token.kind != TokenKind::LCurlyBracket) {
+        return ERR_PTR(err::SyntaxError, lexer, lcurly_token.location,
+                       "expected '{' after type name");
+    }
+
+    std::vector<ast::CtorExpressionFieldData> fields;
+
+#define PARSE_CTOR_FIELD()                                                                  \
+    do {                                                                                    \
+        const auto name_token = lexer.next();                                               \
+        if (name_token.kind != TokenKind::Identifier) {                                     \
+            return ERR_PTR(err::SyntaxError, lexer, name_token.location,                    \
+                           "expected identifier for field name in constructor expression"); \
+        }                                                                                   \
+        auto name = name_token.location.substr();                                           \
+                                                                                            \
+        if (const auto colon_token = lexer.next(); colon_token.kind != TokenKind::Colon) {  \
+            return ERR_PTR(err::SyntaxError, lexer, colon_token.location,                   \
+                           "expected ':' between field name and initializer value");        \
+        }                                                                                   \
+                                                                                            \
+        auto value = parse_whole_expression(lexer);                                         \
+        FORWARD_ERROR(value);                                                               \
+                                                                                            \
+        fields.emplace_back(ast::CtorExpressionFieldData{                                   \
+            .name  = std::move(name),                                                       \
+            .value = std::move(value).value(),                                              \
+        });                                                                                 \
+    } while (false)
+
+    {
+        // Trivial case: no struct fields.
+        const auto next_token = lexer.peek();
+        if (next_token.kind == TokenKind::RCurlyBracket) {
+            lexer.next();  // Consume the '}' token
+            return ast::CtorExpression::alloc(std::move(type).value(), std::move(fields));
+        }
+
+        PARSE_CTOR_FIELD();
+    }
+
+    for (;;) {
+        // Handle the rest of the arguments
+        auto next_token = lexer.peek();
+        switch (next_token.kind) {
+            case TokenKind::Comma:
+                lexer.next();  // Consume the ',' token
+
+                if (lexer.peek().kind == TokenKind::RCurlyBracket) {
+                    lexer.next();  // Consume the '}' token
+                    return ast::CtorExpression::alloc(std::move(type).value(), std::move(fields));
+                }
+                break;
+
+            case TokenKind::RCurlyBracket:
+                lexer.next();  // Consume the '}' token
+                return ast::CtorExpression::alloc(std::move(type).value(), std::move(fields));
+
+            default:
+                return ERR_PTR(err::SyntaxError, lexer, next_token.location, "expected ',' or '}'");
+        }
+
+        PARSE_CTOR_FIELD();
+    }
+
+    __builtin_unreachable();
+
+#undef PARSE_CTOR_FIELD
 }
 
 util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(Lexer&             lexer,
@@ -169,6 +246,15 @@ util::Result<std::unique_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {
 
 util::Result<ast::ExpressionPtr> parse_atom(Lexer& lexer) {
     util::Result<ast::ExpressionPtr> expression;
+
+    {
+        const auto state       = lexer.save_state();
+        auto       ctor_result = parse_ctor(lexer);
+        if (ctor_result.has_value()) {
+            return ctor_result;
+        }
+        lexer.restore_state(state);
+    }
 
     const auto token = lexer.peek();
     switch (token.kind) {

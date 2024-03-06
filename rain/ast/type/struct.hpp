@@ -54,6 +54,15 @@ class StructType : public Type {
     [[nodiscard]] constexpr std::vector<StructTypeFieldData>&& fields() && noexcept {
         return std::move(_fields);
     }
+
+    [[nodiscard]] std::optional<uint32_t> find_field(const util::String name) const noexcept {
+        for (uint32_t i = 0, end = _fields.size(); i < end; ++i) {
+            if (_fields[i].name == name) {
+                return i;
+            }
+        }
+        return std::nullopt;
+    }
 };
 
 }  // namespace rain::ast

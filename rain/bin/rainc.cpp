@@ -26,19 +26,15 @@ llvm::GenericValue lle_X_sqrt(llvm::FunctionType*                llvm_function_t
 
 }  // namespace
 
-namespace rain {
-
 WASM_EXPORT("init")
 void initialize() {
-    code::initialize_llvm();
+    rain::code::initialize_llvm();
 
     // Add external functions here.
     // This is required if there are any external functions that will be called at compile time.
 
     // rain::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
 }
-
-}  // namespace rain
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
@@ -85,31 +81,51 @@ void compile(const char* source_start, const char* source_end) {
 #if !defined(__wasm__)
 
 int main(const int argc, const char* const argv[]) {
-    const std::string_view source = R"(fn fib(n: i32) -> i32 {
+    const std::string_view source = R"(
+struct Point {
+    x: i32;
+    y: i32;
+}
+
+export fn new_point(x: i32, y: i32) -> Point {
+    return Point {
+        x: x,
+        y: y,
+    };
+}
+
+fn fib(n: i32) -> i32 {
     if n <= 1 {
-        return n
-    }
-    return fib(n - 1) + fib(n - 2)
+        return n;
+    };
+    return fib(n - 1) + fib(n - 2);
 }
 
 export fn double(n: i32) -> i32 {
-    let n = n * 2
-    return n
+    let n = n * 2;
+    return n;
 }
 
 export fn run() -> i32 {
-    let i = double(42)
-    return #fib(6)
+    let i = double(42);
+    return #fib(6);
 }
 )";
     rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
 
     initialize();
-    // compile(&*source.cbegin(), &*source.cend());
+
+#define ABORT_ON_ERROR(result, msg)                                 \
+    if (!result.has_value()) {                                      \
+        std::cout << msg << result.error()->message() << std::endl; \
+        std::abort();                                               \
+    }
 
     auto compile_result = rain::compile(std::string_view{source.cbegin(), source.cend()});
     ABORT_ON_ERROR(compile_result, "Failed to compile: ");
     auto rain_mod = std::move(compile_result).value();
+
+    rain_mod.optimize();
 
     auto ir = rain_mod.emit_ir();
     ABORT_ON_ERROR(ir, "Failed to emit IR: ");
@@ -120,15 +136,11 @@ export fn run() -> i32 {
     ABORT_ON_ERROR(wasm_result, "Failed to link: ");
     auto wasm_bytes = std::move(wasm_result).value();
 
-    auto wat_result =
-        rain::decompile(std::span{reinterpret_cast<const std::byte*>(wasm_bytes->getBufferStart()),
-                                  wasm_bytes->getBufferSize()});
+    auto wat_result = rain::decompile(wasm_bytes->data());
     ABORT_ON_ERROR(wat_result, "Failed to decompile: ");
     auto wat_bytes = std::move(wat_result).value();
 
-    std::string_view wat_view{reinterpret_cast<const char*>(wat_bytes->data.data()),
-                              wat_bytes->data.size()};
-    rain::util::console_log(ANSI_CYAN, "WAT:\n", ANSI_RESET, wat_view, "\n");
+    rain::util::console_log(ANSI_CYAN, "WAT:\n", ANSI_RESET, wat_bytes->string(), "\n");
 
 #undef ABORT_ON_ERROR
 }

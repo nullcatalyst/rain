@@ -3,14 +3,10 @@
 #define RAIN_INCLUDE_DECOMPILE
 #include "rain/rain.hpp"
 
-namespace rain {
-
 WASM_EXPORT("init")
 void initialize() {
     // Do nothing. Nothing additional to initialize.
 }
-
-}  // namespace rain
 
 WASM_EXPORT("decompile")
 void decompile(const char* source_start, const char* source_end) {

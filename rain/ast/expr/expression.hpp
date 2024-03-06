@@ -21,6 +21,7 @@ enum class ExpressionKind {
     BlockExpression,
     BooleanExpression,
     CallExpression,
+    CtorExpression,
     ExecExpression,
     ExportExpression,
     FloatExpression,

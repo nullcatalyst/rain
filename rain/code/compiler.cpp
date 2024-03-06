@@ -224,6 +224,9 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPt
         case ast::ExpressionKind::CallExpression:
             return build(ctx, *static_cast<const ast::CallExpression*>(expression.get()));
 
+        case ast::ExpressionKind::CtorExpression:
+            return build(ctx, *static_cast<const ast::CtorExpression*>(expression.get()));
+
         case ast::ExpressionKind::ExecExpression:
             return build(ctx, *static_cast<const ast::ExecExpression*>(expression.get()));
 

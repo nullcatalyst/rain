@@ -78,7 +78,9 @@ class Compiler {
     util::Result<llvm::Value*> build(Context& ctx, const ast::FloatExpression& float_expression);
     util::Result<llvm::Value*> build(Context&                         ctx,
                                      const ast::IdentifierExpression& identifier_expression);
+    util::Result<llvm::Value*> build(Context& ctx, const ast::MemberExpression& member_expression);
     util::Result<llvm::Value*> build(Context& ctx, const ast::CallExpression& call_expression);
+    util::Result<llvm::Value*> build(Context& ctx, const ast::CtorExpression& ctor_expression);
 
     // Operators
     util::Result<llvm::Value*> build(Context& ctx, const ast::ExecExpression& exec_expression);
@@ -86,6 +88,7 @@ class Compiler {
                                      const ast::BinaryOperatorExpression& binop_expression);
 
     // Statements
+    util::Result<void> build(Context& ctx, const ast::StatementExpression& statement_expression);
     util::Result<llvm::Function*> build(Context&                     ctx,
                                         const ast::ExportExpression& export_expression);
     util::Result<llvm::Function*> build(Context&                       ctx,

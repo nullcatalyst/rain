@@ -19,15 +19,16 @@ struct Variable {
     llvm::Value* _value = nullptr;
     llvm::Type*  _type  = nullptr;
 
-    /// If true, the variable can be mutated. This is a compile-time property
+    /// If true, the variable can be mutated. This is a compile-time property.
     bool _mutable = false;
 
-    /// If true, _value is an alloca instruction and must be loaded before use
+    /// If true, _value is an alloca instruction and must be loaded before use.
     bool _alloca = false;
 };
 
 class Scope {
-    absl::flat_hash_map<std::string, llvm::Type*>     _types;
+    absl::flat_hash_map<std::string, ast::TypePtr>    _named_types;
+    absl::flat_hash_map<ast::TypePtr, llvm::Type*>    _llvm_types;
     absl::flat_hash_map<std::string, llvm::Function*> _functions;
     absl::flat_hash_map<std::string, Variable>        _variables;
 
@@ -52,40 +53,32 @@ class Scope {
     [[nodiscard]] bool break_allowed() const noexcept { return _break_allowed; }
     void               set_break_allowed(const bool allowed) noexcept { _break_allowed = allowed; }
 
-    llvm::Type* find_llvm_type(const std::string_view type_name) {
-        if (const auto it = _types.find(type_name); it != _types.end()) {
-            return it->second;
-        }
+    [[nodiscard]] llvm::Type*     find_llvm_type(const ast::TypePtr& type) const noexcept;
+    [[nodiscard]] ast::TypePtr    resolve_type(const ast::TypePtr type) const noexcept;
+    [[nodiscard]] const Variable* find_variable(const util::String name) const noexcept;
 
-        if (_parent != nullptr) {
-            return _parent->find_llvm_type(type_name);
-        }
-        return nullptr;
+    void set_named_type(std::string_view name, ast::TypePtr type) {
+        _named_types.insert_or_assign(name, std::move(type));
+    }
+    void set_named_type(std::string name, ast::TypePtr type) {
+        _named_types.insert_or_assign(name, std::move(type));
     }
 
-    void set_llvm_type(std::string_view name, llvm::Type* const llvm_type) {
-        _types.emplace(std::string(name), llvm_type);
-    }
-
-    const Variable* find_variable(const util::String name) {
-#if RAIN_USE_TWINE
-        const auto str_name = std::string(name);
-#else
-        const auto str_name = name;
-#endif
-        if (const auto it = _variables.find(str_name); it != _variables.end()) {
-            return &it->second;
-        }
-
-        if (_parent != nullptr) {
-            return _parent->find_variable(name);
-        }
-        return nullptr;
+    void set_llvm_type(ast::TypePtr type, llvm::Type* llvm_type) {
+        _llvm_types.insert_or_assign(std::move(type), llvm_type);
     }
 
     void set_variable(std::string_view name, Variable var) {
-        _variables.insert_or_assign(std::string(name), std::move(var));
+        _variables.insert_or_assign(name, std::move(var));
+    }
+    void set_variable(std::string name, Variable var) {
+        _variables.insert_or_assign(name, std::move(var));
     }
 };
 
 }  // namespace rain::code
+
+// template <typename H>
+// H AbslHashValue(H h, const ast::TypePtr& c) {
+//     return H::combine(std::move(h), c.center_, c.radius_);
+// }

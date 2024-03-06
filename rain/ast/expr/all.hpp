@@ -4,6 +4,7 @@
 #include "rain/ast/expr/block.hpp"
 #include "rain/ast/expr/boolean.hpp"
 #include "rain/ast/expr/call.hpp"
+#include "rain/ast/expr/ctor.hpp"
 #include "rain/ast/expr/exec.hpp"
 #include "rain/ast/expr/export.hpp"
 #include "rain/ast/expr/float.hpp"

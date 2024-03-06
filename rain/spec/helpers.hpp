@@ -15,7 +15,6 @@ testing::AssertionResult test_compile(const std::string_view code) {
     if (result.has_value()) {
         return testing::AssertionSuccess();
     }
-    // std::cout << result.error()->message() << std::endl;
     return testing::AssertionFailure() << result.error()->message();
 }
 

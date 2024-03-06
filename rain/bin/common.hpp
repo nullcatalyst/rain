@@ -46,15 +46,6 @@ void* memory_allocate(size_t size) { return malloc(size); }
 WASM_EXPORT("free")
 void memory_free(void* ptr) { return free(ptr); }
 
-namespace internal {
-
-// NOTE: This function is called by the `initialize` function.
-// IT MUST BE IMPLEMENTED BY THE BINARY THAT LINKS TO THIS LIBRARY.
-// IT IS NOT INTENDED TO BE CALLED DIRECTLY.
-void initialize();
-
-}  // namespace internal
-
 #if defined(__wasm__)
 extern "C" void __wasm_call_ctors();
 #endif  // defined(__wasm__)

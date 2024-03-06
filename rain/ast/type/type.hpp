@@ -4,6 +4,10 @@
 
 #include "rain/lang/location.hpp"
 
+namespace llvm {
+class Type;
+}  // namespace llvm
+
 namespace rain::ast {
 
 /**

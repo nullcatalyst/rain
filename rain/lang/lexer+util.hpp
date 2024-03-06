@@ -44,7 +44,7 @@ TokenKind find_keyword(util::String source) {
     return TokenKind::Undefined;
 }
 
-constexpr std::array<TokenKind, 128> OPERATORS = []() {
+static constexpr std::array<TokenKind, 128> OPERATORS = []() {
     std::array<TokenKind, 128> operators{};
 
     operators['#'] = TokenKind::Hash;
