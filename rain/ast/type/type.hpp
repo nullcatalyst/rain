@@ -29,6 +29,8 @@ class Type : public std::enable_shared_from_this<Type> {
     lang::Location _location;
 
   public:
+    Type() = default;
+    Type(const lang::Location location) : _location{location} {}
     virtual ~Type() = default;
 
     [[nodiscard]] virtual constexpr TypeKind      kind() const noexcept = 0;

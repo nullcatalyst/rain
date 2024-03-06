@@ -17,13 +17,29 @@ class StructType : public Type {
     std::optional<util::String>      _name;
     std::vector<StructTypeFieldData> _fields;
 
+    lang::Location _struct_location;
+    lang::Location _block_location;
+
   public:
     StructType(std::optional<util::String> name, std::vector<StructTypeFieldData> fields)
         : _name{std::move(name)}, _fields{std::move(fields)} {}
+    StructType(std::optional<util::String> name, std::vector<StructTypeFieldData> fields,
+               const lang::Location struct_location, const lang::Location block_location)
+        : Type(struct_location.merge(block_location)),
+          _name{std::move(name)},
+          _fields{std::move(fields)},
+          _struct_location(struct_location) {}
 
     [[nodiscard]] static std::shared_ptr<StructType> alloc(
         std::optional<util::String> name, std::vector<StructTypeFieldData> fields) {
         return std::make_shared<StructType>(std::move(name), std::move(fields));
+    }
+    [[nodiscard]] static std::shared_ptr<StructType> alloc(std::optional<util::String>      name,
+                                                           std::vector<StructTypeFieldData> fields,
+                                                           const lang::Location struct_location,
+                                                           const lang::Location block_location) {
+        return std::make_shared<StructType>(std::move(name), std::move(fields), struct_location,
+                                            block_location);
     }
 
     [[nodiscard]] constexpr TypeKind kind() const noexcept override { return TypeKind::StructType; }

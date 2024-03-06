@@ -68,27 +68,27 @@ util::Result<std::unique_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {
 
     std::optional<ast::ExpressionPtr> opt_else_;
 
-    const auto else_token = lexer.peek();
+    lang::Location else_location;
+    const auto     else_token = lexer.peek();
     if (else_token.kind == TokenKind::Else) {
         lexer.next();  // Consume the 'else' token
 
         auto else_ = parse_block(lexer);
         FORWARD_ERROR(else_);
 
-        opt_else_ = std::move(else_).value();
+        opt_else_     = std::move(else_).value();
+        else_location = else_token.location;
     }
 
     return ast::IfExpression::alloc(std::move(condition).value(), std::move(then).value(),
-                                    std::move(opt_else_));
+                                    std::move(opt_else_), if_token.location, else_location);
 }
 
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(Lexer& lexer) {
-    {
-        const auto token = lexer.next();
-        if (token.kind != TokenKind::Fn) {
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
-                           "expected keyword 'fn'; this is an internal error");
-        }
+    const auto function_token = lexer.next();
+    if (function_token.kind != TokenKind::Fn) {
+        return ERR_PTR(err::SyntaxError, lexer, function_token.location,
+                       "expected keyword 'fn'; this is an internal error");
     }
 
     ast::TypePtr method_owner;
@@ -181,7 +181,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(Lexer& lex
 
     return ast::FunctionExpression::alloc(std::move(fn_name), std::move(method_owner),
                                           std::move(return_type), std::move(arguments),
-                                          std::move(body).value());
+                                          std::move(body).value(), function_token.location);
 }
 
 util::Result<std::unique_ptr<ast::LetExpression>> parse_let(Lexer& lexer) {

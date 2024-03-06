@@ -7,7 +7,8 @@
 namespace rain::lang {
 
 util::Result<std::shared_ptr<ast::StructType>> parse_struct(Lexer& lexer) {
-    if (const auto struct_token = lexer.next(); struct_token.kind != TokenKind::Struct) {
+    const auto struct_token = lexer.next();
+    if (struct_token.kind != TokenKind::Struct) {
         return ERR_PTR(err::SyntaxError, lexer, struct_token.location,
                        "expected keyword 'struct'; this is an internal error");
     }
@@ -25,6 +26,7 @@ util::Result<std::shared_ptr<ast::StructType>> parse_struct(Lexer& lexer) {
         return ERR_PTR(err::SyntaxError, lexer, next_token.location,
                        "expected '{' after struct name");
     }
+    const auto block_start_location = next_token.location;
 
     std::vector<ast::StructTypeFieldData> struct_fields;
     for (;;) {
@@ -33,7 +35,9 @@ util::Result<std::shared_ptr<ast::StructType>> parse_struct(Lexer& lexer) {
 
         switch (next_token.kind) {
             case TokenKind::RCurlyBracket:
-                return ast::StructType::alloc(std::move(struct_name), std::move(struct_fields));
+                return ast::StructType::alloc(std::move(struct_name), std::move(struct_fields),
+                                              struct_token.location,
+                                              block_start_location.merge(next_token.location));
 
             case TokenKind::Identifier:
                 // Found a field name

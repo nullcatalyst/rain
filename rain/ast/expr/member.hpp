@@ -17,7 +17,7 @@ class MemberExpression : public Expression {
         : _expression(std::move(expression)), _member(member) {}
     MemberExpression(ExpressionPtr expression, util::String member,
                      const lang::Location dot_location, const lang::Location member_location)
-        : Expression(expression->location().merge(_member_location)),
+        : Expression(expression->location().merge(member_location)),
           _expression(std::move(expression)),
           _member(member),
           _dot_location(dot_location),

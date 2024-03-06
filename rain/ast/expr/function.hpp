@@ -21,6 +21,8 @@ class FunctionExpression : public Expression {
     std::vector<FunctionArgumentData> _arguments;
     std::unique_ptr<BlockExpression>  _block;
 
+    lang::Location _fn_location;
+
   public:
     FunctionExpression(std::optional<util::String> name, ast::TypePtr method_owner,
                        std::optional<TypePtr>            return_type,
@@ -30,6 +32,17 @@ class FunctionExpression : public Expression {
           _return_type{std::move(return_type)},
           _arguments{std::move(arguments)},
           _block{std::move(block)} {}
+    FunctionExpression(std::optional<util::String> name, ast::TypePtr method_owner,
+                       std::optional<TypePtr>            return_type,
+                       std::vector<FunctionArgumentData> arguments, BlockPtr block,
+                       lang::Location fn_location)
+        : Expression(fn_location.merge(block->location())),
+          _name{std::move(name)},
+          _method_owner{std::move(method_owner)},
+          _return_type{std::move(return_type)},
+          _arguments{std::move(arguments)},
+          _block{std::move(block)},
+          _fn_location(fn_location) {}
 
     [[nodiscard]] static std::unique_ptr<FunctionExpression> alloc(
         std::optional<util::String> name, ast::TypePtr method_owner,
@@ -38,6 +51,14 @@ class FunctionExpression : public Expression {
         return std::make_unique<FunctionExpression>(std::move(name), std::move(method_owner),
                                                     std::move(return_type), std::move(arguments),
                                                     std::move(block));
+    }
+    [[nodiscard]] static std::unique_ptr<FunctionExpression> alloc(
+        std::optional<util::String> name, ast::TypePtr method_owner,
+        std::optional<TypePtr> return_type, std::vector<FunctionArgumentData> arguments,
+        BlockPtr block, lang::Location fn_location) {
+        return std::make_unique<FunctionExpression>(std::move(name), std::move(method_owner),
+                                                    std::move(return_type), std::move(arguments),
+                                                    std::move(block), fn_location);
     }
 
     [[nodiscard]] constexpr ExpressionKind kind() const noexcept override {

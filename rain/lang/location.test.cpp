@@ -32,19 +32,14 @@ testing::AssertionResult check_result(const rain::util::Result<T>& result) {
 }  // namespace
 
 TEST(ExpressionLocation, parse_struct) {
-    const std::string_view code = R"(
-struct Point {
-    x: i32;
-    y: i32;
-}
-)";
+    const std::string_view code = "struct Point { x: i32; y: i32; }";
 
     auto result = compile_type(code);
     EXPECT_TRUE(check_result(result));
     const auto type = std::move(result).value();
 
     const auto location = type->location();
-    EXPECT_EQ(location.line(), 2);
+    EXPECT_EQ(location.line(), 1);
     EXPECT_EQ(location.column(), 1);
     EXPECT_EQ(location.substr(), code);
 }

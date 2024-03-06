@@ -8,7 +8,7 @@
             "name": "(test) Lang",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/rain/lang/lang-test",
+            "program": "${workspaceFolder}/bazel-bin/rain/lang/test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -21,6 +21,21 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bazel-bin/rain/rainc",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Specification Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bazel-bin/rain/spec/spec",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

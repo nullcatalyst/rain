@@ -74,6 +74,8 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(Lexe
     }
 
     return ast::ParenthesisExpression::alloc(std::move(expr).value());
+    // return ast::ParenthesisExpression::alloc(std::move(expr).value(),
+    //                                          lround_token.location.merge(rround_token.location));
 }
 
 util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(Lexer&             lexer,
@@ -90,7 +92,8 @@ util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(Lexer&        
                        "expected identifier after '.'");
     }
 
-    return ast::MemberExpression::alloc(std::move(owner), member_token.location.substr());
+    return ast::MemberExpression::alloc(std::move(owner), member_token.location.substr(),
+                                        period_token.location, member_token.location);
 }
 
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&             lexer,
@@ -107,7 +110,8 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&            
         const auto next_token = lexer.peek();
         if (next_token.kind == TokenKind::RRoundBracket) {
             lexer.next();  // Consume the ')' token
-            return ast::CallExpression::alloc(std::move(callee), std::move(arguments));
+            return ast::CallExpression::alloc(std::move(callee), std::move(arguments),
+                                              lbracket_token.location.merge(next_token.location));
         }
 
         auto argument = parse_whole_expression(lexer);
@@ -125,13 +129,17 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&            
 
                 if (lexer.peek().kind == TokenKind::RRoundBracket) {
                     lexer.next();  // Consume the ')' token
-                    return ast::CallExpression::alloc(std::move(callee), std::move(arguments));
+                    return ast::CallExpression::alloc(
+                        std::move(callee), std::move(arguments),
+                        lbracket_token.location.merge(next_token.location));
                 }
                 break;
 
             case TokenKind::RRoundBracket:
                 lexer.next();  // Consume the ')' token
-                return ast::CallExpression::alloc(std::move(callee), std::move(arguments));
+                return ast::CallExpression::alloc(
+                    std::move(callee), std::move(arguments),
+                    lbracket_token.location.merge(next_token.location));
 
             default:
                 return ERR_PTR(err::SyntaxError, lexer, next_token.location, "expected ',' or ')'");
@@ -156,7 +164,7 @@ util::Result<std::unique_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {
     auto expr = parse_atom(lexer);
     FORWARD_ERROR(expr);
 
-    return ast::ExecExpression::alloc(std::move(expr).value());
+    return ast::ExecExpression::alloc(std::move(expr).value(), token.location);
 }
 
 util::Result<ast::ExpressionPtr> parse_atom(Lexer& lexer) {
