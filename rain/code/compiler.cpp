@@ -139,10 +139,10 @@ util::Result<void> Compiler::declare_external_function(
     llvm_function_value->setLinkage(llvm::Function::ExternalLinkage);
 
     _builtin_scope.set_variable(name, Variable{
-                                          ._value   = llvm_function_value,
-                                          ._type    = llvm_function_type,
-                                          ._mutable = false,
-                                          ._alloca  = false,
+                                          ._llvm_value = llvm_function_value,
+                                          ._llvm_type  = llvm_function_type,
+                                          ._mutable    = false,
+                                          ._alloca     = false,
                                       });
 
     return {};
@@ -218,14 +218,17 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::ExpressionPt
         case ast::ExpressionKind::IdentifierExpression:
             return build(ctx, *static_cast<const ast::IdentifierExpression*>(expression.get()));
 
+        case ast::ExpressionKind::CtorExpression:
+            return build(ctx, *static_cast<const ast::CtorExpression*>(expression.get()));
+
+        case ast::ExpressionKind::MemberExpression:
+            return build(ctx, *static_cast<const ast::MemberExpression*>(expression.get()));
+
         case ast::ExpressionKind::BinaryOperatorExpression:
             return build(ctx, *static_cast<const ast::BinaryOperatorExpression*>(expression.get()));
 
         case ast::ExpressionKind::CallExpression:
             return build(ctx, *static_cast<const ast::CallExpression*>(expression.get()));
-
-        case ast::ExpressionKind::CtorExpression:
-            return build(ctx, *static_cast<const ast::CtorExpression*>(expression.get()));
 
         case ast::ExpressionKind::ExecExpression:
             return build(ctx, *static_cast<const ast::ExecExpression*>(expression.get()));

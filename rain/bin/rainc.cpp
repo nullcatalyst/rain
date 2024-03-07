@@ -82,6 +82,31 @@ void compile(const char* source_start, const char* source_end) {
 
 int main(const int argc, const char* const argv[]) {
     const std::string_view source = R"(
+struct Vec4 {
+    x: f32;
+    y: f32;
+    z: f32;
+    w: f32;
+}
+
+export fn Vec4_new(x: f32, y: f32, z: f32, w: f32) -> Vec4 {
+    return Vec4 {
+        x: x,
+        y: y,
+        z: z,
+        w: w,
+    };
+}
+
+export fn Vec4_splat(n: f32) -> Vec4 {
+    return Vec4 {
+        x: n,
+        y: n,
+        z: n,
+        w: n,
+    };
+}
+
 struct Point {
     x: i32;
     y: i32;
@@ -92,6 +117,11 @@ export fn new_point(x: i32, y: i32) -> Point {
         x: x,
         y: y,
     };
+}
+
+export fn point_get_x(p: Point) -> i32 {
+    let np = p;
+    return np.x;
 }
 
 fn fib(n: i32) -> i32 {
@@ -107,7 +137,7 @@ export fn double(n: i32) -> i32 {
 }
 
 export fn run() -> i32 {
-    let i = double(42);
+    // let i = double(42);
     return #fib(6);
 }
 )";

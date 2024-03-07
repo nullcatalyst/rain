@@ -16,8 +16,9 @@
 namespace rain::code {
 
 struct Variable {
-    llvm::Value* _value = nullptr;
-    llvm::Type*  _type  = nullptr;
+    llvm::Value* _llvm_value = nullptr;
+    llvm::Type*  _llvm_type  = nullptr;
+    ast::TypePtr _type;
 
     /// If true, the variable can be mutated. This is a compile-time property.
     bool _mutable = false;
@@ -53,6 +54,7 @@ class Scope {
     [[nodiscard]] bool break_allowed() const noexcept { return _break_allowed; }
     void               set_break_allowed(const bool allowed) noexcept { _break_allowed = allowed; }
 
+    [[nodiscard]] ast::TypePtr    find_named_type(const util::String name) const noexcept;
     [[nodiscard]] llvm::Type*     find_llvm_type(const ast::TypePtr& type) const noexcept;
     [[nodiscard]] ast::TypePtr    resolve_type(const ast::TypePtr type) const noexcept;
     [[nodiscard]] const Variable* find_variable(const util::String name) const noexcept;

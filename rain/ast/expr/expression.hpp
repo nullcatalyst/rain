@@ -43,8 +43,10 @@ enum class ExpressionKind {
 
 class Expression {
   protected:
-    TypePtr        _type;
-    lang::Location _location;
+    // TODO: Remove `mutable` and add a validation pass, so that the compile pass is not the one
+    // assigning the types to expressions.
+    mutable TypePtr _type;
+    lang::Location  _location;
 
   public:
     Expression() = default;
@@ -54,7 +56,10 @@ class Expression {
     [[nodiscard]] virtual constexpr ExpressionKind kind() const noexcept = 0;
     [[nodiscard]] constexpr lang::Location         location() const noexcept { return _location; }
     [[nodiscard]] constexpr const TypePtr&         type() const noexcept { return _type; }
-    // void set_type(TypePtr type) noexcept { _type = std::move(type); }
+
+    // TODO: Remove `const` and add a validation pass, so that the compile pass is not the one
+    // assigning the types to expressions.
+    void set_type(TypePtr type) const noexcept { _type = std::move(type); }
 
     [[nodiscard]] virtual bool compile_time_capable() const noexcept = 0;
 };

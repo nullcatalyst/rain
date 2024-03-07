@@ -25,6 +25,18 @@ Scope Scope::builtin_scope(llvm::LLVMContext& llvm_ctx) {
     return scope;
 }
 
+ast::TypePtr Scope::find_named_type(const util::String name) const noexcept {
+    const auto* scope = this;
+    do {
+        if (const auto it = scope->_named_types.find(name); it != scope->_named_types.end()) {
+            return it->second;
+        }
+        scope = scope->parent();
+    } while (scope != nullptr);
+
+    return nullptr;
+}
+
 llvm::Type* Scope::find_llvm_type(const ast::TypePtr& type) const noexcept {
     assert(type != nullptr);
 

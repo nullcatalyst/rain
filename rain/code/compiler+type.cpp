@@ -37,10 +37,13 @@ util::Result<llvm::Type*> Compiler::find_or_build_type(Context& ctx, const ast::
 }
 
 util::Result<llvm::StructType*> Compiler::build(Context& ctx, const ast::StructType& struct_type) {
-    const auto               name      = struct_type.name_or_empty();
-    auto                     llvm_type = llvm::StructType::create(*_llvm_ctx, name);
+    const auto name = struct_type.name_or_empty();
+
+    llvm::StructType*        llvm_type = llvm::StructType::create(*_llvm_ctx, name);
     std::vector<llvm::Type*> llvm_field_types;
     for (const auto& field : struct_type.fields()) {
+        const_cast<ast::StructTypeFieldData&>(field).type = ctx.scope.resolve_type(field.type);
+
         auto llvm_argument_type = find_or_build_type(ctx, field.type);
         FORWARD_ERROR(llvm_argument_type);
         llvm_field_types.emplace_back(std::move(llvm_argument_type).value());

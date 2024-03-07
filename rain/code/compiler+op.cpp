@@ -18,6 +18,9 @@ util::Result<llvm::Value*> Compiler::build(Context&                             
     auto llvm_rhs = build(ctx, binop_expression.rhs());
     FORWARD_ERROR(llvm_rhs);
 
+    // TODO: This is a temporary fix. We need to handle this properly.
+    binop_expression.set_type(binop_expression.lhs()->type());
+
     switch (binop_expression.op_kind()) {
         case ast::BinaryOperatorKind::Add:
             return _llvm_ir.CreateAdd(std::move(llvm_lhs).value(), std::move(llvm_rhs).value());

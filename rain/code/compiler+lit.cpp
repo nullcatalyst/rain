@@ -15,20 +15,27 @@ util::Result<llvm::Value*> Compiler::build(Context&                         ctx,
                        absl::StrFormat("unknown variable: %s", identifier_expression.name()));
     }
 
-    if (var->_alloca) {
-        return _llvm_ir.CreateLoad(llvm::Type::getInt32Ty(*_llvm_ctx), var->_value);
-    }
+    identifier_expression.set_type(var->_type);
 
-    return var->_value;
+    if (var->_alloca) {
+        return _llvm_ir.CreateLoad(var->_llvm_type, var->_llvm_value);
+    }
+    return var->_llvm_value;
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                      ctx,
                                            const ast::IntegerExpression& integer_expression) {
+    // TODO: Fix this, don't rely on the name of the type.
+    integer_expression.set_type(_builtin_scope.find_named_type("i32"));
+
     return llvm::ConstantInt::get(*_llvm_ctx, llvm::APInt(32, integer_expression.value()));
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                    ctx,
                                            const ast::FloatExpression& float_expression) {
+    // TODO: Fix this, don't rely on the name of the type.
+    float_expression.set_type(_builtin_scope.find_named_type("f32"));
+
     return llvm::ConstantFP::get(*_llvm_ctx, llvm::APFloat(float_expression.value()));
 }
 
@@ -41,11 +48,9 @@ util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
     if (owner_type == nullptr) {
         return ERR_PTR(err::SimpleError, "cannot access member of unknown type");
     }
-
     if (owner_type->kind() == ast::TypeKind::UnresolvedType) {
         owner_type = ctx.scope.resolve_type(owner_type);
     }
-
     if (owner_type->kind() != ast::TypeKind::StructType) {
         return ERR_PTR(err::SimpleError, "cannot access member of non-struct type");
     }
@@ -70,10 +75,29 @@ util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
         }
     }
 
-    // member_expression->_type = struct_type->fields()[field_index.value()].type;
+    auto member_type = struct_type->fields()[field_index.value()].type;
+    assert(member_type != nullptr && "member type is null");
+    std::cout << "member type: " << (int)member_type->kind() << "\n";
+    auto llvm_member_type = ctx.scope.find_llvm_type(member_type);
+    assert(llvm_member_type != nullptr && "cannot find llvm type for member type");
+    member_expression.set_type(member_type);
 
-    return _llvm_ir.CreateStructGEP(llvm_type, std::move(owner_expression).value(),
-                                    field_index.value());
+    if (member_expression.expression()->kind() == ast::ExpressionKind::IdentifierExpression) {
+        const auto* const identifier_expression =
+            static_cast<const ast::IdentifierExpression*>(member_expression.expression().get());
+        const auto* const var = ctx.scope.find_variable(identifier_expression->name());
+        // This should always be true, since the call to `build()` above must have succeeded to get
+        // here.
+        assert(var != nullptr && "variable not found");
+
+        if (var->_alloca) {
+            return _llvm_ir.CreateLoad(
+                llvm_member_type,
+                _llvm_ir.CreateStructGEP(var->_llvm_type, var->_llvm_value, field_index.value()));
+        }
+    }
+
+    return _llvm_ir.CreateExtractValue(std::move(owner_expression).value(), field_index.value());
 }
 
 util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
@@ -89,7 +113,7 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
     const auto* const identifier_expression =
         static_cast<const ast::IdentifierExpression*>(call_expression.callee().get());
     const auto* const         var = ctx.scope.find_variable(identifier_expression->name());
-    llvm::FunctionType* const llvm_function_type = llvm::cast<llvm::FunctionType>(var->_type);
+    llvm::FunctionType* const llvm_function_type = llvm::cast<llvm::FunctionType>(var->_llvm_type);
 
     llvm::SmallVector<llvm::Value*, 4> llvm_arguments;
     llvm_arguments.reserve(call_expression.arguments().size());

@@ -73,10 +73,10 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
 
     if (const auto name = function_expression.name_or_empty(); name.size() > 0) {
         ctx.scope.set_variable(name, Variable{
-                                         ._value   = llvm_function,
-                                         ._type    = llvm_function_type,
-                                         ._mutable = false,
-                                         ._alloca  = false,
+                                         ._llvm_value = llvm_function,
+                                         ._llvm_type  = llvm_function_type,
+                                         ._mutable    = false,
+                                         ._alloca     = false,
                                      });
     }
 
@@ -92,10 +92,11 @@ util::Result<llvm::Function*> Compiler::build(Context&                       ctx
             arg->setName(argument.name);
             function_scope.set_variable(argument.name,
                                         Variable{
-                                            ._value   = arg,
-                                            ._type    = llvm_argument_types[argument_index],
-                                            ._mutable = false,
-                                            ._alloca  = false,
+                                            ._llvm_value = arg,
+                                            ._llvm_type  = llvm_argument_types[argument_index],
+                                            ._type       = argument.type,
+                                            ._mutable    = false,
+                                            ._alloca     = false,
                                         });
         }
     }
@@ -123,6 +124,15 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::LetExpressio
     auto llvm_let_value = build(ctx, let_expression.value());
     FORWARD_ERROR(llvm_let_value);
 
+    auto type = ctx.scope.resolve_type(let_expression.value()->type());
+    if (type == nullptr) {
+        return ERR_PTR(err::SimpleError, "cannot resolve type for let expression");
+    }
+    auto llvm_type = ctx.scope.find_llvm_type(type);
+    if (llvm_type == nullptr) {
+        return ERR_PTR(err::SimpleError, "cannot find llvm type for let expression");
+    }
+
     llvm::Value* llvm_value = std::move(llvm_let_value).value();
     if (let_expression.mutable_()) {
         if (llvm_value == nullptr) {
@@ -130,17 +140,17 @@ util::Result<llvm::Value*> Compiler::build(Context& ctx, const ast::LetExpressio
         }
 
         // Store the expression value into an alloca.
-        llvm::Value* llvm_alloca =
-            _llvm_ir.CreateAlloca(llvm_value->getType(), nullptr, let_expression.name());
+        llvm::Value* llvm_alloca = _llvm_ir.CreateAlloca(llvm_type, nullptr, let_expression.name());
         _llvm_ir.CreateStore(llvm_value, llvm_alloca);
         llvm_value = llvm_alloca;
     }
 
     ctx.scope.set_variable(let_expression.name(), Variable{
-                                                      ._value   = llvm_value,
-                                                      ._type    = nullptr,
-                                                      ._mutable = let_expression.mutable_(),
-                                                      ._alloca  = let_expression.mutable_(),
+                                                      ._llvm_value = llvm_value,
+                                                      ._llvm_type  = llvm_type,
+                                                      ._type       = type,
+                                                      ._mutable    = let_expression.mutable_(),
+                                                      ._alloca     = let_expression.mutable_(),
                                                   });
 
     return llvm_value;

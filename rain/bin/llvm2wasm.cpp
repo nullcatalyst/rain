@@ -5,7 +5,7 @@
 #include "rain/rain.hpp"
 
 WASM_EXPORT("init")
-void initialize() { code::initialize_llvm(); }
+void initialize() { rain::code::initialize_llvm(); }
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
