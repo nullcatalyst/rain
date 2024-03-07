@@ -1,0 +1,16 @@
+{
+  "name": "monaco-rain",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Scott Bennett <scottbennett912@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "monaco-editor": "^0.46.0",
+    "rollup": "^4.12.0",
+    "typescript": "^5.3.3"
+  }
+}
