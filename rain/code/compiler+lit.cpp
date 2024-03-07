@@ -119,12 +119,16 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
         return ERR_PTR(err::SimpleError, "cannot find llvm type for struct type");
     }
 
-    auto llvm_alloca = _llvm_ir.CreateAlloca(llvm_type);
-    _llvm_ir.CreateStore(llvm::Constant::getNullValue(llvm_type), llvm_alloca);
+    // Use insertvalue to set the fields of the struct.
+    // We start with either a poison value (if the user explicitly initializes all the fields --
+    // this is an optimization) or a zero-initialized value (if one or more fields are not set).
+    llvm::Value* llvm_value = ctor_expression.fields().size() == struct_type->fields().size()
+                                  ? llvm::PoisonValue::get(llvm_type)
+                                  : llvm::Constant::getNullValue(llvm_type);
 
     for (const auto& field : ctor_expression.fields()) {
-        auto llvm_value = build(ctx, field.value);
-        FORWARD_ERROR(llvm_value);
+        auto llvm_field_value = build(ctx, field.value);
+        FORWARD_ERROR(llvm_field_value);
 
         const auto field_index = struct_type->find_field(field.name);
         if (!field_index.has_value()) {
@@ -138,11 +142,11 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
             }
         }
 
-        auto llvm_field = _llvm_ir.CreateStructGEP(llvm_type, llvm_alloca, field_index.value());
-        _llvm_ir.CreateStore(std::move(llvm_value).value(), llvm_field);
+        llvm_value = _llvm_ir.CreateInsertValue(llvm_value, std::move(llvm_field_value).value(),
+                                                field_index.value());
     }
 
-    return _llvm_ir.CreateLoad(llvm_type, llvm_alloca);
+    return llvm_value;
 }
 
 }  // namespace rain::code
