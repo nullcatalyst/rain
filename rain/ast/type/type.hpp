@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "rain/lang/location.hpp"
+#include "rain/util/string.hpp"
 
 namespace llvm {
 class Type;

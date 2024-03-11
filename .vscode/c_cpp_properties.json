@@ -7,7 +7,7 @@
                 "${workspaceFolder}/external/_main~_repo_rules~wabt/include",
                 "${workspaceFolder}/external/abseil-cpp~20240116.1",
                 "${workspaceFolder}/external/google_benchmark~1.8.3/benchmark/include",
-                "${workspaceFolder}/external/googletest~1.14.0/googletest/include",
+                "${workspaceFolder}/external/googletest~1.14.0.bcr.1/googletest/include",
                 "${workspaceFolder}/external/llvm-project~override/lld/include",
                 "${workspaceFolder}/external/llvm-project~override/llvm/include",
             ],

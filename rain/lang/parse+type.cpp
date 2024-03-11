@@ -26,52 +26,70 @@ util::Result<std::shared_ptr<ast::StructType>> parse_struct(Lexer& lexer) {
         return ERR_PTR(err::SyntaxError, lexer, next_token.location,
                        "expected '{' after struct name");
     }
-    const auto block_start_location = next_token.location;
 
-    std::vector<ast::StructTypeFieldData> struct_fields;
+    std::vector<ast::StructTypeField> fields;
+
+#define PARSE_CTOR_FIELD()                                                                  \
+    do {                                                                                    \
+        const auto name_token = lexer.next();                                               \
+        if (name_token.kind != TokenKind::Identifier) {                                     \
+            return ERR_PTR(err::SyntaxError, lexer, name_token.location,                    \
+                           "expected identifier for field name in constructor expression"); \
+        }                                                                                   \
+        auto name = name_token.location.substr();                                           \
+                                                                                            \
+        if (const auto colon_token = lexer.next(); colon_token.kind != TokenKind::Colon) {  \
+            return ERR_PTR(err::SyntaxError, lexer, colon_token.location,                   \
+                           "expected ':' between field name and initializer value");        \
+        }                                                                                   \
+                                                                                            \
+        auto type = parse_whole_type(lexer);                                                \
+        FORWARD_ERROR(type);                                                                \
+                                                                                            \
+        fields.emplace_back(ast::StructTypeField{                                           \
+            .name = std::move(name),                                                        \
+            .type = std::move(type).value(),                                                \
+        });                                                                                 \
+    } while (false)
+
+    {
+        // Trivial case: no struct fields.
+        const auto next_token = lexer.peek();
+        if (next_token.kind == TokenKind::RCurlyBracket) {
+            lexer.next();  // Consume the '}' token
+            return ast::StructType::alloc(struct_name, std::move(fields));
+        }
+
+        PARSE_CTOR_FIELD();
+    }
+
     for (;;) {
-        // Handle the struct fields
-        auto next_token = lexer.next();
-
+        // Handle the rest of the arguments
+        auto next_token = lexer.peek();
         switch (next_token.kind) {
-            case TokenKind::RCurlyBracket:
-                return ast::StructType::alloc(std::move(struct_name), std::move(struct_fields),
-                                              struct_token.location,
-                                              block_start_location.merge(next_token.location));
+            case TokenKind::Comma:
+                lexer.next();  // Consume the ',' token
 
-            case TokenKind::Identifier:
-                // Found a field name
+                if (lexer.peek().kind == TokenKind::RCurlyBracket) {
+                    lexer.next();  // Consume the '}' token
+                    return ast::StructType::alloc(struct_name, std::move(fields));
+                }
                 break;
 
+            case TokenKind::RCurlyBracket:
+                lexer.next();  // Consume the '}' token
+                return ast::StructType::alloc(struct_name, std::move(fields));
+
             default:
-                return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-                               "expected identifier for struct field name");
+                return ERR_PTR(err::SyntaxError, lexer, next_token.location, "expected ',' or '}'");
         }
 
-        const auto field_name = next_token.location.substr();
-
-        next_token = lexer.next();
-        if (next_token.kind != TokenKind::Colon) {
-            return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-                           "expected ':' after struct field name");
-        }
-
-        auto field_type = parse_whole_type(lexer);
-        FORWARD_ERROR(field_type);
-
-        struct_fields.emplace_back(ast::StructTypeFieldData{
-            .name = field_name,
-            .type = std::move(field_type).value(),
-        });
-
-        next_token = lexer.next();
-        if (next_token.kind != TokenKind::Semicolon) {
-            return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-                           "expected ';' after struct field definition");
-        }
+        PARSE_CTOR_FIELD();
     }
 
     __builtin_unreachable();
+
+#undef PARSE_CTOR_FIELD
 }
 
 util::Result<std::shared_ptr<ast::InterfaceType>> parse_interface(Lexer& lexer) {

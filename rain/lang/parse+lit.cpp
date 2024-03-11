@@ -90,7 +90,7 @@ util::Result<std::unique_ptr<ast::CtorExpression>> parse_ctor(Lexer& lexer) {
                        "expected '{' after type name");
     }
 
-    std::vector<ast::CtorExpressionFieldData> fields;
+    std::vector<ast::CtorExpressionField> fields;
 
 #define PARSE_CTOR_FIELD()                                                                  \
     do {                                                                                    \
@@ -109,7 +109,7 @@ util::Result<std::unique_ptr<ast::CtorExpression>> parse_ctor(Lexer& lexer) {
         auto value = parse_whole_expression(lexer);                                         \
         FORWARD_ERROR(value);                                                               \
                                                                                             \
-        fields.emplace_back(ast::CtorExpressionFieldData{                                   \
+        fields.emplace_back(ast::CtorExpressionField{                                       \
             .name  = std::move(name),                                                       \
             .value = std::move(value).value(),                                              \
         });                                                                                 \

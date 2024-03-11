@@ -9,6 +9,7 @@ Scope Scope::builtin_scope(llvm::LLVMContext& llvm_ctx) {
         const auto type = ast::OpaqueType::alloc(name);
         scope._named_types.emplace(name, type);
         scope._llvm_types.emplace(type, llvm_type);
+        return type;
     };
 
     add_type("i8", llvm::Type::getInt8Ty(llvm_ctx));
@@ -19,8 +20,21 @@ Scope Scope::builtin_scope(llvm::LLVMContext& llvm_ctx) {
     add_type("u16", llvm::Type::getInt16Ty(llvm_ctx));
     add_type("u32", llvm::Type::getInt32Ty(llvm_ctx));
     add_type("u64", llvm::Type::getInt64Ty(llvm_ctx));
-    add_type("f32", llvm::Type::getFloatTy(llvm_ctx));
+    const auto llvm_f32_ty = llvm::Type::getFloatTy(llvm_ctx);
+    const auto f32_ty      = add_type("f32", llvm_f32_ty);
     add_type("f64", llvm::Type::getDoubleTy(llvm_ctx));
+
+    {
+        const std::vector<ast::StructTypeField> fields{
+            {.name = "x", .type = f32_ty},
+            {.name = "y", .type = f32_ty},
+            {.name = "z", .type = f32_ty},
+            {.name = "w", .type = f32_ty},
+        };
+        const auto type = ast::StructType::alloc("f32x4", fields);
+        scope._named_types.emplace("f32x4", type);
+        scope._llvm_types.emplace(type, llvm::FixedVectorType::get(llvm_f32_ty, 4));
+    }
 
     return scope;
 }

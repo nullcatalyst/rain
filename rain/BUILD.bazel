@@ -60,7 +60,10 @@ cc_library(
 # This is useful to avoid duplicating the framework to get the WASM binaries to be easily callable.
 cc_library(
     name = "bin_common",
-    hdrs = ["bin/common.hpp"],
+    hdrs = [
+        "bin/common.hpp",
+        "bin/compile_time_functions.hpp",
+    ],
     deps = ["//rain/util"],
 )
 

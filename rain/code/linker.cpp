@@ -137,10 +137,10 @@ GlobalSymbol* createGlobalVariable(StringRef name, bool isMutable) {
     return symtab->addSyntheticGlobal(name, WASM_SYMBOL_VISIBILITY_HIDDEN, g);
 }
 
-GlobalSymbol* createOptionalGlobal(StringRef name, bool isMutable) {
-    InputGlobal* g = createGlobal(name, isMutable);
-    return symtab->addOptionalGlobalSymbol(name, g);
-}
+// GlobalSymbol* createOptionalGlobal(StringRef name, bool isMutable) {
+//     InputGlobal* g = createGlobal(name, isMutable);
+//     return symtab->addOptionalGlobalSymbol(name, g);
+// }
 
 // Create ABI-defined synthetic symbols
 void createSyntheticSymbols() {

@@ -68,9 +68,6 @@ class Lexer {
   private:
     /** Load the next token into the list of all tokens. */
     void _tokenize();
-
-    /** Completely tokenize the entire source file. */
-    void _tokenize_all();
 };
 
 }  // namespace rain::lang

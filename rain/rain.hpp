@@ -40,8 +40,8 @@ class Buffer {
 
 #if defined(RAIN_INCLUDE_COMPILE)
 util::Result<code::Module> compile(const std::string_view source);
-util::Result<code::Module> compile(const std::string_view source,
-                                   void (*init_compiler)(code::Compiler&));
+util::Result<code::Module> compile(const std::string_view                    source,
+                                   llvm::function_ref<void(code::Compiler&)> init_compiler);
 #endif  // defined(RAIN_INCLUDE_COMPILE)
 
 #if defined(RAIN_INCLUDE_LINK)

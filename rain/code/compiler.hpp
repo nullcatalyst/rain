@@ -39,9 +39,13 @@ class Compiler {
     Compiler& operator=(Compiler&&)      = delete;
     ~Compiler()                          = default;
 
+    [[nodiscard]] const Scope& builtin_scope() const noexcept { return _builtin_scope; }
+
     util::Result<std::shared_ptr<ast::FunctionType>> get_function_type(
         std::vector<ast::TypePtr> argument_types, std::optional<ast::TypePtr> return_type);
-    util::Result<void> declare_external_function(const std::string_view             name,
+    util::Result<void> declare_external_function(const std::string_view wasm_namespace,
+                                                 const std::string_view wasm_function_name,
+                                                 const std::string_view name,
                                                  std::shared_ptr<ast::FunctionType> function_type);
 
     util::Result<Module> build(const lang::Module& lang_mod);

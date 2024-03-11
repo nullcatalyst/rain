@@ -10,6 +10,10 @@
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Scalar/Reassociate.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
+#include "llvm/Transforms/Vectorize/LoadStoreVectorizer.h"
+#include "llvm/Transforms/Vectorize/LoopVectorize.h"
+#include "llvm/Transforms/Vectorize/SLPVectorizer.h"
+#include "llvm/Transforms/Vectorize/VectorCombine.h"
 #include "rain/ast/expr/all.hpp"
 #include "rain/ast/type/all.hpp"
 #include "rain/code/target.hpp"
@@ -45,6 +49,11 @@ void Module::optimize() {
     fpm.addPass(llvm::GVNPass());
     // Simplify the control flow graph (deleting unreachable blocks, etc)
     fpm.addPass(llvm::SimplifyCFGPass());
+
+    fpm.addPass(llvm::LoadStoreVectorizerPass());
+    fpm.addPass(llvm::VectorCombinePass());
+    fpm.addPass(llvm::SLPVectorizerPass());
+    fpm.addPass(llvm::LoopVectorizePass());
 
     // Run a few optimization passes across the entire module
     llvm::PassBuilder pb;

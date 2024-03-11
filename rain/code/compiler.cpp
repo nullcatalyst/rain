@@ -42,8 +42,7 @@ llvm::ExecutionEngine* create_interpreter(
 void Compiler::use_external_function(const std::string_view function_name,
                                      llvm::GenericValue (*external_function)(
                                          llvm::FunctionType*, llvm::ArrayRef<llvm::GenericValue>)) {
-    llvm::InterpreterRegisterExternalFunction(absl::StrCat("lle_X_", function_name),
-                                              external_function);
+    llvm::InterpreterRegisterExternalFunction(std::string(function_name), external_function);
 }
 
 Compiler::Compiler()
@@ -61,8 +60,6 @@ void Compiler::_initialize_builtins() {
     _llvm_mod    = new llvm::Module("rain", *_llvm_ctx);
     _llvm_engine = std::unique_ptr<llvm::ExecutionEngine>(
         create_interpreter(_llvm_mod, wasm_target_machine()));
-
-    // _add_externref_support();
 }
 
 void Compiler::_add_externref_support() {
@@ -103,6 +100,7 @@ util::Result<std::shared_ptr<ast::FunctionType>> Compiler::get_function_type(
 }
 
 util::Result<void> Compiler::declare_external_function(
+    const std::string_view wasm_namespace, const std::string_view wasm_function_name,
     const std::string_view name, std::shared_ptr<ast::FunctionType> function_type) {
     if (name.empty()) {
         return ERR_PTR(err::SimpleError, "cannot declare external function, no name given");
@@ -119,8 +117,6 @@ util::Result<void> Compiler::declare_external_function(
         auto llvm_found_type = find_or_build_type(ctx, function_type->return_type().value());
         FORWARD_ERROR(llvm_found_type);
         llvm_return_type = std::move(llvm_found_type).value();
-        // llvm_return_type =
-        //     FORWARD_OR_UNWRAP(find_or_build_type(ctx, function_type->return_type().value()));
     }
 
     std::vector<llvm::Type*> llvm_argument_types;
@@ -137,6 +133,13 @@ util::Result<void> Compiler::declare_external_function(
     auto llvm_global         = _llvm_mod->getOrInsertFunction(name, llvm_function_type);
     auto llvm_function_value = llvm::cast<llvm::Function>(llvm_global.getCallee());
     llvm_function_value->setLinkage(llvm::Function::ExternalLinkage);
+
+    if (!wasm_namespace.empty() && !wasm_function_name.empty()) {
+        llvm_function_value->addFnAttr(llvm::Attribute::get(llvm_function_value->getContext(),
+                                                            "wasm-import-module", wasm_namespace));
+        llvm_function_value->addFnAttr(llvm::Attribute::get(
+            llvm_function_value->getContext(), "wasm-import-name", wasm_function_name));
+    }
 
     _builtin_scope.set_variable(name, Variable{
                                           ._llvm_value = llvm_function_value,

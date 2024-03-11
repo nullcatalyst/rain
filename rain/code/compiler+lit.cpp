@@ -1,6 +1,8 @@
 #include "rain/code/compiler.hpp"
 // ^ Keep at top
 
+#include <span>
+
 #include "rain/ast/expr/all.hpp"
 #include "rain/ast/type/all.hpp"
 #include "rain/err/simple.hpp"
@@ -142,13 +144,8 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
         return ERR_PTR(err::SimpleError, "cannot find llvm type for struct type");
     }
 
-    // Use insertvalue to set the fields of the struct.
-    // We start with either a poison value (if the user explicitly initializes all the fields --
-    // this is an optimization) or a zero-initialized value (if one or more fields are not set).
-    llvm::Value* llvm_value = ctor_expression.fields().size() == struct_type->fields().size()
-                                  ? llvm::PoisonValue::get(llvm_type)
-                                  : llvm::Constant::getNullValue(llvm_type);
-
+    std::vector<llvm::Value*> llvm_field_values;
+    llvm_field_values.resize(struct_type->fields().size(), nullptr);
     for (const auto& field : ctor_expression.fields()) {
         auto llvm_field_value = build(ctx, field.value);
         FORWARD_ERROR(llvm_field_value);
@@ -165,8 +162,38 @@ util::Result<llvm::Value*> Compiler::build(Context&                   ctx,
             }
         }
 
-        llvm_value = _llvm_ir.CreateInsertValue(llvm_value, std::move(llvm_field_value).value(),
-                                                field_index.value());
+        llvm_field_values[field_index.value()] = std::move(llvm_field_value).value();
+    }
+
+    const bool fully_initialized = std::all_of(llvm_field_values.begin(), llvm_field_values.end(),
+                                               [](const auto* value) { return value != nullptr; });
+    const bool is_constant =
+        fully_initialized && std::all_of(llvm_field_values.begin(), llvm_field_values.end(),
+                                         [](const llvm::Value* value) {
+                                             return llvm::isa<const llvm::Constant>(value);
+                                         });
+
+    if (is_constant) {
+        llvm::ArrayRef<llvm::Constant*> llvm_constants(
+            reinterpret_cast<llvm::Constant**>(llvm_field_values.data()), llvm_field_values.size());
+        if (llvm_type->isVectorTy()) {
+            return llvm::ConstantVector::get(llvm_constants);
+        } else {
+            return llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(llvm_type),
+                                             llvm_constants);
+        }
+    }
+
+    llvm::Value* llvm_value = fully_initialized ? llvm::PoisonValue::get(llvm_type)
+                                                : llvm::Constant::getNullValue(llvm_type);
+    if (llvm_type->isVectorTy()) {
+        for (size_t i = 0, end = llvm_field_values.size(); i < end; ++i) {
+            llvm_value = _llvm_ir.CreateInsertElement(llvm_value, llvm_field_values[i], i);
+        }
+    } else {
+        for (size_t i = 0, end = llvm_field_values.size(); i < end; ++i) {
+            llvm_value = _llvm_ir.CreateInsertValue(llvm_value, llvm_field_values[i], i);
+        }
     }
 
     return llvm_value;
