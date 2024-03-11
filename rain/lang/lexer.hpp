@@ -37,17 +37,23 @@ class Lexer {
     LexerState save_state() const { return _next_token; }
     void       restore_state(LexerState state) { _next_token = state; }
 
-    Token _next();
     Token next() {
+        // If we have tokens left, return the next one.
         if (_next_token < _tokens.size()) {
             return _tokens[_next_token++];
         }
 
-        // Try to get the next token. If we're at the end of the file, no new tokens will be added.
-        _tokenize();
-        if (_next_token < _tokens.size()) {
-            return _tokens[_next_token++];
+        if (_it != nullptr) {
+            // Try to get the next token.
+            // If we're at the end of the file, no new tokens will be added.
+            _tokenize();
+
+            // Check to ensure that a new token was added before incrementing the next token index.
+            if (_next_token < _tokens.size()) {
+                return _tokens[_next_token++];
+            }
         }
+
         return _tokens.back();
     }
 
