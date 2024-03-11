@@ -1,0 +1,21 @@
+cc_library(
+    name = "crypto",
+    visibility = ["//rain:__subpackages__"],
+    deps = [":sha256"],
+)
+
+cc_library(
+    name = "sha256",
+    srcs = ["sha256.cpp"],
+    hdrs = ["sha256.hpp"],
+    visibility = ["//rain:__subpackages__"],
+)
+
+cc_test(
+    name = "sha256_test",
+    srcs = ["sha256.test.cpp"],
+    deps = [
+        ":sha256",
+        "@googletest//:gtest_main",
+    ],
+)
