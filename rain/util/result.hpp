@@ -43,3 +43,17 @@ template <typename T, typename E = std::unique_ptr<Error>>
 using Result = tl::expected<T, E>;
 
 }  // namespace rain::util
+
+#if defined(GTEST_TEST)
+
+// Add a useful testing helper function, that prints out the error message if the result is an
+// error. Hopefully this should make it easier to debug tests.
+template <typename T>
+testing::AssertionResult check_success(const rain::util::Result<T>& result) {
+    if (result.has_value()) {
+        return testing::AssertionSuccess();
+    }
+    return testing::AssertionFailure() << result.error()->message();
+}
+
+#endif  // defined(GTEST_TEST)

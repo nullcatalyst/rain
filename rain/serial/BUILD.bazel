@@ -1,0 +1,30 @@
+cc_library(
+    name = "serial",
+    srcs = [
+        "builder.cpp",
+        "module.cpp",
+    ],
+    hdrs = [
+        "builder.hpp",
+        "expression.hpp",
+        "header.hpp",
+        "header_v0.hpp",
+        "module.hpp",
+        "type.hpp",
+        "variable.hpp",
+    ],
+    deps = [
+        "//rain/crypto",
+        "//rain/err",
+        "//rain/util",
+    ],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["module.test.cpp"],
+    deps = [
+        ":serial",
+        "@googletest//:gtest_main",
+    ],
+)
