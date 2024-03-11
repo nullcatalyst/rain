@@ -6,7 +6,7 @@
 
 namespace rain::serial {
 
-util::Result<Module> Module::load(std::unique_ptr<uint8_t[]> data, const size_t size) {
+util::Result<Module> Module::from_memory(std::unique_ptr<uint8_t[]> data, const size_t size) {
     if (size < sizeof(Header)) {
         return ERR_PTR(err::SimpleError, "file too small to contain header information");
     }
