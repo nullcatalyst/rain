@@ -1,11 +1,10 @@
 #pragma once
 
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/Module.h>
-#include <llvm/Target/TargetMachine.h>
-
 #include <memory>
 
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Target/TargetMachine.h"
 #include "rain/code/scope.hpp"
 
 namespace rain::code {

@@ -1,8 +1,7 @@
 #include "rain/code/compiler.hpp"
 // ^ Keep at top
 
-#include <llvm/ExecutionEngine/GenericValue.h>
-
+#include "llvm/ExecutionEngine/GenericValue.h"
 #include "rain/ast/expr/all.hpp"
 #include "rain/ast/type/all.hpp"
 #include "rain/code/compiler.hpp"

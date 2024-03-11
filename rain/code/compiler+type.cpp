@@ -1,10 +1,9 @@
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/MC/TargetRegistry.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Target/TargetMachine.h>
-#include <llvm/Transforms/Utils/Cloning.h>
-
 #include "absl/strings/str_format.h"
+#include "llvm/ExecutionEngine/GenericValue.h"
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 #include "rain/ast/expr/all.hpp"
 #include "rain/ast/type/all.hpp"
 #include "rain/code/compiler.hpp"
@@ -42,7 +41,7 @@ util::Result<llvm::StructType*> Compiler::build(Context& ctx, const ast::StructT
     llvm::StructType*        llvm_type = llvm::StructType::create(*_llvm_ctx, name);
     std::vector<llvm::Type*> llvm_field_types;
     for (const auto& field : struct_type.fields()) {
-        const_cast<ast::StructTypeFieldData&>(field).type = ctx.scope.resolve_type(field.type);
+        const_cast<ast::StructTypeField&>(field).type = ctx.scope.resolve_type(field.type);
 
         auto llvm_argument_type = find_or_build_type(ctx, field.type);
         FORWARD_ERROR(llvm_argument_type);

@@ -1,10 +1,10 @@
 #include "rain/util/twine.hpp"
 
-#include <gtest/gtest.h>
-
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "gtest/gtest.h"
 
 using namespace rain;
 using namespace rain::util;

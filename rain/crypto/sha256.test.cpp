@@ -1,6 +1,6 @@
 #include "rain/crypto/sha256.hpp"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 TEST(SHA256, hello) {
     using namespace rain::crypto::sha256;
