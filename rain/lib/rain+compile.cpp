@@ -15,7 +15,7 @@
 namespace rain {
 
 util::Result<rain::code::Module> compile(const std::string_view source) {
-    lang::Lexer  lexer{source};
+    lang::Lexer  lexer = lang::Lexer::from_memory("<memory>", source);
     lang::Parser parser;
 
     auto parse_result = parser.parse(lexer);
@@ -27,7 +27,7 @@ util::Result<rain::code::Module> compile(const std::string_view source) {
 
 util::Result<rain::code::Module> compile(const std::string_view                    source,
                                          llvm::function_ref<void(code::Compiler&)> init_compiler) {
-    lang::Lexer  lexer{source};
+    lang::Lexer  lexer = lang::Lexer::from_memory("<memory>", source);
     lang::Parser parser;
 
     auto parse_result = parser.parse(lexer);

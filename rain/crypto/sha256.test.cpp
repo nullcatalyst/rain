@@ -18,6 +18,6 @@ TEST(SHA256, hello) {
         // clang-format on
     };
 
-    const auto digest = sha256(reinterpret_cast<const uint8_t*>("hello"), 5);
+    const auto digest = hash(reinterpret_cast<const uint8_t*>("hello"), 5);
     EXPECT_EQ(digest, EXPECTED_DIGEST);
 }

@@ -30,6 +30,7 @@ enum TokenKind : uint32_t {
     Export,
     Struct,
     Interface,
+    Self,
     Fn,
     Let,
 

@@ -8,14 +8,24 @@
 
 namespace {
 
-testing::AssertionResult test_compile(const std::string_view code) {
-    rain::lang::Lexer  lexer(code);
+[[maybe_unused]] rain::util::Result<rain::lang::Module> compile(const std::string_view source) {
+    rain::lang::Lexer  lexer = rain::lang::Lexer::from_memory("<memory>", source);
     rain::lang::Parser parser;
-    auto               result = parser.parse(lexer);
-    if (result.has_value()) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() << result.error()->message();
+    return parser.parse(lexer);
+}
+
+[[maybe_unused]] rain::util::Result<rain::ast::TypePtr> compile_type(
+    const std::string_view source) {
+    rain::lang::Lexer  lexer = rain::lang::Lexer::from_memory("<memory>", source);
+    rain::lang::Parser parser;
+    return parser.parse_type(lexer);
+}
+
+[[maybe_unused]] rain::util::Result<rain::ast::ExpressionPtr> compile_expression(
+    const std::string_view source) {
+    rain::lang::Lexer  lexer = rain::lang::Lexer::from_memory("<memory>", source);
+    rain::lang::Parser parser;
+    return parser.parse_expression(lexer);
 }
 
 }  // namespace

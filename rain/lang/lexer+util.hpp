@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <tuple>
 
 #include "rain/lang/token.hpp"
@@ -10,7 +11,7 @@ namespace rain::lang {
 
 namespace {
 
-constexpr std::array<std::tuple<std::string_view, TokenKind>, 9> KEYWORDS{
+constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
     // clang-format off
     // <keep-sorted>
     std::make_tuple("else", TokenKind::Else),
@@ -20,24 +21,19 @@ constexpr std::array<std::tuple<std::string_view, TokenKind>, 9> KEYWORDS{
     std::make_tuple("if", TokenKind::If),
     std::make_tuple("let", TokenKind::Let),
     std::make_tuple("return", TokenKind::Return),
+    std::make_tuple("self", TokenKind::Self),
     std::make_tuple("struct", TokenKind::Struct),
     std::make_tuple("true", TokenKind::True),
     // </keep-sorted>
     // clang-format on
 };
 
-TokenKind find_keyword(util::String source) {
-#if RAIN_USE_TWINE
-    const std::string str_source = std::string(source);
-#else
-    const std::string_view str_source = source;
-#endif
-
-    // Binary search through the list of keywords
-    const auto it =
-        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), str_source,
+TokenKind find_keyword(std::string_view source) {
+    // Binary search through the list of keywords (this is why the list MUST BE sorted!).
+    const std::tuple<std::string_view, TokenKind>* it =
+        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), source,
                          [](const auto& lhs, const auto& rhs) { return std::get<0>(lhs) < rhs; });
-    if (it != KEYWORDS.end() && std::get<0>(*it) == str_source) {
+    if (it != KEYWORDS.end() && std::get<0>(*it) == source) {
         return std::get<1>(*it);
     }
 
@@ -78,15 +74,15 @@ static constexpr std::array<TokenKind, 128> OPERATORS = []() {
     return operators;
 }();
 
-std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine::Iterator index) {
-    if (index == -1) [[unlikely]] {
+std::tuple<TokenKind, int> find_operator(const std::string_view source, const char* it) {
+    if (it == nullptr || it < source.begin() || it >= source.end()) [[unlikely]] {
         return std::tuple(TokenKind::Undefined, 0);
     }
 
-    const auto op = OPERATORS[static_cast<uint8_t>(source[index])];
+    const auto op = OPERATORS[static_cast<uint8_t>(*it)];
     switch (op) {
         case TokenKind::Minus:
-            switch (source[index + 1]) {
+            switch (it[1]) {
                 case '>':
                     return std::tuple(TokenKind::RArrow, 2);
                 default:
@@ -95,7 +91,7 @@ std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine:
             break;
 
         case TokenKind::Equal:
-            switch (source[index + 1]) {
+            switch (it[1]) {
                 case '=':
                     return std::tuple(TokenKind::EqualEqual, 2);
                 default:
@@ -104,7 +100,7 @@ std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine:
             break;
 
         case TokenKind::Exclaim:
-            switch (source[index + 1]) {
+            switch (it[1]) {
                 case '=':
                     return std::tuple(TokenKind::ExclaimEqual, 2);
                 default:
@@ -112,7 +108,7 @@ std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine:
             }
 
         case TokenKind::Less:
-            switch (source[index + 1]) {
+            switch (it[1]) {
                 case '=':
                     return std::tuple(TokenKind::LessEqual, 2);
                 case '<':
@@ -122,7 +118,7 @@ std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine:
             }
 
         case TokenKind::Greater:
-            switch (source[index + 1]) {
+            switch (it[1]) {
                 case '=':
                     return std::tuple(TokenKind::GreaterEqual, 2);
                 case '>':
@@ -137,16 +133,14 @@ std::tuple<TokenKind, int> find_operator(const util::Twine& source, util::Twine:
     return std::tuple(op, 1);
 }
 
-std::tuple<util::Twine::Iterator /*index*/, int /*line*/, int /*column*/> skip_whitespace(
-    const util::Twine& twine, util::Twine::Iterator it, int line, int column) {
-    const auto end = twine.end();
-    if (it >= end) [[unlikely]] {
-        return std::make_tuple(-1, line, column);
+std::tuple<const char* /*it*/, int /*line*/, int /*column*/> skip_whitespace(
+    const std::string_view source, const char* it, int line, int column) {
+    if (it == nullptr || it < source.begin() || it >= source.end()) [[unlikely]] {
+        return std::make_tuple(nullptr, line, column);
     }
 
+    char c = *it;
     do {
-        char c = twine[it];
-
         // Skip whitespace
         while (std::isspace(c)) {
             if (c == '\n') {
@@ -157,24 +151,22 @@ std::tuple<util::Twine::Iterator /*index*/, int /*line*/, int /*column*/> skip_w
             }
 
             ++it;
-            c = twine[it];
+            c = *it;
         }
 
-        c = twine[it];
-
         // Skip comments
-        if (c == '/' && twine[it + 1] == '/') {
+        if (c == '/' && it[1] == '/') {
             while (c != '\n' && c != '\0') {
                 ++column;
                 ++it;
-                c = twine[it];
+                c = *it;
             }
         }
-    } while (std::isspace(twine[it]));
+    } while (std::isspace(c));
 
     // Reset the index to the nullptr if we've reached the end of the string
-    if (twine[it] == '\0') [[unlikely]] {
-        it = -1;
+    if (c == '\0') [[unlikely]] {
+        it = nullptr;
     }
 
     return std::make_tuple(it, line, column);

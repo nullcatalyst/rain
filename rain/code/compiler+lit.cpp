@@ -77,7 +77,6 @@ util::Result<llvm::Value*> Compiler::build(Context&                     ctx,
 
     auto member_type = struct_type->fields()[field_index.value()].type;
     assert(member_type != nullptr && "member type is null");
-    std::cout << "member type: " << (int)member_type->kind() << "\n";
     auto llvm_member_type = ctx.scope.find_llvm_type(member_type);
     assert(llvm_member_type != nullptr && "cannot find llvm type for member type");
     member_expression.set_type(member_type);

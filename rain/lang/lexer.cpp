@@ -6,20 +6,20 @@
 
 namespace rain::lang {
 
-Token Lexer::next() {
+void Lexer::_tokenize() {
     {
         // Skip whitespace and comments
         const auto [it, line, column] = skip_whitespace(_source, _it, _line, _column);
+        _it                           = it;
+        _line                         = line;
+        _column                       = column;
 
-        _it     = it;
-        _line   = line;
-        _column = column;
-
-        if (_it == -1) [[unlikely]] {
-            return Token{
+        if (_it == nullptr) [[unlikely]] {
+            _tokens.emplace_back(Token{
                 .kind     = TokenKind::Eof,
-                .location = Location(_source, -1, -1, _line, _column),
-            };
+                .location = Location(_source, _source.end(), _source.end(), _line, _column),
+            });
+            return;
         }
     }
 
@@ -28,11 +28,11 @@ Token Lexer::next() {
     const auto line        = _line;
     const auto column      = _column;
 
-    char       c         = _source[_it];
+    char       c         = *_it;
     const auto next_char = [&, this]() -> char {
         ++_it;
         ++_column;
-        c = _source[_it];
+        c = *_it;
         return c;
     };
 
@@ -42,11 +42,12 @@ Token Lexer::next() {
             next_char();
         }
 
-        if (c != '.' || !std::isdigit(_source[_it + 1])) {
-            return Token{
+        if (c != '.' || !std::isdigit(_it[1])) {
+            _tokens.emplace_back(Token{
                 .kind     = TokenKind::Integer,
                 .location = Location(_source, token_start, _it, line, column),
-            };
+            });
+            return;
         }
 
         // Skip the decimal point
@@ -56,10 +57,11 @@ Token Lexer::next() {
             next_char();
         }
 
-        return Token{
+        _tokens.emplace_back(Token{
             .kind     = TokenKind::Float,
             .location = Location(_source, token_start, _it, line, column),
-        };
+        });
+        return;
     }
 
     // Identifier or keyword
@@ -68,19 +70,21 @@ Token Lexer::next() {
             next_char();
         }
 
-        const auto identifier = _source.substr(token_start, _it - token_start);
+        const auto identifier = std::string_view{token_start, _it};
         const auto keyword    = find_keyword(identifier);
         if (keyword != TokenKind::Undefined) {
-            return Token{
+            _tokens.emplace_back(Token{
                 .kind     = keyword,
                 .location = Location(_source, token_start, _it, line, column),
-            };
+            });
+            return;
         }
 
-        return Token{
+        _tokens.emplace_back(Token{
             .kind     = TokenKind::Identifier,
             .location = Location(_source, token_start, _it, line, column),
-        };
+        });
+        return;
     }
 
     // Operator
@@ -89,13 +93,18 @@ Token Lexer::next() {
         _it += length;
         _column += length;
 
-        return Token{
+        _tokens.emplace_back(Token{
             .kind     = operator_kind,
             .location = Location(_source, token_start, _it, line, column),
-        };
+        });
+        return;
     }
+}
 
-    return Token();
+void Lexer::_tokenize_all() {
+    while (_it != nullptr) {
+        _tokenize();
+    }
 }
 
 }  // namespace rain::lang
