@@ -9,7 +9,12 @@ cc_library(
         "lazy_list_lexer.hpp",
         "lexer.hpp",
         "list_lexer.hpp",
+        "location.hpp",
+        "state.hpp",
         "token.hpp",
         "tokenize.hpp",
+    ],
+    deps = [
+        "//rain/util",
     ],
 )

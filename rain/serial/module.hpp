@@ -21,7 +21,7 @@ class Module {
      * The list of types.
      *
      * This is a contiguous array of types, whose memory is backed by the `_memory` block.
-     **/
+     */
     const Type* _types       = nullptr;
     size_t      _types_count = 0;
 
@@ -29,7 +29,7 @@ class Module {
      * The list of expressions.
      *
      * This is a contiguous array of expressions, whose memory is backed by the `_memory` block.
-     **/
+     */
     const Expression* _expressions       = nullptr;
     size_t            _expressions_count = 0;
 
@@ -37,7 +37,7 @@ class Module {
      * The list of variables.
      *
      * This is a contiguous array of variables, whose memory is backed by the `_memory` block.
-     **/
+     */
     const Variable* _variables       = nullptr;
     size_t          _variables_count = 0;
 
@@ -45,7 +45,7 @@ class Module {
      * The list of indices used by various lists.
      *
      * This is a contiguous array of variables, whose memory is backed by the `_memory` block.
-     **/
+     */
     const uint32_t* _indices       = nullptr;
     size_t          _indices_count = 0;
 
@@ -53,7 +53,7 @@ class Module {
      * The list of strings used in the module.
      *
      * This is a contiguous array of strings, whose memory is part of the `_memory` block.
-     **/
+     */
     const char* _strings      = nullptr;
     size_t      _strings_size = 0;
 
@@ -136,7 +136,7 @@ class Module {
      *
      * This method does no bounds checking. It is a helper method to reduce code duplication.
      * It is the responsibility of the caller to ensure that the data is valid.
-     **/
+     */
     void _set_pointers();
 };
 

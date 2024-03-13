@@ -5,7 +5,7 @@
 #include "rain/util/colors.hpp"
 #include "rain/util/log.hpp"
 
-namespace rain::lang {
+namespace rain::lang::lex {
 
 class Location {
   public:
@@ -20,6 +20,14 @@ class Location {
     Location(const std::string_view source, const char* begin, const char* end, int line,
              int column)
         : _begin(begin), _end(end), _line(line), _column(column), _source(source) {}
+
+#if defined(_MSC_VER)
+    // The MSVC stdlib hdrs don't appear to allow implicit conversion from string_view::iterator to
+    // const char* or vice versa. So explicitly add an overload for MSVC.
+    Location(const std::string_view source, const std::string_view::iterator begin,
+             const std::string_view::iterator end, int line, int column)
+        : _begin(&*begin), _end(&*end), _line(line), _column(column), _source(source) {}
+#endif  // defined(_MSC_VER)
 
     [[nodiscard]] constexpr int line() const noexcept { return _line; }
     [[nodiscard]] constexpr int column() const noexcept { return _column; }
@@ -65,4 +73,4 @@ class Location {
     }
 };
 
-}  // namespace rain::lang
+}  // namespace rain::lang::lex

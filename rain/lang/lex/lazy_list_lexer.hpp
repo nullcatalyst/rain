@@ -1,9 +1,9 @@
 #pragma once
 
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/token.hpp"
+#include "rain/lang/lex/token.hpp"
 
-namespace rain::lang {
+namespace rain::lang::lex {
 
 class LazyListLexer : public Lexer {
     size_t             _next_token = 0;
@@ -17,7 +17,7 @@ class LazyListLexer : public Lexer {
      * Wrap the lexer in a lexer that saves all tokens in a list.
      *
      * This does NOT take ownership of the lexer. The lexer MUST outlive the LazyListLexer.
-     **/
+     */
     static LazyListLexer using_lexer(Lexer& lexer) {
         LazyListLexer new_lexer;
         new_lexer._lexer = &lexer;
@@ -60,4 +60,4 @@ class LazyListLexer : public Lexer {
     }
 };
 
-}  // namespace rain::lang
+}  // namespace rain::lang::lex

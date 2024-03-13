@@ -1,7 +1,20 @@
 #include "rain/lang/lex/lazy_lexer.hpp"
 
+#include "rain/lang/lex/location.hpp"
+#include "rain/lang/lex/token.hpp"
 #include "rain/lang/lex/tokenize.hpp"
-#include "rain/lang/location.hpp"
-#include "rain/lang/token.hpp"
 
-namespace rain::lang {}  // namespace rain::lang
+namespace rain::lang::lex {
+
+Token LazyLexer::next() override {
+    auto [token, state] = next_token(_source, _state);
+    _state              = state;
+    return token;
+}
+
+Token LazyLexer::peek() override {
+    auto [token, state] = next_token(_source, _state);
+    return token;
+}
+
+}  // namespace rain::lang::lex

@@ -1,12 +1,25 @@
 #include "rain/lang/lex/tokenize.hpp"
 
-#include "rain/lang/token.hpp"
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <tuple>
 
-namespace rain::lang {
+#include "rain/lang/lex/token.hpp"
 
-[[nodiscard]] LexerState skip_whitespace(const std::string_view source, LexerState state) {
-    if (state.it == nullptr || state.it < source.begin() || state.it >= source.end()) [[unlikely]] {
-        return LexerState{nullptr, state.line, state.column};
+namespace rain::lang::lex {
+
+namespace {
+
+constexpr bool contains(const std::string_view s, const char* it) {
+    return it >= &*s.begin() && it < &*s.end();
+}
+
+}  // namespace
+
+[[nodiscard]] State skip_whitespace(const std::string_view source, State state) {
+    if (state.it == nullptr || !contains(source, state.it)) [[unlikely]] {
+        return State{nullptr, state.line, state.column};
     }
 
     char c = *state.it;
@@ -42,7 +55,7 @@ namespace rain::lang {
     return state;
 }
 
-[[nodiscard]] TokenKind check_keyword(std::string_view source) {
+[[nodiscard]] TokenKind check_keyword(std::string_view word) {
     constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
         // clang-format off
         // <keep-sorted>
@@ -61,17 +74,17 @@ namespace rain::lang {
     };
 
     // Binary search through the list of keywords (this is why the list MUST BE sorted!).
-    const std::tuple<std::string_view, TokenKind>* it =
-        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), source,
+    const auto it =
+        std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), word,
                          [](const auto& lhs, const auto& rhs) { return std::get<0>(lhs) < rhs; });
-    if (it != KEYWORDS.end() && std::get<0>(*it) == source) {
+    if (it != KEYWORDS.end() && std::get<0>(*it) == word) {
         return std::get<1>(*it);
     }
 
     return TokenKind::Undefined;
 }
 
-[[nodiscard]] TokenKind find_operator(const std::string_view source, LexerState state) {
+[[nodiscard]] TokenKind find_operator(State state) {
     static constexpr std::array<TokenKind, 128> OPERATORS = []() {
         std::array<TokenKind, 128> operators{};
 
@@ -105,10 +118,6 @@ namespace rain::lang {
 
         return operators;
     }();
-
-    if (state.it == nullptr || state.it < source.begin() || state.it >= source.end()) [[unlikely]] {
-        return TokenKind::Undefined;
-    }
 
     const auto op = OPERATORS[static_cast<uint8_t>(*state.it)];
     switch (op) {
@@ -211,14 +220,11 @@ namespace rain::lang {
     return OPERATOR_LENGTH[kind];
 }
 
-[[nodiscard]] std::tuple<Token, LexerState> next_token(const std::string_view source,
-                                                       LexerState             state) {
+[[nodiscard]] std::tuple<Token, State> next_token(const std::string_view source, State state) {
     {
         // Skip whitespace and comments
-        const auto [it, line, column] = skip_whitespace(source, state);
-        state.it                      = it;
-        state.line                    = line;
-        state.column                  = column;
+        state = skip_whitespace(source, state);
+        state.index += 1;
 
         if (state.it == nullptr) [[unlikely]] {
             return std::make_tuple(
@@ -246,9 +252,9 @@ namespace rain::lang {
 
     // Integer or float
     if (std::isdigit(c)) {
-        while (std::isdigit(c)) {
+        do {
             next_char();
-        }
+        } while (std::isdigit(c));
 
         if (c != '.' || !std::isdigit(state.it[1])) {
             return std::make_tuple(
@@ -323,4 +329,4 @@ namespace rain::lang {
         state);
 }
 
-}  // namespace rain::lang
+}  // namespace rain::lang::lex

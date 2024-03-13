@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <string_view>
 
-#include "rain/lang/location.hpp"
+#include "rain/lang/lex/location.hpp"
 
-namespace rain::lang {
+namespace rain::lang::lex {
 
 enum TokenKind : uint32_t {
     Undefined,
@@ -78,4 +78,4 @@ struct Token {
     Location  location;
 };
 
-}  // namespace rain::lang
+}  // namespace rain::lang::lex

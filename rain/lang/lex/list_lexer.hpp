@@ -1,9 +1,9 @@
 #pragma once
 
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/token.hpp"
+#include "rain/lang/lex/token.hpp"
 
-namespace rain::lang {
+namespace rain::lang::lex {
 
 class ListLexer : public Lexer {
     size_t             _next_token = 0;
@@ -50,4 +50,4 @@ class ListLexer : public Lexer {
     }
 };
 
-}  // namespace rain::lang
+}  // namespace rain::lang::lex

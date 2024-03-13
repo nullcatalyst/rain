@@ -17,7 +17,7 @@ struct __attribute__((packed)) Header {
      *
      * This is used to verify the integrity of the library.
      * It is calculated by hashing the entire library, starting from the `version` field.
-     **/
+     */
     crypto::sha256::Digest sha256;
 
     uint8_t                version;

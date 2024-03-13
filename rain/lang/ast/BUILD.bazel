@@ -1,0 +1,30 @@
+cc_library(
+    name = "ast",
+    srcs = [
+        "scope/block.cpp",
+        "scope/builtin.cpp",
+        "scope/module.cpp",
+    ],
+    hdrs = [
+        "scope/block.hpp",
+        "scope/builtin.hpp",
+        "scope/module.hpp",
+        "scope/scope.hpp",
+        "type/function.hpp",
+        "type/opaque.hpp",
+        "type/type.hpp",
+        "var/builtin_function.hpp",
+        "var/function.hpp",
+        "var/variable.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/util",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@llvm-project//llvm:Core",
+        "@llvm-project//llvm:Support",
+    ],
+)
