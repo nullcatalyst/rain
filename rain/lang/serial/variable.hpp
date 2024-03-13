@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 enum class VariableKind {
     Unknown,
@@ -25,4 +25,4 @@ struct Variable {
     };
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

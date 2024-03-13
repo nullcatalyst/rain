@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include "rain/serial/expression.hpp"
-#include "rain/serial/module.hpp"
-#include "rain/serial/type.hpp"
-#include "rain/serial/variable.hpp"
+#include "rain/lang/serial/expression.hpp"
+#include "rain/lang/serial/module.hpp"
+#include "rain/lang/serial/type.hpp"
+#include "rain/lang/serial/variable.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 class Builder {
     std::vector<Type>       _types;
@@ -63,4 +63,4 @@ class Builder {
     Module build();
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

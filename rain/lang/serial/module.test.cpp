@@ -1,5 +1,7 @@
+#include "rain/lang/serial/module.hpp"
+
 #include "gtest/gtest.h"
-#include "rain/serial/builder.hpp"
+#include "rain/lang/serial/builder.hpp"
 
 TEST(Module, build_and_load_empty) {
     using namespace rain::serial;

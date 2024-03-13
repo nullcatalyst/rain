@@ -1,8 +1,8 @@
-#include "rain/serial/builder.hpp"
+#include "rain/lang/serial/builder.hpp"
 
-#include "rain/serial/header_v0.hpp"
+#include "rain/lang/serial/header_v0.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 Module Builder::build() {
     const auto types_size       = sizeof(Type) * _types.size();
@@ -46,4 +46,4 @@ Module Builder::build() {
     return mod;
 }
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

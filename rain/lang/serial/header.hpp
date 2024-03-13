@@ -5,7 +5,7 @@
 
 #include "rain/crypto/sha256.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 using MagicNumber = std::array<uint8_t, 8>;
 
@@ -31,4 +31,4 @@ constexpr const MagicNumber RAIN_MAGIC_NUMBER{
     // clang-format on
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

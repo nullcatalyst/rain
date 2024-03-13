@@ -2,7 +2,7 @@
 
 #include "rain/serial/header.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 struct __attribute__((packed)) HeaderV0 {
     Header hdr;  // 44 bytes
@@ -15,4 +15,4 @@ struct __attribute__((packed)) HeaderV0 {
 };
 static_assert(sizeof(HeaderV0) == 64);
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

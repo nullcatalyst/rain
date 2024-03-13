@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 enum class TypeKind {
     Unknown,
@@ -87,4 +87,4 @@ struct Type {
     };
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

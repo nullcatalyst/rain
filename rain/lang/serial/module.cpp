@@ -1,10 +1,10 @@
-#include "rain/serial/module.hpp"
+#include "rain/lang/serial/module.hpp"
 
 #include "rain/crypto/sha256.hpp"
 #include "rain/err/simple.hpp"
-#include "rain/serial/header_v0.hpp"
+#include "rain/lang/serial/header_v0.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 util::Result<Module> Module::from_memory(std::unique_ptr<uint8_t[]> data, const size_t size) {
     if (size < sizeof(Header)) {
@@ -58,4 +58,4 @@ void Module::_set_pointers() {
     _strings_size      = v0->strings_size;
 }
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

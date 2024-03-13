@@ -8,7 +8,7 @@
 #include "rain/err/simple.hpp"
 #include "rain/util/result.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 ////////////////////////////////////////////////////////////////
 // Expressions
@@ -166,4 +166,4 @@ struct Expression {
     };
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial

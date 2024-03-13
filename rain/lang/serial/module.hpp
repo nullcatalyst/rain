@@ -7,12 +7,12 @@
 #include <string_view>
 #include <tuple>
 
-#include "rain/serial/expression.hpp"
-#include "rain/serial/type.hpp"
-#include "rain/serial/variable.hpp"
+#include "rain/lang/serial/expression.hpp"
+#include "rain/lang/serial/type.hpp"
+#include "rain/lang/serial/variable.hpp"
 #include "rain/util/result.hpp"
 
-namespace rain::serial {
+namespace rain::lang::serial {
 
 class Builder;
 
@@ -140,4 +140,4 @@ class Module {
     void _set_pointers();
 };
 
-}  // namespace rain::serial
+}  // namespace rain::lang::serial
