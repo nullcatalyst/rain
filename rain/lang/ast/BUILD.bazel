@@ -22,6 +22,7 @@ cc_library(
     ],
     deps = [
         "//rain/util",
+        "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
         "@llvm-project//llvm:Core",

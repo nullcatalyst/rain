@@ -76,6 +76,8 @@ enum TokenKind : uint32_t {
 struct Token {
     TokenKind kind = TokenKind::Undefined;
     Location  location;
+
+    constexpr std::string_view text() const { return location.substr(); }
 };
 
 }  // namespace rain::lang::lex

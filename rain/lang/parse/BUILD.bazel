@@ -1,12 +1,16 @@
 cc_library(
     name = "parse",
     srcs = [
-        "parser.cpp",
+        "any.cpp",
+        "block.cpp",
+        "function.cpp",
+        "integer.cpp",
     ],
     hdrs = [
-        "parser.hpp",
+        "all.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",
+        "@abseil-cpp//absl/strings",
     ],
 )
