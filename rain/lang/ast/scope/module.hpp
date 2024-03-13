@@ -22,27 +22,26 @@ class ModuleScope : public Scope {
     BuiltinScope& _builtin;
 
   public:
-    ModuleScope(BuiltinScope& builtin_scope) : _builtin(builtin_scope) {}
+    ModuleScope(BuiltinScope& builtin) : _builtin(builtin) {}
     ~ModuleScope() override = default;
 
-    [[nodiscard]] constexpr std::optional<Scope*> parent() const noexcept override {
-        return &_builtin;
+    [[nodiscard]] absl::Nullable<Scope*>      parent() const noexcept override { return &_builtin; }
+    [[nodiscard]] absl::Nonnull<ModuleScope*> module() noexcept override { return this; }
+    [[nodiscard]] absl::Nonnull<const ModuleScope*> module() const noexcept override {
+        return this;
     }
 
-    [[nodiscard]] constexpr const ModuleScope& module() const noexcept override { return *this; }
-    [[nodiscard]] constexpr ModuleScope&       module() noexcept override { return *this; }
+    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
+        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
 
-    [[nodiscard]] FunctionType* get_function_type(
-        const TypeList& argument_types, std::optional<Type*> return_type) noexcept override;
-
-    [[nodiscard]] std::optional<Type*> find_type(
+    [[nodiscard]] absl::Nullable<Type*> find_type(
         const std::string_view name) const noexcept override;
 
-    [[nodiscard]] std::optional<FunctionVariable*> find_method(
+    [[nodiscard]] absl::Nullable<FunctionVariable*> find_method(
         Type* callee_type, const TypeList& argument_types,
         const std::string_view name) const noexcept override;
 
-    [[nodiscard]] std::optional<Variable*> find_variable(
+    [[nodiscard]] absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept override;
 };
 

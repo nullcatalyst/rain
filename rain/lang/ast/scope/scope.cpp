@@ -2,7 +2,8 @@
 
 namespace rain::lang::ast {
 
-FunctionType* Scope::get_function_type(const TypeList& argument_types, Type* return_type) noexcept {
+absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument_types,
+                                                        Type*           return_type) noexcept {
     const bool owns_types =
         std::any_of(argument_types.begin(), argument_types.end(),
                     [this](const auto* type) { return _owned_types.contains(type); }) ||

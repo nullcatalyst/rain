@@ -24,21 +24,21 @@ class BuiltinScope : public Scope {
     BuiltinScope();
     ~BuiltinScope() override = default;
 
-    [[nodiscard]] constexpr std::optional<Scope*> parent() const noexcept override {
-        return std::nullopt;
-    }
-
-    [[nodiscard]] const ModuleScope& module() const noexcept override {
-        util::console_error("the builtin scope is not part of a module");
+    [[nodiscard]] absl::Nonnull<ModuleScope*> module() noexcept override {
+        util::console_error(
+            "the builtin scope is not part of any module, and can instead be shared between many "
+            "modules");
         std::abort();
     }
-    [[nodiscard]] ModuleScope& module() noexcept override {
-        util::console_error("the builtin scope is not part of a module");
+    [[nodiscard]] absl::Nonnull<ModuleScope*> module() const noexcept override {
+        util::console_error(
+            "the builtin scope is not part of any module, and can instead be shared between many "
+            "modules");
         std::abort();
     }
 
-    [[nodiscard]] FunctionType* get_function_type(
-        const TypeList& argument_types, std::optional<Type*> return_type) noexcept override;
+    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
+        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
 
     void add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept override {
         util::console_error(

@@ -2,31 +2,31 @@
 
 namespace rain::lang::ast {
 
-FunctionType* ModuleScope::get_function_type(const TypeList&      argument_types,
-                                             std::optional<Type*> return_type) noexcept {
-    if (auto* type = Scope::get_function_type(argument_types, return_type); type != nullptr) {
+absl::Nonnull<FunctionType*> ModuleScope::get_function_type(
+    const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
+    if (auto* type = Scope::_get_function_type(argument_types, return_type); type != nullptr) {
         return type;
     }
     return _builtin.get_function_type(argument_types, return_type);
 }
 
-std::optional<Type*> ModuleScope::find_type(const std::string_view name) const noexcept {
-    if (const auto it = Scope::find_type(name); it.has_value()) {
+absl::Nullable<Type*> ModuleScope::find_type(const std::string_view name) const noexcept {
+    if (const auto it = Scope::find_type(name); it != nullptr) {
         return it;
     }
     return _builtin.find_type(name);
 }
 
-std::optional<FunctionVariable*> ModuleScope::find_method(
+absl::Nullable<FunctionVariable*> ModuleScope::find_method(
     Type* callee_type, const TypeList& argument_types, const std::string_view name) const noexcept {
-    if (const auto it = Scope::find_method(callee_type, argument_types, name); it.has_value()) {
+    if (const auto it = Scope::find_method(callee_type, argument_types, name); it != nullptr) {
         return it;
     }
     return _builtin.find_method(callee_type, argument_types, name);
 }
 
-std::optional<Variable*> ModuleScope::find_variable(const std::string_view name) const noexcept {
-    if (const auto found = Scope::find_variable(name); found.has_value()) {
+absl::Nullable<Variable*> ModuleScope::find_variable(const std::string_view name) const noexcept {
+    if (const auto found = Scope::find_variable(name); found != nullptr) {
         return found;
     }
     return _builtin.find_variable(name);

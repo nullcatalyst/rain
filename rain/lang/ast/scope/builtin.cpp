@@ -49,8 +49,8 @@ BuiltinScope::BuiltinScope() {
     }
 }
 
-FunctionType* BuiltinScope::get_function_type(const TypeList&      argument_types,
-                                              std::optional<Type*> return_type) noexcept {
+absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
+    const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
 #if !defined(NDEBUG)
     // All of the argument types must be non-null.
     // The return type MAY BE null (in the case of a void function).
@@ -59,12 +59,19 @@ FunctionType* BuiltinScope::get_function_type(const TypeList&      argument_type
         assert(argument_type != nullptr);
         assert(_owned_types.contains(argument_type));
     }
-    if (return_type.has_value()) {
-        assert(_owned_types.contains(return_type.value()));
+    if (return_type != nullptr) {
+        assert(_owned_types.contains(return_type));
     }
 #endif  // !defined(NDEBUG)
 
-    return Scope::get_function_type(argument_types, return_type);
+    auto type = Scope::_get_function_type(argument_types, return_type);
+    if (type == nullptr) {
+        util::console_error(
+            "failed to find function type: cannot create a function type with types not found in "
+            "scope at any level (this should never happen)");
+        std::abort();
+    }
+    return type;
 }
 
 }  // namespace rain::lang::ast
