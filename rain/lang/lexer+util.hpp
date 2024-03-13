@@ -30,7 +30,7 @@ constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
 
 TokenKind find_keyword(std::string_view source) {
     // Binary search through the list of keywords (this is why the list MUST BE sorted!).
-    const std::tuple<std::string_view, TokenKind>* it =
+    const auto it =
         std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), source,
                          [](const auto& lhs, const auto& rhs) { return std::get<0>(lhs) < rhs; });
     if (it != KEYWORDS.end() && std::get<0>(*it) == source) {
@@ -75,7 +75,7 @@ static constexpr std::array<TokenKind, 128> OPERATORS = []() {
 }();
 
 std::tuple<TokenKind, int> find_operator(const std::string_view source, const char* it) {
-    if (it == nullptr || it < source.begin() || it >= source.end()) [[unlikely]] {
+    if (it == nullptr || it < &*source.begin() || it >= &*source.end()) [[unlikely]] {
         return std::tuple(TokenKind::Undefined, 0);
     }
 
@@ -135,7 +135,7 @@ std::tuple<TokenKind, int> find_operator(const std::string_view source, const ch
 
 std::tuple<const char* /*it*/, int /*line*/, int /*column*/> skip_whitespace(
     const std::string_view source, const char* it, int line, int column) {
-    if (it == nullptr || it < source.begin() || it >= source.end()) [[unlikely]] {
+    if (it == nullptr || it < &*source.begin() || it >= &*source.end()) [[unlikely]] {
         return std::make_tuple(nullptr, line, column);
     }
 

@@ -17,6 +17,7 @@
 #ifndef WABT_CONFIG_H_
 #define WABT_CONFIG_H_
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -36,7 +37,9 @@
 #define HAVE_SNPRINTF 1
 
 /* Whether ssize_t is defined by stddef.h */
+#if !defined(_MSC_VER)
 #define HAVE_SSIZE_T 1
+#endif
 
 /* Whether strcasecmp is defined by strings.h */
 #define HAVE_STRCASECMP 1
@@ -50,9 +53,15 @@
 /* Whether <openssl/sha.h> is available */
 // #define HAVE_OPENSSL_SHA_H
 
+#if defined(__clang__)
 #define COMPILER_IS_CLANG 1
-// #define COMPILER_IS_GNU
-// #define COMPILER_IS_MSVC
+#elif defined(__GNUC__)
+#define COMPILER_IS_GNU 1
+#elif defined(_MSC_VER)
+#define COMPILER_IS_MSVC 1
+#else
+#error unknown compiler
+#endif
 
 // #define WITH_EXCEPTIONS
 
@@ -253,10 +262,12 @@ inline int Popcount(unsigned __int64 value) {
 #if COMPILER_IS_MSVC
 
 /* print format specifier for size_t */
-#if SIZEOF_SIZE_T == 4
+// #if SIZEOF_SIZE_T == 4
+#if SIZE_MAX == 0xFFFFFFFF
 #define PRIzd "d"
 #define PRIzx "x"
-#elif SIZEOF_SIZE_T == 8
+// #elif SIZEOF_SIZE_T == 8
+#elif SIZE_MAX == 0xFFFFFFFFFFFFFFFF
 #define PRIzd "I64d"
 #define PRIzx "I64x"
 #else

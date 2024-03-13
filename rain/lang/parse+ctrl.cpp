@@ -50,7 +50,7 @@ util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(Lexer& lexer) {
                        "block can be closed with '}'");
     }
 
-    __builtin_unreachable();
+    // __builtin_unreachable();
 }
 
 util::Result<std::unique_ptr<ast::IfExpression>> parse_if(Lexer& lexer) {

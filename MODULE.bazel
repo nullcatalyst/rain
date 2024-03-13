@@ -49,7 +49,7 @@ bazel_dep(name = "abseil-cpp", version = "20240116.1")
 #### Google Test ####
 
 # https://registry.bazel.build/modules/googletest
-bazel_dep(name = "googletest", version = "1.14.0")
+bazel_dep(name = "googletest", version = "1.14.0.bcr.1")
 
 #### Google Benchmark ####
 
@@ -94,6 +94,9 @@ archive_override(
         # LLVM links to -lpthread, -ldl, -lm, and -lrt by default. Remove the link flags, so they
         # can be explicitly added by the user if needed.
         "//third_party/llvm/patches:1004-Remove-LLVM-standard-link-libs.patch",
+        # By default, LLVM expects the user to have a UNIX-like shell installed (eg: bash). This
+        # adds the ability to use Windows PowerShell instead of bash.
+        "//third_party/llvm/patches:1005-Windows-powershell-support.patch",
 
         # Add the ability to call additional functions from the interpreter.
         "//third_party/llvm/patches:2001-Add-interpreter-functions.patch",

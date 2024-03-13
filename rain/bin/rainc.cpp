@@ -45,7 +45,7 @@ void compile(const char* source_start, const char* source_end) {
         rain::throw_error(link_result.error()->message());
     }
     auto wasm = std::move(link_result).value();
-    callback(rain::Action::CompileLLVM, wasm->string().begin(), wasm->string().begin());
+    callback(rain::Action::CompileLLVM, &*wasm->string().begin(), &*wasm->string().begin());
 
     // Decompile the WebAssembly into WAT.
     auto decompile_result =
@@ -55,7 +55,7 @@ void compile(const char* source_start, const char* source_end) {
         rain::throw_error(decompile_result.error()->message());
     }
     auto wat = std::move(decompile_result).value();
-    callback(rain::Action::DecompileWasm, wat->string().begin(), wat->string().end());
+    callback(rain::Action::DecompileWasm, &*wat->string().begin(), &*wat->string().end());
 }
 
 #if !defined(__wasm__)

@@ -1,0 +1,66 @@
+diff --git a/llvm/BUILD.bazel b/llvm/BUILD.bazel
+index be5c719..609a3ac 100644
+--- a/llvm/BUILD.bazel
++++ b/llvm/BUILD.bazel	
+@@ -183,6 +183,8 @@ genrule(
+     outs = ["include/llvm/Support/VCSRevision.h"],
+     cmd = "echo '#undef LLVM_REVISION' >> $@\n" +
+           "echo '#undef LLVM_REPOSITORY' >> $@\n",
++    cmd_ps = "echo '#undef LLVM_REVISION' >> $@\n" +
++             "echo '#undef LLVM_REPOSITORY' >> $@\n",
+ )
+ 
+ genrule(
+@@ -190,6 +192,8 @@ genrule(
+     outs = ["include/llvm/Support/Extension.def"],
+     cmd = "echo -e '// extension handlers' >> $@\n" +
+           "echo -e '#undef HANDLE_EXTENSION' >> $@\n",
++    cmd_ps = "echo '// extension handlers' >> $@\n" +
++             "echo '#undef HANDLE_EXTENSION' >> $@\n",
+ )
+ 
+ cc_library(
+diff --git a/lld/BUILD.bazel b/lld/BUILD.bazel
+index 5706192..01787c8 100644
+--- a/lld/BUILD.bazel
++++ b/lld/BUILD.bazel	
+@@ -21,6 +21,7 @@ genrule(
+     name = "config_version_gen",
+     outs = ["include/lld/Common/Version.inc"],
+     cmd = "echo '#define LLD_VERSION_STRING \"{}\"' > $@".format(LLVM_VERSION),
++    cmd_ps = "echo '#define LLD_VERSION_STRING \"{}\"' > $@".format(LLVM_VERSION),
+ )
+ 
+ genrule(
+@@ -28,6 +29,8 @@ genrule(
+     outs = ["Common/VCSVersion.inc"],
+     cmd = "echo '#undef LLD_REVISION' >> $@\n" +
+           "echo '#undef LLD_REPOSITORY' >> $@\n",
++    cmd_ps = "echo '#undef LLD_REVISION' >> $@\n" +
++             "echo '#undef LLD_REPOSITORY' >> $@\n",
+ )
+ 
+ # See https://github.com/bazelbuild/bazel/issues/13803
+diff --git a/llvm/tblgen.bzl b/llvm/tblgen.bzl
+index 4bdeb08..4572812 100644
+--- a/llvm/tblgen.bzl
++++ b/llvm/tblgen.bzl
+@@ -59,6 +59,18 @@ def gentbl(
+                 td_file,
+                 tblgen_args,
+             )),
++            cmd_bat = (("$(location %s) -I %s/llvm/include " +
++                        "-I %s/clang/include " +
++                        "-I $(location %s)/.. " +
++                        "%s $(location %s) %s -o $@") % (
++                tblgen,
++                llvm_project_execroot_path,
++                llvm_project_execroot_path,
++                td_file,
++                opts,
++                td_file,
++                tblgen_args,
++            )),
+         )
+ 
+     # For now, all generated files can be assumed to comprise public interfaces.

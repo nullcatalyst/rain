@@ -87,7 +87,7 @@ util::Result<std::shared_ptr<ast::StructType>> parse_struct(Lexer& lexer) {
         PARSE_CTOR_FIELD();
     }
 
-    __builtin_unreachable();
+    // __builtin_unreachable();
 
 #undef PARSE_CTOR_FIELD
 }

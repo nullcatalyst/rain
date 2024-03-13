@@ -30,7 +30,7 @@ class SyntaxError : public util::Error {
             under_line += ' ';
         }
         under_line += '^';
-        for (int i = 0; i < static_cast<ssize_t>(_location.substr().size()) - 1; ++i) {
+        for (int i = 0; i < static_cast<int>(_location.substr().size()) - 1; ++i) {
             under_line += '~';
         }
         under_line += ANSI_RESET;

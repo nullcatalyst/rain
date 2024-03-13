@@ -6,7 +6,7 @@ cc_library(
         "log.hpp",
         "result.hpp",
         "string.hpp",
-        "twine.hpp",
+        # "twine.hpp",
         "wasm.hpp",
     ],
     visibility = [
@@ -15,13 +15,13 @@ cc_library(
     deps = [
         "//third_party/tl_expected",
         "@abseil-cpp//absl/strings",
-        "@llvm-project//llvm:Support",
     ],
 )
 
 cc_test(
     name = "test",
     srcs = [
+        "twine.hpp",
         "twine.test.cpp",
     ],
     visibility = [

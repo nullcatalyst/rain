@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "rain/util/twine.hpp"
+// #include "rain/util/twine.hpp"
 
 #if !defined(RAIN_USE_TWINE)
 #define RAIN_USE_TWINE 0
@@ -17,8 +17,9 @@ using StringIterator = util::Twine::Iterator;
 
 #else  // RAIN_USE_TWINE
 
-using String         = std::string_view;
-using StringIterator = ssize_t;
+using String = std::string_view;
+// using StringIterator = ssize_t;
+using StringIterator = size_t;
 
 #endif  // !RAIN_USE_TWINE
 

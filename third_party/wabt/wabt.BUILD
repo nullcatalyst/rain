@@ -1,5 +1,15 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
+_MSVC_COPTS = [
+    "/wd4319",  # Suppress warning: '~': zero extending 'unsigned int' to 'unsigned long long' of greater size"
+]
+
+_COPTS = select({
+    "@bazel_tools//tools/cpp:clang-cl": _MSVC_COPTS,
+    "@bazel_tools//tools/cpp:msvc": _MSVC_COPTS,
+    "//conditions:default": [],
+})
+
 copy_file(
     name = "config",
     src = "@//third_party/wabt:config.h",
@@ -106,6 +116,7 @@ cc_library(
         "include/wabt/wat-writer.h",
         ":config",
     ],
+    copts = _COPTS,
     includes = [
         "include",
     ],
@@ -139,6 +150,7 @@ cc_library(
         "include/wabt/interp/interp-util.h",
         "include/wabt/interp/istream.h",
     ],
+    copts = _COPTS,
     includes = [
         "include",
     ],

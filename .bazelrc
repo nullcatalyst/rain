@@ -13,7 +13,7 @@ test --test_output=all
 
 # In opt mode, bazel by default builds both PIC and non-PIC object files for tests vs binaries. We
 # don't need this feature and it slows down opt builds considerably.
-build --force_pic
+# build --force_pic
 
 # Shared objects take up more space. With fast linkers and binaries that aren't super large, the
 # benefits of shared objects are minimal.
@@ -35,6 +35,16 @@ build:macos --cxxopt=-Wno-range-loop-analysis --host_cxxopt=-Wno-range-loop-anal
 build:windows --copt=/Zc:strictStrings --host_copt=/Zc:strictStrings
 build:windows --copt=/Oi --host_copt=/Oi
 build:windows --cxxopt=/Zc:rvalueCast --host_cxxopt=/Zc:rvalueCast
+
+# Disable a variety of warnings (that would be treated as errors), that are found in LLVM code.
+build:windows --copt=/wd4141 --host_copt=/wd4141 # inline used more than once
+build:windows --copt=/wd4244 --host_copt=/wd4244 # conversion type -> type
+build:windows --copt=/wd4267 --host_copt=/wd4267 # conversion size_t -> type
+build:windows --copt=/wd4273 --host_copt=/wd4273 # multiple definitions with different dllimport
+build:windows --copt=/wd4319 --host_copt=/wd4319 # zero-extending after complement
+build:windows --copt=/wd4624 --host_copt=/wd4624 # destructor was implicitly defined as deleted
+build:windows --copt=/wd4804 --host_copt=/wd4804 # comparisons between bool and int
+build:windows --copt=/wd4805 --host_copt=/wd4805 # comparisons between bool and int
 
 # Use the more flexible bigobj format for C++ files that have lots of symbols.
 build:windows --cxxopt=/bigobj --host_cxxopt=/bigobj

@@ -150,7 +150,7 @@ util::Result<std::unique_ptr<ast::CtorExpression>> parse_ctor(Lexer& lexer) {
         PARSE_CTOR_FIELD();
     }
 
-    __builtin_unreachable();
+    // __builtin_unreachable();
 
 #undef PARSE_CTOR_FIELD
 }
@@ -228,7 +228,7 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(Lexer&            
         arguments.emplace_back(std::move(argument).value());
     }
 
-    __builtin_unreachable();
+    // __builtin_unreachable();
 }
 
 util::Result<std::unique_ptr<ast::ExecExpression>> parse_exec(Lexer& lexer) {

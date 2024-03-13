@@ -101,10 +101,4 @@ void Lexer::_tokenize() {
     }
 }
 
-void Lexer::_tokenize_all() {
-    while (_it != nullptr) {
-        _tokenize();
-    }
-}
-
 }  // namespace rain::lang

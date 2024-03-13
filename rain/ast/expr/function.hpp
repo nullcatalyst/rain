@@ -77,7 +77,7 @@ class FunctionExpression : public Expression {
         return _name.value_or(util::String{});
     }
 
-    [[nodiscard]] constexpr bool has_method_owner() const noexcept {
+    [[nodiscard]] /*constexpr*/ bool has_method_owner() const noexcept {
         return _method_owner != nullptr;
     }
     [[nodiscard]] const TypePtr& method_owner() const noexcept { return _method_owner; }

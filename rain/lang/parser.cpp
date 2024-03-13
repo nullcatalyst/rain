@@ -57,7 +57,7 @@ util::Result<ParsedModule> Parser::parse(Lexer& lexer) {
         }
     }
 
-    __builtin_unreachable();
+    // __builtin_unreachable();
 }
 
 }  // namespace rain::lang
