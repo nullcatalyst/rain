@@ -6,25 +6,38 @@
 #include "absl/hash/hash.h"
 #include "rain/lang/ast/type/function.hpp"
 #include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"
 
 namespace rain::lang::ast {
 
 class ModuleScope;
 
-/**
- *
- */
-using TypeList = llvm::SmallVector<Type*, 4>;
+class TypeList : public llvm::SmallVector<Type*, 4> {
+  public:
+    using llvm::SmallVector<Type*, 4>::SmallVector;
 
-/**
- * The key used to store and look up a function type in a scope.
- *
- * This is just a useful alias, since the type is long and can be prone to typos.
- */
+    template <typename H>
+    friend H AbslHashValue(H h, const TypeList& type_list) {
+        return h.combine_contiguous(std::move(h), type_list.data(), type_list.size());
+    }
+};
+
 using FunctionTypeKey = std::tuple<TypeList, Type*>;
 
 class Scope {
+  protected:
+    absl::flat_hash_map<std::string_view, Type*>        _named_types;
+    absl::flat_hash_map<FunctionTypeKey, FunctionType*> _function_types;
+    absl::flat_hash_set<std::unique_ptr<Type>>          _owned_types;
+
+    absl::flat_hash_map<
+        std::tuple<Type* /*callee*/, TypeList /*arguments*/, std::string_view /*name*/>,
+        FunctionVariable*>
+                                                     _methods;
+    absl::flat_hash_map<std::string_view, Variable*> _named_variables;
+    absl::flat_hash_set<std::unique_ptr<Variable>>   _owned_variables;
+
   public:
     virtual ~Scope() = default;
 
@@ -32,34 +45,26 @@ class Scope {
     [[nodiscard]] virtual const ModuleScope&     module() const noexcept = 0;
     [[nodiscard]] virtual constexpr ModuleScope& module() noexcept       = 0;
 
-    [[nodiscard]] virtual FunctionTypePtr get_function_type(const TypeList& argument_types,
-                                                            Type* return_type) noexcept = 0;
+    [[nodiscard]] virtual FunctionType* get_function_type(
+        const TypeList& argument_types, std::optional<Type*> return_type) noexcept;
 
-    [[nodiscard]] virtual std::optional<TypePtr> find_type(
-        const std::string_view name) const noexcept = 0;
+    [[nodiscard]] virtual std::optional<Type*> find_type(
+        const std::string_view name) const noexcept;
 
-    [[nodiscard]] virtual std::optional<VariablePtr> find_method(
-        const TypePtr& callee_type, const std::string_view name) const noexcept = 0;
+    [[nodiscard]] virtual std::optional<FunctionVariable*> find_method(
+        Type* callee_type, const TypeList& argument_types,
+        const std::string_view name) const noexcept;
 
-    [[nodiscard]] virtual std::optional<VariablePtr> find_variable(
-        const std::string_view name) const noexcept = 0;
+    [[nodiscard]] virtual std::optional<Variable*> find_variable(
+        const std::string_view name) const noexcept;
 
-    virtual void add_type(const std::string_view name, TypePtr type) noexcept = 0;
+    virtual void add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept;
 
-    virtual void add_method(const TypePtr& callee_type, const std::string_view name,
-                            VariablePtr variable) noexcept = 0;
+    virtual void add_method(Type* callee_type, const std::string_view name,
+                            std::unique_ptr<FunctionVariable> method) noexcept;
 
-    virtual void add_variable(const std::string_view name, VariablePtr variable) noexcept = 0;
+    virtual void add_variable(const std::string_view    name,
+                              std::unique_ptr<Variable> variable) noexcept;
 };
-
-template <typename H>
-H AbslHashValue(H h, const TypeList& type_list) {
-    return h.combine_contiguous(std::move(h), type_list.data(), type_list.size());
-}
-
-template <typename H>
-H AbslHashValue(H h, const FunctionTypeKey& function_type_key) {
-    return H::combine(std::move(h), std::get<0>(function_type_key), std::get<1>(function_type_key));
-}
 
 }  // namespace rain::lang::ast

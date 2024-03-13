@@ -21,13 +21,6 @@ namespace rain::lang::ast {
 class ModuleScope : public Scope {
     BuiltinScope& _builtin;
 
-    absl::flat_hash_map<std::string_view, TypePtr>                        _named_types;
-    absl::flat_hash_map<FunctionTypeKey, FunctionTypePtr>                 _function_types;
-    absl::flat_hash_map<std::tuple<Type*, std::string_view>, VariablePtr> _methods;
-    absl::flat_hash_map<std::string_view, VariablePtr>                    _variables;
-
-    absl::flat_hash_set<TypePtr> _owned_types;
-
   public:
     ModuleScope(BuiltinScope& builtin_scope) : _builtin(builtin_scope) {}
     ~ModuleScope() override = default;
@@ -39,24 +32,18 @@ class ModuleScope : public Scope {
     [[nodiscard]] constexpr const ModuleScope& module() const noexcept override { return *this; }
     [[nodiscard]] constexpr ModuleScope&       module() noexcept override { return *this; }
 
-    [[nodiscard]] FunctionTypePtr get_function_type(const TypeList& argument_types,
-                                                    Type*           return_type) noexcept override;
+    [[nodiscard]] FunctionType* get_function_type(
+        const TypeList& argument_types, std::optional<Type*> return_type) noexcept override;
 
-    [[nodiscard]] std::optional<TypePtr> find_type(
+    [[nodiscard]] std::optional<Type*> find_type(
         const std::string_view name) const noexcept override;
 
-    [[nodiscard]] std::optional<VariablePtr> find_method(
-        const TypePtr& callee_type, const std::string_view name) const noexcept override;
-
-    [[nodiscard]] std::optional<VariablePtr> find_variable(
+    [[nodiscard]] std::optional<FunctionVariable*> find_method(
+        Type* callee_type, const TypeList& argument_types,
         const std::string_view name) const noexcept override;
 
-    void add_type(const std::string_view name, TypePtr type) noexcept override;
-
-    void add_method(const TypePtr& callee_type, const std::string_view name,
-                    VariablePtr variable) noexcept override;
-
-    void add_variable(const std::string_view name, VariablePtr variable) noexcept override;
+    [[nodiscard]] std::optional<Variable*> find_variable(
+        const std::string_view name) const noexcept override;
 };
 
 }  // namespace rain::lang::ast

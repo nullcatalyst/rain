@@ -16,7 +16,7 @@ class Parser {
     [[nodiscard]] util::Result<ast::TypePtr>       parse_type(Lexer& lexer);
     [[nodiscard]] util::Result<ast::ExpressionPtr> parse_expression(Lexer& lexer);
 
-    [[nodiscard]] util::Result<ParsedModule> parse(Lexer& lexer);
+    [[nodiscard]] util::Result<Module> parse(Lexer& lexer);
 };
 
 }  // namespace rain::lang

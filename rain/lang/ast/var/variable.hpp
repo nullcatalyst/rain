@@ -12,9 +12,7 @@ class Variable {
     virtual ~Variable() = default;
 
     [[nodiscard]] virtual std::string_view name() const noexcept = 0;
-    [[nodiscard]] virtual TypePtr          type() const noexcept = 0;
+    [[nodiscard]] virtual Type*            type() const noexcept = 0;
 };
-
-using VariablePtr = std::shared_ptr<Variable>;
 
 }  // namespace rain::lang::ast

@@ -6,58 +6,51 @@
 namespace rain::lang::ast {
 
 BuiltinScope::BuiltinScope() {
-    _bool_type = std::make_shared<OpaqueType>();
-    _i32_type  = std::make_shared<OpaqueType>();
-    _i64_type  = std::make_shared<OpaqueType>();
-    _f32_type  = std::make_shared<OpaqueType>();
-    _f64_type  = std::make_shared<OpaqueType>();
+    _bool_type = _owned_types.emplace(std::make_unique<OpaqueType>()).first->get();
+    _i32_type  = _owned_types.emplace(std::make_unique<OpaqueType>()).first->get();
+    _i64_type  = _owned_types.emplace(std::make_unique<OpaqueType>()).first->get();
+    _f32_type  = _owned_types.emplace(std::make_unique<OpaqueType>()).first->get();
+    _f64_type  = _owned_types.emplace(std::make_unique<OpaqueType>()).first->get();
 
-    _owned_types.emplace(_bool_type);
-    _owned_types.emplace(_i32_type);
-    _owned_types.emplace(_i64_type);
-    _owned_types.emplace(_f32_type);
-    _owned_types.emplace(_f64_type);
+    _named_types.emplace("bool", _bool_type);
+    _named_types.emplace("i32", _i32_type);
+    _named_types.emplace("i64", _i64_type);
+    _named_types.emplace("f32", _f32_type);
+    _named_types.emplace("f64", _f64_type);
 
-    _named_types.emplace("bool", _bool_type.get());
-    _named_types.emplace("i32", _i32_type.get());
-    _named_types.emplace("i64", _i64_type.get());
-    _named_types.emplace("f32", _f32_type.get());
-    _named_types.emplace("f64", _f64_type.get());
+#define ADD_BUILTIN_METHOD(name, callee_type, function_type, argument_types, impl)                 \
+    do {                                                                                           \
+        auto method = make_builtin_function_variable(name, function_type,                          \
+                                                     [](auto& builder, auto& arguments) { impl }); \
+        _methods.emplace(std::make_tuple(callee_type, argument_types, name), method.get());        \
+        _owned_variables.emplace(std::move(method));                                               \
+    } while (0)
 
     {
-        auto i32_binop_type =
-            get_function_type({_i32_type.get(), _i32_type.get()}, _i32_type.get());
+        auto  i32_binop_args = TypeList{_i32_type, _i32_type};
+        auto* i32_binop_type = get_function_type(i32_binop_args, _i32_type);
 
-        _methods.emplace(std::make_tuple(_i32_type.get(), "__add__"),
-                         make_builtin_function_variable(
-                             "__add__", i32_binop_type, [](auto& builder, auto& arguments) {
-                                 return builder.CreateAdd(arguments[0], arguments[1]);
-                             }));
-        _methods.emplace(std::make_tuple(_i32_type.get(), "__sub__"),
-                         make_builtin_function_variable(
-                             "__sub__", i32_binop_type, [](auto& builder, auto& arguments) {
-                                 return builder.CreateSub(arguments[0], arguments[1]);
-                             }));
-        _methods.emplace(std::make_tuple(_i32_type.get(), "__mul__"),
-                         make_builtin_function_variable(
-                             "__mul__", i32_binop_type, [](auto& builder, auto& arguments) {
-                                 return builder.CreateMul(arguments[0], arguments[1]);
-                             }));
-        _methods.emplace(std::make_tuple(_i32_type.get(), "__div__"),
-                         make_builtin_function_variable(
-                             "__div__", i32_binop_type, [](auto& builder, auto& arguments) {
-                                 return builder.CreateSDiv(arguments[0], arguments[1]);
-                             }));
-        _methods.emplace(std::make_tuple(_i32_type.get(), "__rem__"),
-                         make_builtin_function_variable(
-                             "__rem__", i32_binop_type, [](auto& builder, auto& arguments) {
-                                 return builder.CreateSRem(arguments[0], arguments[1]);
-                             }));
+        ADD_BUILTIN_METHOD("__add__", _i32_type, i32_binop_type, i32_binop_args,
+                           { return builder.CreateAdd(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__sub__", _i32_type, i32_binop_type, i32_binop_args,
+                           { return builder.CreateSub(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__mul__", _i32_type, i32_binop_type, i32_binop_args,
+                           { return builder.CreateMul(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__div__", _i32_type, i32_binop_type, i32_binop_args,
+                           { return builder.CreateSDiv(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__rem__", _i32_type, i32_binop_type, i32_binop_args,
+                           { return builder.CreateSRem(arguments[0], arguments[1]); });
+
+        auto  i32_as_f32_args = TypeList{_i32_type, _f32_type};
+        auto* i32_as_f32_type = get_function_type(i32_as_f32_args, _f32_type);
+        ADD_BUILTIN_METHOD("__as__", _i32_type, i32_as_f32_type, i32_as_f32_args, {
+            return builder.CreateSIToFP(arguments[0], llvm::Type::getFloatTy(builder.getContext()));
+        });
     }
 }
 
-FunctionTypePtr BuiltinScope::get_function_type(const TypeList& argument_types,
-                                                Type*           return_type) noexcept {
+FunctionType* BuiltinScope::get_function_type(const TypeList&      argument_types,
+                                              std::optional<Type*> return_type) noexcept {
 #if !defined(NDEBUG)
     // All of the argument types must be non-null.
     // The return type MAY BE null (in the case of a void function).
@@ -66,42 +59,12 @@ FunctionTypePtr BuiltinScope::get_function_type(const TypeList& argument_types,
         assert(argument_type != nullptr);
         assert(_owned_types.contains(argument_type));
     }
-    if (return_type != nullptr) {
-        assert(_owned_types.contains(return_type));
+    if (return_type.has_value()) {
+        assert(_owned_types.contains(return_type.value()));
     }
 #endif  // !defined(NDEBUG)
 
-    if (auto it = _function_types.find(std::make_tuple(argument_types, return_type));
-        it != _function_types.end()) {
-        return it->second;
-    }
-
-    auto function_type = std::make_shared<FunctionType>(argument_types, return_type);
-    _function_types.emplace(std::make_tuple(argument_types, return_type), function_type);
-    return function_type;
-}
-
-std::optional<TypePtr> BuiltinScope::find_type(const std::string_view name) const noexcept {
-    if (const auto it = _named_types.find(name); it != _named_types.end()) {
-        return it->second;
-    }
-    return std::nullopt;
-}
-
-std::optional<VariablePtr> BuiltinScope::find_method(const TypePtr&         callee_type,
-                                                     const std::string_view name) const noexcept {
-    if (const auto it = _methods.find(std::make_tuple(callee_type.get(), name));
-        it != _methods.end()) {
-        return it->second;
-    }
-    return std::nullopt;
-}
-
-std::optional<VariablePtr> BuiltinScope::find_variable(const std::string_view name) const noexcept {
-    if (const auto it = _variables.find(name); it != _variables.end()) {
-        return it->second;
-    }
-    return std::nullopt;
+    return Scope::get_function_type(argument_types, return_type);
 }
 
 }  // namespace rain::lang::ast

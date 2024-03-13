@@ -9,6 +9,4 @@ class Type {
     virtual ~Type() = default;
 };
 
-using TypePtr = std::shared_ptr<Type>;
-
 }  // namespace rain::lang::ast

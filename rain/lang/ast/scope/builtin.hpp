@@ -12,20 +12,13 @@
 namespace rain::lang::ast {
 
 class BuiltinScope : public Scope {
-    absl::flat_hash_map<std::string_view, TypePtr>                        _named_types;
-    absl::flat_hash_map<FunctionTypeKey, FunctionTypePtr>                 _function_types;
-    absl::flat_hash_map<std::tuple<Type*, std::string_view>, VariablePtr> _methods;
-    absl::flat_hash_map<std::string_view, VariablePtr>                    _variables;
-
-    absl::flat_hash_set<TypePtr> _owned_types;
-
     // Primitive types. These are stored separately for easy access (so that they don't need to be
     // looked up by name for every literal).
-    TypePtr _bool_type;
-    TypePtr _i32_type;
-    TypePtr _i64_type;
-    TypePtr _f32_type;
-    TypePtr _f64_type;
+    Type* _bool_type;
+    Type* _i32_type;
+    Type* _i64_type;
+    Type* _f32_type;
+    Type* _f64_type;
 
   public:
     BuiltinScope();
@@ -44,32 +37,24 @@ class BuiltinScope : public Scope {
         std::abort();
     }
 
-    [[nodiscard]] FunctionTypePtr get_function_type(const TypeList& argument_types,
-                                                    Type*           return_type) noexcept override;
+    [[nodiscard]] FunctionType* get_function_type(
+        const TypeList& argument_types, std::optional<Type*> return_type) noexcept override;
 
-    [[nodiscard]] std::optional<TypePtr> find_type(
-        const std::string_view name) const noexcept override;
-
-    [[nodiscard]] std::optional<VariablePtr> find_method(
-        const TypePtr& callee_type, const std::string_view name) const noexcept override;
-
-    [[nodiscard]] std::optional<VariablePtr> find_variable(
-        const std::string_view name) const noexcept override;
-
-    void add_type(const std::string_view name, TypePtr type) noexcept override {
+    void add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom types added to it");
         std::abort();
     }
 
-    void add_method(const TypePtr& callee_type, const std::string_view name,
-                    VariablePtr variable) noexcept override {
+    void add_method(Type* callee_type, const std::string_view name,
+                    std::unique_ptr<FunctionVariable> variable) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom methods added to it");
         std::abort();
     }
 
-    void add_variable(const std::string_view name, VariablePtr variable) noexcept override {
+    void add_variable(const std::string_view    name,
+                      std::unique_ptr<Variable> variable) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom variables added to it");
         std::abort();

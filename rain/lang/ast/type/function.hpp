@@ -22,6 +22,4 @@ class FunctionType : public Type {
     [[nodiscard]] Type* return_type() const noexcept { return _return_type; }
 };
 
-using FunctionTypePtr = std::shared_ptr<FunctionType>;
-
 }  // namespace rain::lang::ast
