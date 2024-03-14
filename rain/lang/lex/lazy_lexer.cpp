@@ -6,13 +6,13 @@
 
 namespace rain::lang::lex {
 
-Token LazyLexer::next() override {
+Token LazyLexer::next() {
     auto [token, state] = next_token(_source, _state);
     _state              = state;
     return token;
 }
 
-Token LazyLexer::peek() override {
+Token LazyLexer::peek() {
     auto [token, state] = next_token(_source, _state);
     return token;
 }

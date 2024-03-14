@@ -239,8 +239,6 @@ constexpr bool contains(const std::string_view s, const char* it) {
 
     // Save the start of the token
     const auto token_start = state.it;
-    const auto line        = state.line;
-    const auto column      = state.column;
 
     char       c         = *state.it;
     const auto next_char = [&]() -> char {
@@ -306,7 +304,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
     }
 
     // Operator
-    const auto operator_kind = find_operator(source, state);
+    const auto operator_kind = find_operator(state);
     if (operator_kind != TokenKind::Undefined) {
         const auto length = operator_length(operator_kind);
         state.it += length;
