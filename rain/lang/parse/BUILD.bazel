@@ -5,12 +5,20 @@ cc_library(
         "block.cpp",
         "function.cpp",
         "integer.cpp",
+        "list.hpp",
+        "module.cpp",
+        "struct.cpp",
     ],
     hdrs = [
         "all.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang/ast",
+        "//rain/lang/lex",
+        "//rain/util",
         "@abseil-cpp//absl/strings",
     ],
 )

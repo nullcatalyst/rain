@@ -26,9 +26,11 @@ class ModuleScope : public Scope {
     ~ModuleScope() override = default;
 
     [[nodiscard]] absl::Nullable<Scope*>      parent() const noexcept override { return &_builtin; }
-    [[nodiscard]] absl::Nonnull<ModuleScope*> module() noexcept override { return this; }
-    [[nodiscard]] absl::Nonnull<const ModuleScope*> module() const noexcept override {
-        return this;
+    [[nodiscard]] absl::Nonnull<ModuleScope*> module() const noexcept override {
+        return const_cast<ModuleScope*>(this);
+    }
+    [[nodiscard]] absl::Nonnull<BuiltinScope*> builtin() const noexcept override {
+        return &_builtin;
     }
 
     [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
@@ -38,7 +40,7 @@ class ModuleScope : public Scope {
         const std::string_view name) const noexcept override;
 
     [[nodiscard]] absl::Nullable<FunctionVariable*> find_method(
-        Type* callee_type, const TypeList& argument_types,
+        absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
         const std::string_view name) const noexcept override;
 
     [[nodiscard]] absl::Nullable<Variable*> find_variable(

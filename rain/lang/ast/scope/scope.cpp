@@ -27,27 +27,28 @@ absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument
     return function_type_ptr;
 }
 
-std::optional<Type*> Scope::find_type(const std::string_view name) const noexcept {
+absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexcept {
     if (const auto it = _named_types.find(name); it != _named_types.end()) {
         return it->second;
     }
-    return _builtin.find_type(name);
+    return nullptr;
 }
 
-std::optional<FunctionVariable*> Scope::find_method(Type*                  callee_type,
-                                                    const std::string_view name) const noexcept {
-    if (const auto it = _methods.find(std::make_tuple(callee_type.get(), name));
+absl::Nullable<FunctionVariable*> Scope::find_method(absl::Nonnull<Type*>   callee_type,
+                                                     const TypeList&        argument_types,
+                                                     const std::string_view name) const noexcept {
+    if (const auto it = _methods.find(std::make_tuple(callee_type, argument_types, name));
         it != _methods.end()) {
         return it->second;
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<Variable*> Scope::find_variable(const std::string_view name) const noexcept {
+absl::Nullable<Variable*> Scope::find_variable(const std::string_view name) const noexcept {
     if (const auto it = _named_variables.find(name); it != _named_variables.end()) {
         return it->second;
     }
-    return std::nullopt;
+    return nullptr;
 }
 
 void Scope::add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept {
@@ -55,14 +56,15 @@ void Scope::add_type(const std::string_view name, std::unique_ptr<Type> type) no
     _owned_types.emplace(std::move(type));
 }
 
-void Scope::add_method(Type* callee_type, const std::string_view name,
+void Scope::add_method(absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
+                       const std::string_view            name,
                        std::unique_ptr<FunctionVariable> method) noexcept {
-    _methods.emplace(std::make_tuple(callee_type, name), method.get());
+    _methods.emplace(std::make_tuple(callee_type, argument_types, name), method.get());
     _owned_variables.emplace(std::move(method));
 }
 
 void Scope::add_variable(const std::string_view name, std::unique_ptr<Variable> variable) noexcept {
-    _variables.emplace(name, variable.get());
+    _named_variables.emplace(name, variable.get());
     _owned_variables.emplace(std::move(variable));
 }
 }  // namespace rain::lang::ast

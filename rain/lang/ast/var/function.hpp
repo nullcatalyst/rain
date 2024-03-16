@@ -23,7 +23,9 @@ class FunctionVariable : public Variable {
 
     [[nodiscard]] virtual llvm::Value* build_call(
         llvm::IRBuilder<>&                        builder,
-        const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept;
+        const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept {
+        return nullptr;
+    }
 };
 
 }  // namespace rain::lang::ast

@@ -7,69 +7,61 @@
 
 namespace rain::lang::lex {
 
-class Location {
-  public:
-    const char*      _begin  = 0;
-    const char*      _end    = 0;
-    int              _line   = 0;
-    int              _column = 0;
-    std::string_view _source;
+struct Location {
+    const char*      begin  = 0;
+    const char*      end    = 0;
+    int              line   = 0;
+    int              column = 0;
+    std::string_view source;
 
   public:
     Location() = default;
     Location(const std::string_view source, const char* begin, const char* end, int line,
              int column)
-        : _begin(begin), _end(end), _line(line), _column(column), _source(source) {}
+        : begin(begin), end(end), line(line), column(column), source(source) {}
 
 #if defined(_MSC_VER)
     // The MSVC stdlib hdrs don't appear to allow implicit conversion from string_view::iterator to
     // const char* or vice versa. So explicitly add an overload for MSVC.
     Location(const std::string_view source, const std::string_view::iterator begin,
              const std::string_view::iterator end, int line, int column)
-        : _begin(&*begin), _end(&*end), _line(line), _column(column), _source(source) {}
+        : begin(&*begin), end(&*end), line(line), column(column), source(source) {}
 #endif  // defined(_MSC_VER)
 
-    [[nodiscard]] constexpr int line() const noexcept { return _line; }
-    [[nodiscard]] constexpr int column() const noexcept { return _column; }
-
-    [[nodiscard]] std::string_view substr() const noexcept {
-        return std::string_view{_begin, _end};
-    }
+    [[nodiscard]] std::string_view text() const noexcept { return std::string_view{begin, end}; }
 
     [[nodiscard]] Location merge(const Location& other) const noexcept {
 #if !defined(NDEBUG)
-        if (_source != other._source) {
+        if (source.data() != other.source.data() && source.size() != other.source.size()) {
             util::console_error(ANSI_RED, "cannot merge locations from different sources",
                                 ANSI_RESET);
             std::abort();
         }
 #endif  // !defined(NDEBUG)
 
-        const char* const begin = std::min(_begin, other._begin);
-        const char* const end   = std::max(_end, other._end);
-        return Location(_source, begin, end, std::min(_line, other._line),
-                        std::min(_column, other._column));
+        return Location(source, std::min(begin, other.begin), std::max(end, other.end),
+                        std::min(line, other.line), std::min(column, other.column));
     }
 
     [[nodiscard]] Location whole_line() const noexcept {
-        const char* line_start = _begin;
-        while (line_start > _source.data() && *line_start != '\n') {
+        const char* line_start = begin;
+        while (line_start > source.data() && *line_start != '\n') {
             --line_start;
         }
 
-        const char* line_end = _begin;
-        while (line_end < _source.data() + _source.size() && *line_end != '\n') {
+        const char* line_end = begin;
+        while (line_end < source.data() + source.size() && *line_end != '\n') {
             ++line_end;
         }
 
-        return Location(_source, line_start, line_end, _line, 1);
+        return Location(source, line_start, line_end, line, 1);
     }
 
     // Return the empty string after the location.
     // This is useful for error messages where we want to say that a specific token needs to follow
     // the previous token, or when encountering the end of the file.
     [[nodiscard]] Location empty_string_after() const {
-        return Location(_source, _end, _end, _line, _column + 1);
+        return Location(source, end, end, line, column + 1);
     }
 };
 

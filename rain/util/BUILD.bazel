@@ -4,9 +4,10 @@ cc_library(
         "colors.hpp",
         "defer.hpp",
         "log.hpp",
+        "maybe_owned_ptr.hpp",
         "result.hpp",
         "string.hpp",
-        # "twine.hpp",
+        "unreachable.hpp",
         "wasm.hpp",
     ],
     visibility = [

@@ -7,8 +7,6 @@
 
 #include "rain/lang/lex/token.hpp"
 
-namespace rain::lang::lex {
-
 namespace {
 
 constexpr bool contains(const std::string_view s, const char* it) {
@@ -16,6 +14,8 @@ constexpr bool contains(const std::string_view s, const char* it) {
 }
 
 }  // namespace
+
+namespace rain::lang::lex {
 
 [[nodiscard]] State skip_whitespace(const std::string_view source, State state) {
     if (state.it == nullptr || !contains(source, state.it)) [[unlikely]] {
@@ -55,7 +55,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
     return state;
 }
 
-[[nodiscard]] TokenKind check_keyword(std::string_view word) {
+[[nodiscard]] TokenKind find_keyword(std::string_view word) {
     constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
         // clang-format off
         // <keep-sorted>
@@ -224,12 +224,11 @@ constexpr bool contains(const std::string_view s, const char* it) {
     {
         // Skip whitespace and comments
         state = skip_whitespace(source, state);
-        state.index += 1;
 
         if (state.it == nullptr) [[unlikely]] {
             return std::make_tuple(
                 Token{
-                    .kind = TokenKind::Eof,
+                    .kind = TokenKind::EndOfFile,
                     .location =
                         Location(source, source.end(), source.end(), state.line, state.column),
                 },
@@ -238,7 +237,9 @@ constexpr bool contains(const std::string_view s, const char* it) {
     }
 
     // Save the start of the token
-    const auto token_start = state.it;
+    const auto start_it     = state.it;
+    const auto start_line   = state.line;
+    const auto start_column = state.column;
 
     char       c         = *state.it;
     const auto next_char = [&]() -> char {
@@ -258,7 +259,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
             return std::make_tuple(
                 Token{
                     .kind     = TokenKind::Integer,
-                    .location = Location(source, token_start, state.it, state.line, state.column),
+                    .location = Location(source, start_it, state.it, start_line, start_column),
                 },
                 state);
         }
@@ -273,7 +274,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
         return std::make_tuple(
             Token{
                 .kind     = TokenKind::Float,
-                .location = Location(source, token_start, state.it, state.line, state.column),
+                .location = Location(source, start_it, state.it, start_line, start_column),
             },
             state);
     }
@@ -284,13 +285,13 @@ constexpr bool contains(const std::string_view s, const char* it) {
             next_char();
         }
 
-        const auto identifier = std::string_view{token_start, state.it};
+        const auto identifier = std::string_view{start_it, state.it};
         const auto keyword    = find_keyword(identifier);
         if (keyword != TokenKind::Undefined) {
             return std::make_tuple(
                 Token{
                     .kind     = keyword,
-                    .location = Location(source, token_start, state.it, state.line, state.column),
+                    .location = Location(source, start_it, state.it, start_line, start_column),
                 },
                 state);
         }
@@ -298,7 +299,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
         return std::make_tuple(
             Token{
                 .kind     = TokenKind::Identifier,
-                .location = Location(source, token_start, state.it, state.line, state.column),
+                .location = Location(source, start_it, state.it, start_line, start_column),
             },
             state);
     }
@@ -313,7 +314,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
         return std::make_tuple(
             Token{
                 .kind     = operator_kind,
-                .location = Location(source, token_start, state.it, state.line, state.column),
+                .location = Location(source, start_it, state.it, start_line, start_column),
             },
             state);
     }
@@ -322,7 +323,7 @@ constexpr bool contains(const std::string_view s, const char* it) {
     return std::make_tuple(
         Token{
             .kind     = TokenKind::Undefined,
-            .location = Location(source, token_start, state.it, state.line, state.column),
+            .location = Location(source, start_it, state.it, start_line, start_column),
         },
         state);
 }

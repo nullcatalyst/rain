@@ -28,7 +28,7 @@ constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
     // clang-format on
 };
 
-TokenKind find_keyword(std::string_view source) {
+TokenKind find_keyword(const std::string_view source) {
     // Binary search through the list of keywords (this is why the list MUST BE sorted!).
     const auto it =
         std::lower_bound(KEYWORDS.begin(), KEYWORDS.end(), source,

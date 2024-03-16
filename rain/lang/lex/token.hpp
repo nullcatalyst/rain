@@ -9,7 +9,7 @@ namespace rain::lang::lex {
 
 enum TokenKind : uint32_t {
     Undefined,
-    Eof,
+    EndOfFile,
 
     // Atoms and literals
     Identifier,
@@ -63,6 +63,8 @@ enum TokenKind : uint32_t {
     Greater,
     GreaterEqual,
 
+    // Yes, we all agree that these are bad names for these tokens, that there are "more correct"
+    // names, but can we also agree that we all know (unamibiguously) what these names refer to?
     LRoundBracket,
     RRoundBracket,
     LSquareBracket,
@@ -77,7 +79,7 @@ struct Token {
     TokenKind kind = TokenKind::Undefined;
     Location  location;
 
-    constexpr std::string_view text() const { return location.substr(); }
+    constexpr std::string_view text() const { return location.text(); }
 };
 
 }  // namespace rain::lang::lex

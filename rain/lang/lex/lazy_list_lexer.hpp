@@ -36,7 +36,7 @@ class LazyListLexer : public Lexer {
             return _tokens[_next_token++];
         }
 
-        if (_tokens.size() > 0 && _tokens.back().kind == TokenKind::Eof) {
+        if (_tokens.size() > 0 && _tokens.back().kind == TokenKind::EndOfFile) {
             return _tokens.back();
         }
 
@@ -50,7 +50,7 @@ class LazyListLexer : public Lexer {
             return _tokens[_next_token];
         }
 
-        if (_tokens.size() > 0 && _tokens.back().kind == TokenKind::Eof) {
+        if (_tokens.size() > 0 && _tokens.back().kind == TokenKind::EndOfFile) {
             return _tokens.back();
         }
 

@@ -14,6 +14,8 @@ class IntegerExpression : public Expression {
     ~IntegerExpression() override = default;
 
     [[nodiscard]] constexpr uint64_t value() const noexcept { return _value; }
+
+    util::Result<void> validate(Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

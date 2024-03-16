@@ -18,7 +18,7 @@ class BuiltinFunctionVariable : public FunctionVariable {
         : FunctionVariable(name, std::move(type)), _build_fn(std::move(build_fn)) {}
     ~BuiltinFunctionVariable() override = default;
 
-    [[nodiscard]] virtual llvm::Value* build_call(
+    [[nodiscard]] llvm::Value* build_call(
         llvm::IRBuilder<>&                        builder,
         const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept override {
         return _build_fn(builder, arguments);

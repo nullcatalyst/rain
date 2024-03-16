@@ -2,20 +2,42 @@
 
 #include <memory>
 
-#include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/util/result.hpp"
 
+// Expressions
+#include "rain/lang/ast/expr/block.hpp"
+#include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/integer.hpp"
+#include "rain/lang/ast/expr/module.hpp"
+#include "rain/lang/ast/expr/type.hpp"
+
+// Types
+#include "rain/lang/ast/type/struct.hpp"
+#include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/type/unresolved.hpp"
+
+// Scopes
+#include "rain/lang/ast/scope/builtin.hpp"
+#include "rain/lang/ast/scope/scope.hpp"
+
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
-                                                                    Scope&      scope);
+util::Result<std::unique_ptr<ast::Module>> parse_module(lex::Lexer&        lexer,
+                                                        ast::BuiltinScope& scope);
 
-util::Result<std::unique_ptr<ast::Expression>> parse_module(lex::Lexer& lexer, BuiltinScope& scope);
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
+
 util::Result<std::unique_ptr<ast::IntegerExpression>>  parse_integer(lex::Lexer& lexer,
-                                                                     Scope&      scope);
-util::Result<std::unique_ptr<ast::IntegerExpression>>  parse_block(lex::Lexer& lexer, Scope& scope);
+                                                                     ast::Scope& scope);
+util::Result<std::unique_ptr<ast::BlockExpression>>    parse_block(lex::Lexer& lexer,
+                                                                   ast::Scope& scope);
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
-                                                                      Scope&      scope);
+                                                                      ast::Scope& scope);
+
+util::Result<std::unique_ptr<ast::Type>>       parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, ast::Scope& scope);
 
 }  // namespace rain::lang::parse

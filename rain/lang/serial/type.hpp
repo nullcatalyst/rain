@@ -2,27 +2,9 @@
 
 #include <cstdint>
 
+#include "rain/lang/serial/kind.hpp"
+
 namespace rain::lang::serial {
-
-enum class TypeKind {
-    Unknown,
-
-    Null,
-    Builtin,
-
-    Function,
-    Optional,
-    Pointer,
-    Array,
-    Slice,
-    Tuple,
-
-    Alias,
-    Struct,
-    Interface,
-
-    Count,
-};
 
 struct BuiltinType {
     uint32_t type_id;

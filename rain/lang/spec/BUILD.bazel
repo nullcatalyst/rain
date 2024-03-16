@@ -1,0 +1,15 @@
+cc_test(
+    name = "spec",
+    size = "small",
+    timeout = "short",
+    srcs = [
+        "lexer.spec.cpp",
+        "rain.spec.cpp",
+    ],
+    deps = [
+        "//rain/lang/ast",
+        "//rain/lang/lex",
+        "//rain/lang/parse",
+        "@googletest//:gtest_main",
+    ],
+)

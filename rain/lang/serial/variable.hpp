@@ -2,17 +2,9 @@
 
 #include <cstdint>
 
+#include "rain/lang/serial/kind.hpp"
+
 namespace rain::lang::serial {
-
-enum class VariableKind {
-    Unknown,
-
-    Local,
-    Function,
-    Export,
-
-    Count,
-};
 
 struct LocalVariable {
     uint32_t type_id;

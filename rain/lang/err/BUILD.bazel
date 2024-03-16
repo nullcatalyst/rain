@@ -10,7 +10,7 @@ cc_library(
         "//rain:__subpackages__",
     ],
     deps = [
-        "//rain/lang:location",
+        "//rain/lang/lex",
         "//rain/util",
         "@abseil-cpp//absl/strings",
     ],

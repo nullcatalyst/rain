@@ -1,51 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <string_view>
 
-#include "rain/crypto/sha256.hpp"
-#include "rain/err/simple.hpp"
-#include "rain/util/result.hpp"
+#include "rain/lang/serial/kind.hpp"
 
 namespace rain::lang::serial {
-
-////////////////////////////////////////////////////////////////
-// Expressions
-////////////////////////////////////////////////////////////////
-
-enum class ExpressionKind {
-    Unknown,
-
-    // Literals
-    Null,
-    True,
-    False,
-    Integer,
-    Float,
-    Variable,
-    Tuple,
-
-    // Operations
-    Ctor,
-    Call,
-    Exec,
-    Member,
-    UnaryOperator,
-    BinaryOperator,
-    Parenthesis,
-
-    // Control flow
-    Block,
-    If,
-    Return,
-
-    // Declarations
-    Function,
-    Let,
-
-    Count,
-};
 
 ////////////////////////////////
 // Literals

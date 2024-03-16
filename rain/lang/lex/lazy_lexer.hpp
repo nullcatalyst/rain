@@ -24,6 +24,12 @@ class LazyLexer : public Lexer {
     static LazyLexer using_source(std::string_view source,
                                   std::string_view file_name = "<unknown>") {
         LazyLexer new_lexer;
+        new_lexer._state = State{
+            .it     = source.data(),
+            .line   = 1,
+            .column = 1,
+            .index  = 0,
+        };
         new_lexer._source    = source;
         new_lexer._file_name = file_name;
         return new_lexer;

@@ -9,9 +9,13 @@ cc_library(
         "expression.hpp",
         "header.hpp",
         "header_v0.hpp",
+        "kind.hpp",
         "module.hpp",
         "type.hpp",
         "variable.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
     ],
     deps = [
         "//rain/crypto",

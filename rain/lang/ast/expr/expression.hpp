@@ -2,19 +2,22 @@
 
 #include <cstdint>
 
+#include "absl/base/nullability.h"
+#include "rain/lang/ast/scope/scope.hpp"
+#include "rain/util/result.hpp"
+
 namespace rain::lang::ast {
 
 class Expression {
-    uint32_t _start_token_index;
-    uint32_t _end_token_index;
+  protected:
+    absl::Nullable<Type*> _type = nullptr;
 
   public:
     virtual ~Expression() = default;
 
-    [[nodiscard]] constexpr uint32_t start_token_index() const noexcept {
-        return _start_token_index;
-    }
-    [[nodiscard]] constexpr uint32_t end_token_index() const noexcept { return _end_token_index; }
+    [[nodiscard]] virtual bool compile_time_capable() const noexcept { return false; }
+
+    virtual util::Result<void> validate(Scope& scope) = 0;
 };
 
 }  // namespace rain::lang::ast

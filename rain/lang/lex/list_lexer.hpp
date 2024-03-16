@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rain/lang/lex/lazy_lexer.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/lang/lex/token.hpp"
 
@@ -23,15 +24,34 @@ class ListLexer : public Lexer {
 
         do {
             new_lexer._tokens.push_back(lexer.next());
-        } while (new_lexer._tokens.back().kind != TokenKind::Eof);
+        } while (new_lexer._tokens.back().kind != TokenKind::EndOfFile);
 
         return new_lexer;
+    }
+
+    static ListLexer from_tokens(std::vector<Token> tokens,
+                                 std::string_view   file_name = "<unknown>") {
+        ListLexer new_lexer;
+        new_lexer._tokens    = std::move(tokens);
+        new_lexer._file_name = file_name;
+        return new_lexer;
+    }
+
+    static ListLexer using_source(std::string_view source,
+                                  std::string_view file_name = "<unknown>") {
+        LazyLexer lazy_lexer = LazyLexer::using_source(source, file_name);
+        return from_lexer(lazy_lexer);
     }
 
     [[nodiscard]] constexpr std::string_view source() const noexcept override { return _source; }
     [[nodiscard]] constexpr std::string_view file_name() const noexcept override {
         return _file_name;
     }
+
+    [[nodiscard]] State save_state() const noexcept override {
+        return State{.index = static_cast<int>(_next_token)};
+    }
+    void restore_state(State state) noexcept override { _next_token = state.index; }
 
     Token next() override {
         if (_next_token < _tokens.size()) {

@@ -18,13 +18,17 @@ class BlockExpression : public Expression {
   public:
     BlockExpression(Scope& parent) : _scope(parent) {}
 
-    void add_expression(std::unique_ptr<Expression> expression) noexcept {
-        _expressions.push_back(std::move(expression));
-    }
-
     [[nodiscard]] constexpr const decltype(_expressions)& expressions() const noexcept {
         return _expressions;
     }
+
+    [[nodiscard]] constexpr BlockScope& scope() noexcept { return _scope; }
+
+    void add_expression(std::unique_ptr<Expression> expression) {
+        _expressions.push_back(std::move(expression));
+    }
+
+    util::Result<void> validate(Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast
