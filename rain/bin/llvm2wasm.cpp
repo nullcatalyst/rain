@@ -1,11 +1,10 @@
 #include "rain/bin/common.hpp"
-#include "rain/code/initialize.hpp"
-
-#define RAIN_INCLUDE_LINK
-#include "rain/rain.hpp"
+#include "rain/lang/code/target/default.hpp"
+#include "rain/link.hpp"
+#include "rain/util/wasm.hpp"
 
 WASM_EXPORT("init")
-void initialize() { rain::code::initialize_llvm(); }
+void initialize() { rain::lang::code::initialize_llvm(); }
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
@@ -13,9 +12,12 @@ void compile(const char* source_start, const char* source_end) {
     prev_result.reset();
 
     // Link the LLVM IR into WebAssembly.
-    auto link_result = rain::link(std::string_view{source_start, source_end});
+    auto llvm_target_machine = rain::lang::code::target_machine();
+    auto link_result = rain::link(std::string_view{source_start, source_end}, *llvm_target_machine);
     if (!link_result.has_value()) {
-        rain::throw_error(link_result.error()->message());
+        const auto msg = link_result.error()->message();
+        callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());
+        return;
     }
 
     prev_result = std::move(link_result).value();

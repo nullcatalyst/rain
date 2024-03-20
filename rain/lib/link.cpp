@@ -1,16 +1,11 @@
+#include "rain/link.hpp"
+
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "rain/lang/code/target/wasm/linker.hpp"
 #include "rain/lang/err/simple.hpp"
-#include "rain/lang/lexer.hpp"
-#include "rain/lang/parser.hpp"
-#include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
 #include "rain/util/result.hpp"
-
-#define RAIN_INCLUDE_LINK
-#include "rain/rain.hpp"
 
 namespace rain {
 
@@ -35,23 +30,33 @@ class LlvmBuffer : public Buffer {
 
 }  // namespace
 
-util::Result<std::unique_ptr<Buffer>> link(rain::code::Module& module) {
-    rain::code::Linker linker;
-    linker.add(module);
+util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module) {
+#if defined(RAIN_TARGET_WASM)
+    lang::code::wasm::Linker linker;
+    linker.add(module.llvm_module(), module.llvm_target_machine());
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());
+#else
+#error "Unsupported target"
+#endif
 }
 
-util::Result<std::unique_ptr<Buffer>> link(llvm::Module& module) {
-    rain::code::Linker linker;
-    linker.add(module);
+util::Result<std::unique_ptr<Buffer>> link(llvm::Module&        llvm_module,
+                                           llvm::TargetMachine& llvm_target_machine) {
+#if defined(RAIN_TARGET_WASM)
+    lang::code::wasm::Linker linker;
+    linker.add(llvm_module, llvm_target_machine);
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());
+#else
+#error "Unsupported target"
+#endif
 }
 
-util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir) {
+util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir,
+                                           llvm::TargetMachine&   llvm_target_machine) {
     // NOTE: Make sure that the LLVMContext lives as long as the Module.
     std::shared_ptr<llvm::LLVMContext> llvm_ctx = std::make_shared<llvm::LLVMContext>();
 
@@ -59,14 +64,10 @@ util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir) {
     auto                          llvm_buffer = llvm::MemoryBuffer::getMemBufferCopy(llvm_ir);
     std::unique_ptr<llvm::Module> llvm_module = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
     if (llvm_module == nullptr) {
-        return ERR_PTR(err::SimpleError, llvm_err.getMessage().str());
+        return ERR_PTR(lang::err::SimpleError, llvm_err.getMessage().str());
     }
 
-    rain::code::Linker linker;
-    linker.add(*llvm_module);
-    auto result = linker.link();
-    FORWARD_ERROR(result);
-    return std::make_unique<LlvmBuffer>(std::move(result).value());
+    return link(*llvm_module, llvm_target_machine);
 }
 
 }  // namespace rain
