@@ -1,56 +1,13 @@
 cc_library(
-    name = "location",
-    hdrs = [
-        "location.hpp",
-    ],
-    visibility = [
-        "//rain:__subpackages__",
-    ],
-)
-
-cc_library(
     name = "lang",
-    srcs = [
-        "lexer.cpp",
-        "module.cpp",
-        "parse+common.hpp",
-        "parse+ctrl.cpp",
-        "parse+lit.cpp",
-        "parse+op.cpp",
-        "parse+type.cpp",
-        "parser.cpp",
-    ],
-    hdrs = [
-        "lexer.hpp",
-        "lexer+util.hpp",
-        "module.hpp",
-        "parser.hpp",
-        "token.hpp",
-    ],
     visibility = [
         "//rain:__subpackages__",
     ],
     deps = [
-        ":location",
-        "//rain/ast",
-        "//rain/err",
-        "//rain/util",
-        "@abseil-cpp//absl/strings",
-    ],
-)
-
-cc_test(
-    name = "test",
-    srcs = [
-        "lexer.test.cpp",
-        "location.test.cpp",
-        "parser.test.cpp",
-    ],
-    visibility = [
-        "//rain:__subpackages__",
-    ],
-    deps = [
-        ":lang",
-        "@googletest//:gtest_main",
+        "//rain/lang/ast",
+        "//rain/lang/code",
+        "//rain/lang/lex",
+        "//rain/lang/parse",
+        "//rain/lang/serial",
     ],
 )
