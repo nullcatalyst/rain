@@ -12,10 +12,11 @@ cc_library(
         "compile/module.cpp",
         "compile/type.cpp",
         "context.cpp",
+        "module.cpp",
     ],
     hdrs = [
         "context.hpp",
-        # "module.hpp",
+        "module.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

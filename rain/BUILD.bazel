@@ -18,15 +18,16 @@ cc_library(
 # size of binaries that don't need that part of the library.
 
 # For reference, linking the wasm2wat binary with LLVM (even though it is not used at all) increases
-# the binary size from 398KiB to 9.4MiB -- note the different order of magnitude, a 24x increase.
+# the binary size from 398KiB to 9.4MiB -- making it 24x the size!
 
 cc_library(
     name = "lib_compile",
     srcs = ["lib/rain+compile.cpp"],
-    hdrs = ["rain.hpp"],
+    hdrs = [
+        "buffer.hpp",
+        "compile.hpp",
+    ],
     deps = [
-        "//rain/code",
-        "//rain/err",
         "//rain/lang",
         "//rain/util",
     ],
@@ -35,10 +36,11 @@ cc_library(
 cc_library(
     name = "lib_link",
     srcs = ["lib/rain+link.cpp"],
-    hdrs = ["rain.hpp"],
+    hdrs = [
+        "buffer.hpp",
+        "link.hpp",
+    ],
     deps = [
-        "//rain/code",
-        "//rain/err",
         "//rain/lang",
         "//rain/util",
         "@llvm-project//llvm:IRReader",
@@ -48,9 +50,12 @@ cc_library(
 cc_library(
     name = "lib_decompile",
     srcs = ["lib/rain+decompile.cpp"],
-    hdrs = ["rain.hpp"],
+    hdrs = [
+        "buffer.hpp",
+        "decompile.hpp",
+    ],
     deps = [
-        "//rain/err",
+        "//rain/lang/err",
         "//rain/util",
         "@wabt",
     ],

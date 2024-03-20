@@ -14,20 +14,20 @@
 #include "llvm/Transforms/Vectorize/LoopVectorize.h"
 #include "llvm/Transforms/Vectorize/SLPVectorizer.h"
 #include "llvm/Transforms/Vectorize/VectorCombine.h"
-#include "rain/ast/expr/all.hpp"
-#include "rain/ast/type/all.hpp"
-#include "rain/code/target.hpp"
-#include "rain/err/simple.hpp"
+#include "rain/lang/code/target/wasm/target.hpp"
 
 namespace rain::lang::code {
 
-Module::Module(std::shared_ptr<llvm::LLVMContext> ctx, std::unique_ptr<llvm::Module> mod,
-               Scope exported_scope)
-    : _llvm_ctx(std::move(ctx)),
-      _llvm_mod(std::move(mod)),
-      _exported_scope(std::move(exported_scope)) {
-    // _mod->setDataLayout(_target_machine->createDataLayout());
-    // _mod->setTargetTriple(_target_machine->getTargetTriple().str());
+Module::Module() : Module(wasm::target_machine()) {}
+
+Module::Module(std::unique_ptr<llvm::TargetMachine> llvm_target_machine)
+    : _llvm_ctx(std::make_unique<llvm::LLVMContext>()),
+      _llvm_module(std::make_unique<llvm::Module>("rain", *_llvm_ctx)),
+      _llvm_target_machine(std::move(llvm_target_machine)) {
+    assert(_llvm_target_machine);
+
+    _llvm_module->setDataLayout(_llvm_target_machine->createDataLayout());
+    _llvm_module->setTargetTriple(_llvm_target_machine->getTargetTriple().str());
 }
 
 void Module::optimize() {
@@ -68,32 +68,31 @@ void Module::optimize() {
     // llvm::ModulePassManager mpm = pb.buildModuleInlinerPipeline(
     //     llvm::OptimizationLevel::Os, llvm::ThinOrFullLTOPhase::ThinLTOPreLink);
     mpm.addPass(llvm::createModuleToFunctionPassAdaptor(std::move(fpm)));
-    mpm.run(*_llvm_mod, mam);
+    mpm.run(*_llvm_module, mam);
 }
 
 util::Result<std::string> Module::emit_ir() const {
     std::string              str;
     llvm::raw_string_ostream os(str);
-    _llvm_mod->print(os, nullptr);
+    _llvm_module->print(os, nullptr);
     return os.str();
 }
 
-// util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
-//     llvm::SmallString<0>      code;
-//     llvm::raw_svector_ostream ostream(code);
-//     llvm::legacy::PassManager pass_manager;
+util::Result<std::unique_ptr<llvm::MemoryBuffer>> Module::emit_obj() const {
+    llvm::SmallString<0>      code;
+    llvm::raw_svector_ostream ostream(code);
+    llvm::legacy::PassManager pass_manager;
 
-//     auto target_machine = wasm_target_machine();
-//     if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-//                                             llvm::CodeGenFileType::CGFT_ObjectFile)) {
-//         std::abort();
-//     }
-//     pass_manager.run(*_llvm_mod);
+    auto target_machine = _llvm_target_machine.get();
+    if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                            llvm::CodeGenFileType::CGFT_ObjectFile)) {
+        std::abort();
+    }
+    pass_manager.run(*_llvm_module);
 
-//     // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
-//     // always up to date, so there is no need to call flush().
-//     // ostream.flush();
-//     return llvm::MemoryBuffer::getMemBufferCopy(code.str());
-// }
+    // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
+    // always up to date, so there is no need to call flush() before returning the string.
+    return llvm::MemoryBuffer::getMemBufferCopy(code.str());
+}
 
 }  // namespace rain::lang::code

@@ -7,10 +7,7 @@ cc_test(
         "rain.spec.cpp",
     ],
     deps = [
-        "//rain/lang/ast",
-        "//rain/lang/code",
-        "//rain/lang/lex",
-        "//rain/lang/parse",
+        "//rain/lang",
         "@googletest//:gtest_main",
     ],
 )

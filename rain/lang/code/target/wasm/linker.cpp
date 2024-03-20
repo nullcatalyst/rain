@@ -7,11 +7,11 @@
 #include "lld/wasm/InputFiles.h"
 #include "lld/wasm/MarkLive.h"
 #include "lld/wasm/SymbolTable.h"
-#include "rain/code/target.hpp"
+#include "llvm/Target/TargetMachine.h"
 #include "rain/lang/err/simple.hpp"
 #include "rain/util/defer.hpp"
 
-namespace rain::lang::code {
+namespace rain::lang::code::wasm {
 
 using namespace lld;
 using namespace lld::wasm;
@@ -436,17 +436,17 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     return writeResult();
 }
 
-util::Result<void> Linker::add(llvm::Module& llvm_mod) {
+util::Result<void> Linker::add(llvm::Module&        llvm_module,
+                               llvm::TargetMachine& llvm_target_machine) {
     llvm::SmallString<0>      code;
     llvm::raw_svector_ostream ostream(code);
     llvm::legacy::PassManager pass_manager;
 
-    auto target_machine = wasm_target_machine();
-    if (target_machine->addPassesToEmitFile(pass_manager, ostream, nullptr,
-                                            llvm::CodeGenFileType::CGFT_ObjectFile)) {
+    if (llvm_target_machine.addPassesToEmitFile(pass_manager, ostream, nullptr,
+                                                llvm::CodeGenFileType::CGFT_ObjectFile)) {
         return ERR_PTR(err::SimpleError, "failed to emit object file");
     }
-    pass_manager.run(llvm_mod);
+    pass_manager.run(llvm_module);
 
     // Based on the documentation for llvm::raw_svector_ostream, the underlying SmallString is
     // always up to date, so there is no need to call flush().
@@ -455,4 +455,4 @@ util::Result<void> Linker::add(llvm::Module& llvm_mod) {
     return {};
 }
 
-}  // namespace rain::lang::code
+}  // namespace rain::lang::code::wasm

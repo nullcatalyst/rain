@@ -1,6 +1,6 @@
 #include "rain/bin/common.hpp"
 #include "rain/bin/compile_time_functions.hpp"
-#include "rain/code/initialize.hpp"
+#include "rain/lang/code/target/default.hpp"
 
 #define RAIN_INCLUDE_COMPILE
 #define RAIN_INCLUDE_LINK
@@ -9,7 +9,7 @@
 
 WASM_EXPORT("init")
 void initialize() {
-    rain::code::initialize_llvm();
+    rain::lang::code::target::initialize_llvm();
 
     load_external_functions_into_llvm();
 }

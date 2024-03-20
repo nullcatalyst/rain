@@ -1,22 +1,35 @@
 cc_library(
+    name = "interpreter",
+    srcs = ["interpreter.cpp"],
+    hdrs = ["interpreter.hpp"],
+    visibility = ["//rain:__subpackages__"],
+    deps = [
+        "//rain/lang/err",
+        "//rain/util",
+        "@abseil-cpp//absl/strings",
+        "@llvm-project//llvm:Interpreter",
+    ],
+)
+
+cc_library(
     name = "wasm",
     srcs = [
-        # "wasm/linker.cpp",
+        "wasm/linker.cpp",
         "wasm/target.cpp",
-        # "wasm/writer.cpp",
+        "wasm/writer.cpp",
     ],
     hdrs = [
         "default.hpp",
-        # "wasm/linker.hpp",
+        "wasm/linker.hpp",
         "wasm/target.hpp",
     ],
     defines = ["RAIN_TARGET_WASM=1"],
     visibility = ["//rain:__subpackages__"],
     deps = [
+        ":interpreter",
         "//rain/util",
         "@llvm-project//lld:Common",
         "@llvm-project//lld:Wasm",
-        "@llvm-project//llvm:Interpreter",
         "@llvm-project//llvm:Linker",
         "@llvm-project//llvm:WebAssemblyAsmParser",
         "@llvm-project//llvm:WebAssemblyCodeGen",

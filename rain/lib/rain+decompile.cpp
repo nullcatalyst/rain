@@ -2,7 +2,7 @@
 #include <span>
 #include <vector>
 
-#include "rain/err/simple.hpp"
+#include "rain/lang/err/simple.hpp"
 #include "rain/util/colors.hpp"
 #include "rain/util/log.hpp"
 #include "rain/util/result.hpp"
@@ -23,6 +23,8 @@
 #include "rain/rain.hpp"
 
 namespace rain {
+
+using namespace lang;
 
 namespace {
 

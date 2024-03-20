@@ -1,11 +1,13 @@
 #pragma once
 
+#include <vector>
+
 #include "lld/Common/CommonLinkerContext.h"
 #include "lld/Common/Memory.h"
 #include "lld/wasm/InputChunks.h"
 #include "lld/wasm/InputElement.h"
 #include "llvm/Support/MemoryBuffer.h"
-#include "rain/lang/code/module.hpp"
+#include "rain/util/result.hpp"
 
 namespace rain::lang::code::wasm {
 
@@ -31,8 +33,7 @@ class Linker {
     void add(std::unique_ptr<llvm::MemoryBuffer> memory_buffer) {
         _files.emplace_back(std::move(memory_buffer));
     }
-    util::Result<void> add(llvm::Module& llvm_mod);
-    util::Result<void> add(Module& mod) { return add(mod.llvm_module()); }
+    util::Result<void> add(llvm::Module& llvm_module, llvm::TargetMachine& llvm_target_machine);
 
     [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> link();
 };

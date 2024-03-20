@@ -4,7 +4,9 @@
 
 #include "llvm/ExecutionEngine/GenericValue.h"
 #include "llvm/IR/DerivedTypes.h"
-#include "rain/code/compiler.hpp"
+#include "rain/lang/code/target/interpreter.hpp"
+#include "rain/util/colors.hpp"
+#include "rain/util/log.hpp"
 
 namespace {
 
@@ -46,23 +48,23 @@ llvm::GenericValue lle_X_sin(llvm::FunctionType*                llvm_function_ty
 #undef ASSERT_ARGUMENT_COUNT
 
 void load_external_functions_into_llvm() {
-    rain::code::Compiler::use_external_function("__builtin_sqrt", lle_X_sqrt);
-    rain::code::Compiler::use_external_function("__builtin_cos", lle_X_cos);
-    rain::code::Compiler::use_external_function("__builtin_sin", lle_X_sin);
+    rain::lang::code::target::use_external_function("__builtin_sqrt", lle_X_sqrt);
+    rain::lang::code::target::use_external_function("__builtin_cos", lle_X_cos);
+    rain::lang::code::target::use_external_function("__builtin_sin", lle_X_sin);
 }
 
-void add_external_functions_to_compiler(rain::code::Compiler& compiler) {
-    const auto& scope = compiler.builtin_scope();
-    const auto  f64   = scope.find_named_type("f64");
-    assert(f64 != nullptr && "f64 type not found");
+// void add_external_functions_to_compiler(rain::code::Compiler& compiler) {
+//     const auto& scope = compiler.builtin_scope();
+//     const auto  f64   = scope.find_named_type("f64");
+//     assert(f64 != nullptr && "f64 type not found");
 
-    auto fn_f64__f64_result = compiler.get_function_type({f64}, f64);
-    assert(fn_f64__f64_result.has_value() && "fn (f64) -> f64 function type not found");
-    const auto fn_f64__f64 = std::move(fn_f64__f64_result).value();
+//     auto fn_f64__f64_result = compiler.get_function_type({f64}, f64);
+//     assert(fn_f64__f64_result.has_value() && "fn (f64) -> f64 function type not found");
+//     const auto fn_f64__f64 = std::move(fn_f64__f64_result).value();
 
-    compiler.declare_external_function("math", "sqrt", "__builtin_sqrt", fn_f64__f64);
-    compiler.declare_external_function("math", "cos", "__builtin_cos", fn_f64__f64);
-    compiler.declare_external_function("math", "sin", "__builtin_sin", fn_f64__f64);
-}
+//     compiler.declare_external_function("math", "sqrt", "__builtin_sqrt", fn_f64__f64);
+//     compiler.declare_external_function("math", "cos", "__builtin_cos", fn_f64__f64);
+//     compiler.declare_external_function("math", "sin", "__builtin_sin", fn_f64__f64);
+// }
 
 }  // namespace

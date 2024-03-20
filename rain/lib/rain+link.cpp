@@ -1,8 +1,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
-#include "rain/code/linker.hpp"
-#include "rain/err/simple.hpp"
+#include "rain/lang/code/target/wasm/linker.hpp"
+#include "rain/lang/err/simple.hpp"
 #include "rain/lang/lexer.hpp"
 #include "rain/lang/parser.hpp"
 #include "rain/util/colors.hpp"
@@ -57,13 +57,13 @@ util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir) {
 
     llvm::SMDiagnostic            llvm_err;
     auto                          llvm_buffer = llvm::MemoryBuffer::getMemBufferCopy(llvm_ir);
-    std::unique_ptr<llvm::Module> llvm_mod    = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
-    if (llvm_mod == nullptr) {
+    std::unique_ptr<llvm::Module> llvm_module = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
+    if (llvm_module == nullptr) {
         return ERR_PTR(err::SimpleError, llvm_err.getMessage().str());
     }
 
     rain::code::Linker linker;
-    linker.add(*llvm_mod);
+    linker.add(*llvm_module);
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());

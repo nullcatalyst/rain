@@ -1,14 +1,14 @@
 cc_library(
     name = "lex",
     srcs = [
-        "lazy_lexer.cpp",
+        "lazy.cpp",
         "tokenize.cpp",
     ],
     hdrs = [
-        "lazy_lexer.hpp",
-        "lazy_list_lexer.hpp",
+        "lazy.hpp",
+        "lazy_list.hpp",
         "lexer.hpp",
-        "list_lexer.hpp",
+        "list.hpp",
         "location.hpp",
         "state.hpp",
         "token.hpp",

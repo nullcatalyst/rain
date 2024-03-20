@@ -1,37 +1,12 @@
-#include "llvm/ExecutionEngine/GenericValue.h"
 #include "rain/bin/common.hpp"
-#include "rain/code/initialize.hpp"
-
-#define RAIN_INCLUDE_COMPILE
-#include "rain/rain.hpp"
-
-namespace {
-
-llvm::GenericValue lle_X_sqrt(llvm::FunctionType*                llvm_function_type,
-                              llvm::ArrayRef<llvm::GenericValue> llvm_arguments) {
-    if (llvm_arguments.size() != 1) {
-        rain::util::console_error(ANSI_RED, "bad builtin function call: \"sqrt\": ", ANSI_RESET,
-                                  "expected 1 argument, got ", llvm_arguments.size());
-        std::abort();
-    }
-
-    const double value = llvm_arguments[0].DoubleVal;
-
-    llvm::GenericValue result;
-    result.DoubleVal = std::sqrt(value);
-    return result;
-}
-
-}  // namespace
+#include "rain/compile.hpp"
+#include "rain/lang/code/target/default.hpp"
+#include "rain/util/wasm.hpp"
 
 WASM_EXPORT("init")
 void initialize() {
-    rain::code::initialize_llvm();
-
-    // Add external functions here.
-    // This is required if there are any external functions that will be called at compile time.
-
-    // rain::code::Compiler::use_external_function("sqrt", lle_X_sqrt);
+    rain::lang::code::initialize_llvm();
+    // load_external_functions_into_llvm();
 }
 
 WASM_EXPORT("compile")
@@ -44,13 +19,13 @@ void compile(const char* source_start, const char* source_end) {
     if (!compile_result.has_value()) {
         rain::throw_error(compile_result.error()->message());
     }
-    auto rain_mod = std::move(compile_result).value();
+    auto module = std::move(compile_result).value();
 
     // Optimize the module.
-    rain_mod.optimize();
+    module.optimize();
 
     // Get the LLVM IR.
-    auto ir_result = rain_mod.emit_ir();
+    auto ir_result = module.emit_ir();
     if (!ir_result.has_value()) {
         rain::throw_error(ir_result.error()->message());
     }
@@ -63,27 +38,37 @@ void compile(const char* source_start, const char* source_end) {
 #if !defined(__wasm__)
 
 int main(const int argc, const char* const argv[]) {
-    const std::string source = R"(fn fib(n: i32) -> i32 {
-    if n <= 1 {
-        return n
-    }
-    return fib(n - 1) + fib(n - 2)
+    //     const std::string source = R"(
+    // fn fib(n: i32) -> i32 {
+    //     if n <= 1 {
+    //         return n
+    //     }
+    //     return fib(n - 1) + fib(n - 2)
+    // }
+
+    // export fn double(n: i32) -> i32 {
+    //     let n = n * 2
+    //     return n
+    // }
+
+    // export fn run() -> i32 {
+    //     let i = double(42)
+    //     return #fib(6)
+    // }
+    // )";
+    const std::string_view code = R"(
+fn i32.double(self) -> i32 {
+    2 * self
 }
 
-export fn double(n: i32) -> i32 {
-    let n = n * 2
-    return n
-}
-
-export fn run() -> i32 {
-    let i = double(42)
-    return #fib(6)
+fn do_something() -> i32 {
+    4.double()
 }
 )";
-    rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
+    rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, code, "\n");
 
     initialize();
-    compile(&*source.cbegin(), &*source.cend());
+    compile(&*code.cbegin(), &*code.cend());
     return 0;
 }
 

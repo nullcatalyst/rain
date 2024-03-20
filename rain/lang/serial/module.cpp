@@ -1,7 +1,7 @@
 #include "rain/lang/serial/module.hpp"
 
 #include "rain/crypto/sha256.hpp"
-#include "rain/err/simple.hpp"
+#include "rain/lang/err/simple.hpp"
 #include "rain/lang/serial/header_v0.hpp"
 
 namespace rain::lang::serial {
