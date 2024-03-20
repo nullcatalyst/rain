@@ -11,27 +11,17 @@
 namespace rain {
 
 enum Action {
-    Undefined,
+    Error     = -1,
+    Undefined = 0,
     CompileRain,
     CompileLLVM,
     DecompileWasm,
 };
 
-[[noreturn]] WASM_IMPORT("env", "throw") void throw_error(const char* msg_start,
-                                                          const char* msg_end);
-[[noreturn]] inline void throw_error(const std::string_view msg) {
-    throw_error(msg.data(), msg.data() + msg.size());
-}
-
 WASM_IMPORT("env", "callback")
 void callback(uint32_t action, const char* msg_start, const char* msg_end);
 
 #if !defined(__wasm__)
-
-[[noreturn]] void throw_error(const char* msg_start, const char* msg_end) {
-    util::console_error(ANSI_RED, "error: ", ANSI_RESET, std::string_view{msg_start, msg_end});
-    std::abort();
-}
 
 void callback(uint32_t action, const char* msg_start, const char* msg_end) {
     util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET, std::string_view{msg_start, msg_end},

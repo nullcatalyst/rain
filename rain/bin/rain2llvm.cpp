@@ -17,7 +17,9 @@ void compile(const char* source_start, const char* source_end) {
     // Compile the source code.
     auto compile_result = rain::compile(std::string_view{source_start, source_end});
     if (!compile_result.has_value()) {
-        rain::throw_error(compile_result.error()->message());
+        const auto msg = compile_result.error()->message();
+        callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());
+        return;
     }
     auto module = std::move(compile_result).value();
 
@@ -27,7 +29,9 @@ void compile(const char* source_start, const char* source_end) {
     // Get the LLVM IR.
     auto ir_result = module.emit_ir();
     if (!ir_result.has_value()) {
-        rain::throw_error(ir_result.error()->message());
+        const auto msg = ir_result.error()->message();
+        callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());
+        return;
     }
 
     prev_result = std::move(ir_result).value();
