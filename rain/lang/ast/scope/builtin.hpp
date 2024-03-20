@@ -44,22 +44,23 @@ class BuiltinScope : public Scope {
     [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
         const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
 
-    void add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept override {
+    absl::Nonnull<Type*> add_type(const std::string_view name,
+                                  std::unique_ptr<Type>  type) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom types added to it");
         std::abort();
     }
 
-    void add_method(absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
-                    const std::string_view            name,
-                    std::unique_ptr<FunctionVariable> variable) noexcept override {
+    absl::Nonnull<FunctionVariable*> add_method(
+        absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
+        const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom methods added to it");
         std::abort();
     }
 
-    void add_variable(const std::string_view    name,
-                      std::unique_ptr<Variable> variable) noexcept override {
+    absl::Nonnull<Variable*> add_variable(const std::string_view    name,
+                                          std::unique_ptr<Variable> variable) noexcept override {
         util::console_error(
             "the builtin scope is immutable and cannot have custom variables added to it");
         std::abort();

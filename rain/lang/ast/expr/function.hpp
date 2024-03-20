@@ -42,8 +42,14 @@ class FunctionExpression : public Expression {
     /** The function body. */
     std::unique_ptr<BlockExpression> _block;
 
+    /**
+     * If the function has a name, this will be non-null and will point to the variable that
+     * references it.
+     */
+    absl::Nullable<FunctionVariable*> _variable = nullptr;
+
     /** The type of the function. */
-    absl::Nonnull<FunctionType*> _type;
+    absl::Nullable<FunctionType*> _type = nullptr;
 
   public:
     FunctionExpression(std::optional<std::string_view> name, ArgumentList arguments,
@@ -74,6 +80,8 @@ class FunctionExpression : public Expression {
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
 
     [[nodiscard]] absl::Nonnull<BlockExpression*> block() const noexcept { return _block.get(); }
+
+    [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         // TODO: Should this always return true?

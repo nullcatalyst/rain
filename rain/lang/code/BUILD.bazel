@@ -1,0 +1,35 @@
+cc_library(
+    name = "code",
+    srcs = [
+        "compile/all.hpp",
+        "compile/any.cpp",
+        "compile/binary_operator.cpp",
+        "compile/block.cpp",
+        "compile/call.cpp",
+        "compile/function.cpp",
+        "compile/identifier.cpp",
+        "compile/integer.cpp",
+        "compile/module.cpp",
+        "compile/type.cpp",
+        "context.cpp",
+    ],
+    hdrs = [
+        "context.hpp",
+        # "module.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang/ast",
+        "//rain/lang/code/target:wasm",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@llvm-project//llvm:CodeGen",
+        "@llvm-project//llvm:ExecutionEngine",
+        "@llvm-project//llvm:Interpreter",
+        "@llvm-project//llvm:MC",
+        "@llvm-project//llvm:common_transforms",
+    ],
+)

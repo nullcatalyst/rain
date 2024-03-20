@@ -2,6 +2,8 @@
 
 #include "gtest/gtest.h"
 #include "rain/lang/ast/scope/builtin.hpp"
+#include "rain/lang/code/compile/all.hpp"
+#include "rain/lang/code/target/default.hpp"
 #include "rain/lang/lex/lazy_lexer.hpp"
 #include "rain/lang/lex/list_lexer.hpp"
 #include "rain/lang/parse/all.hpp"
@@ -43,6 +45,14 @@ fn do_something() -> i32 {
 
     auto validate_result = mod->validate();
     ASSERT_TRUE(check_success(validate_result));
+
+    code::initialize_llvm();
+
+    code::Context ctx;
+    code::compile_module(ctx, *mod);
+    // ASSERT_TRUE(check_success(compile_result));
+
+    std::cout << ctx.emit_ir() << std::endl;
 
     // auto struct_point = mod->expressions()[0].get();
     // ASSERT_EQ(struct_point->kind(), ast::ExpressionKind::Struct);

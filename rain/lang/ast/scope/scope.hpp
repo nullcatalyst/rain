@@ -48,6 +48,15 @@ class Scope {
   public:
     virtual ~Scope() = default;
 
+    [[nodiscard]] constexpr const absl::flat_hash_set<std::unique_ptr<Type>>& owned_types()
+        const noexcept {
+        return _owned_types;
+    }
+    [[nodiscard]] constexpr const absl::flat_hash_set<std::unique_ptr<Variable>>& owned_variables()
+        const noexcept {
+        return _owned_variables;
+    }
+
     [[nodiscard]] virtual absl::Nullable<Scope*>       parent() const noexcept  = 0;
     [[nodiscard]] virtual absl::Nonnull<ModuleScope*>  module() const noexcept  = 0;
     [[nodiscard]] virtual absl::Nonnull<BuiltinScope*> builtin() const noexcept = 0;
@@ -65,14 +74,15 @@ class Scope {
     [[nodiscard]] virtual absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
 
-    virtual void add_type(const std::string_view name, std::unique_ptr<Type> type) noexcept;
+    virtual absl::Nonnull<Type*> add_type(const std::string_view name,
+                                          std::unique_ptr<Type>  type) noexcept;
 
-    virtual void add_method(Type* callee_type, const TypeList& argument_types,
-                            const std::string_view            name,
-                            std::unique_ptr<FunctionVariable> method) noexcept;
+    virtual absl::Nonnull<FunctionVariable*> add_method(
+        Type* callee_type, const TypeList& argument_types, const std::string_view name,
+        std::unique_ptr<FunctionVariable> method) noexcept;
 
-    virtual void add_variable(const std::string_view    name,
-                              std::unique_ptr<Variable> variable) noexcept;
+    virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
+                                                  std::unique_ptr<Variable> variable) noexcept;
 
   protected:
     [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type(

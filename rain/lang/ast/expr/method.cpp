@@ -20,8 +20,8 @@ util::Result<void> MethodExpression::validate(Scope& scope) {
     }
     _callee_type = std::move(callee_type).value();
 
-    scope.add_method(_callee_type.get_nonnull(), argument_types, _name.value(),
-                     std::make_unique<FunctionVariable>(_name.value(), _type));
+    _variable = scope.add_method(_callee_type.get_nonnull(), argument_types, _name.value(),
+                                 std::make_unique<FunctionVariable>(_name.value(), _type));
 
     return {};
 }

@@ -11,7 +11,8 @@ class CallExpression : public Expression {
     std::unique_ptr<Expression>                       _callee;
     llvm::SmallVector<std::unique_ptr<Expression>, 4> _arguments;
 
-    absl::Nullable<Type*> _type = nullptr;
+    absl::Nullable<FunctionVariable*> _function = nullptr;
+    absl::Nullable<Type*>             _type     = nullptr;
 
   public:
     CallExpression(std::unique_ptr<Expression>                       callee,
@@ -28,6 +29,8 @@ class CallExpression : public Expression {
         const {
         return _arguments;
     }
+
+    [[nodiscard]] absl::Nullable<FunctionVariable*> function() const noexcept { return _function; }
 
     util::Result<void> validate(Scope& scope) override;
 };

@@ -8,6 +8,7 @@ cc_test(
     ],
     deps = [
         "//rain/lang/ast",
+        "//rain/lang/code",
         "//rain/lang/lex",
         "//rain/lang/parse",
         "@googletest//:gtest_main",

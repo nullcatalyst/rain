@@ -26,6 +26,9 @@ class IdentifierExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr std::string_view      name() const noexcept { return _name; }
+    [[nodiscard]] constexpr absl::Nullable<Variable*> variable() const noexcept {
+        return _variable;
+    }
 
     util::Result<void> validate(Scope& scope) override;
 };

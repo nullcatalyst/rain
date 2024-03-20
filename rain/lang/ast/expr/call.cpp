@@ -66,7 +66,8 @@ util::Result<void> CallExpression::validate(Scope& scope) {
             }
         }
 
-        _type = method->function_type()->return_type();
+        _function = method;
+        _type     = method->function_type()->return_type();
     } else {
         return ERR_PTR(err::SimpleError, "callee is not a member expression");
     }
