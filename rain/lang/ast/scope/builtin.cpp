@@ -2,8 +2,7 @@
 
 #include "rain/lang/ast/type/opaque.hpp"
 #include "rain/lang/ast/var/builtin_function.hpp"
-//
-// #include <cassert>
+#include "rain/lang/ast/var/function.hpp"
 
 namespace rain::lang::ast {
 

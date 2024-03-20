@@ -4,7 +4,6 @@
 #include <string_view>
 
 #include "absl/base/nullability.h"
-#include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/util/result.hpp"
 
@@ -23,3 +22,5 @@ class Variable {
 };
 
 }  // namespace rain::lang::ast
+
+#include "rain/lang/ast/scope/scope.hpp"

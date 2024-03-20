@@ -86,4 +86,5 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
     _owned_variables.emplace(std::move(variable));
     return variable_ptr;
 }
+
 }  // namespace rain::lang::ast

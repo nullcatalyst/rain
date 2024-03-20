@@ -91,5 +91,7 @@ class Scope {
 
 }  // namespace rain::lang::ast
 
+#include "rain/lang/ast/type/function.hpp"
 #include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"

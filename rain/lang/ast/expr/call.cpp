@@ -60,9 +60,14 @@ util::Result<void> CallExpression::validate(Scope& scope) {
             method = scope.find_method(member->lhs()->type(), argument_types, member->name());
 
             if (method == nullptr) {
+#if !defined(NDEBUG)
                 return ERR_PTR(err::SimpleError,
                                absl::StrCat("no method named .", member->name(), " found on type ",
                                             member->lhs()->type()->debug_name()));
+#else
+                return ERR_PTR(err::SimpleError,
+                               absl::StrCat("no method named .", member->name(), " found on type"));
+#endif  // !defined(NDEBUG)
             }
         }
 
