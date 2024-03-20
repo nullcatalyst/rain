@@ -45,6 +45,7 @@ class Context {
     void set_llvm_value(const ast::Variable* variable, llvm::Value* llvm_value);
     [[nodiscard]] llvm::Value* llvm_value(const ast::Variable* variable) const;
 
+    void        optimize();
     std::string emit_ir() const;
 };
 

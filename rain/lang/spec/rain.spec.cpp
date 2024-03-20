@@ -52,6 +52,7 @@ fn do_something() -> i32 {
     code::compile_module(ctx, *mod);
     // ASSERT_TRUE(check_success(compile_result));
 
+    ctx.optimize();
     std::cout << ctx.emit_ir() << std::endl;
 
     // auto struct_point = mod->expressions()[0].get();
