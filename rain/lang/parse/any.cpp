@@ -10,23 +10,27 @@ namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
                                                                     ast::Scope& scope) {
-    const auto token = lexer.peek();
-    switch (token.kind) {
-        case lex::TokenKind::Integer:
-            return parse_integer(lexer, scope);
+    auto lhs = parse_atom(lexer, scope);
+    FORWARD_ERROR(lhs);
 
-        case lex::TokenKind::LCurlyBracket:
-            return parse_block(lexer, scope);
+    return parse_rhs(lexer, scope, std::move(lhs).value());
+    // const auto token = lexer.peek();
+    // switch (token.kind) {
+    //     case lex::TokenKind::Integer:
+    //         return parse_integer(lexer, scope);
 
-        case lex::TokenKind::Fn:
-            return parse_function(lexer, scope);
+    //     case lex::TokenKind::LCurlyBracket:
+    //         return parse_block(lexer, scope);
 
-        default:
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
-                           absl::StrCat("unexpected token \"", token.text(), "\""));
-    }
+    //     case lex::TokenKind::Fn:
+    //         return parse_function(lexer, scope);
 
-    util::unreachable();
+    //     default:
+    //         return ERR_PTR(err::SyntaxError, lexer, token.location,
+    //                        absl::StrCat("unexpected token \"", token.text(), "\""));
+    // }
+
+    // util::unreachable();
 }
 
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope) {

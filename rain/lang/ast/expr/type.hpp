@@ -17,6 +17,10 @@ class TypeExpression : public Expression {
   public:
     TypeExpression(absl::Nonnull<Type*> declare_type) : _declare_type(declare_type) {}
 
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
+        return serial::ExpressionKind::Type;
+    }
+    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return nullptr; }
     [[nodiscard]] absl::Nonnull<Type*> declare_type() const noexcept { return _declare_type; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }

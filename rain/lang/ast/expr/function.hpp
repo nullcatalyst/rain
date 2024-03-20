@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "absl/base/nullability.h"
+#include "llvm/ADT/SmallVector.h"
 #include "rain/lang/ast/expr/block.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/var/function.hpp"
@@ -18,11 +19,15 @@ struct FunctionArgument {
 };
 
 class FunctionExpression : public Expression {
+  public:
+    using ArgumentList = llvm::SmallVector<absl::Nonnull<Variable*>, 4>;
+
+  protected:
     /** The name of the function, if it has one. */
     std::optional<std::string_view> _name;
 
     /** The set of arguments passed to the function. */
-    std::vector<FunctionArgument> _arguments;
+    ArgumentList _arguments;
 
     /**
      * The return type of the function, or null if the function does not return a value.
@@ -37,22 +42,22 @@ class FunctionExpression : public Expression {
     /** The function body. */
     std::unique_ptr<BlockExpression> _block;
 
+    /** The type of the function. */
+    absl::Nonnull<FunctionType*> _type;
+
   public:
-    FunctionExpression(std::optional<std::string_view> name,
-                       std::vector<FunctionArgument> arguments, absl::Nullable<Type*> return_type,
+    FunctionExpression(std::optional<std::string_view> name, ArgumentList arguments,
+                       util::MaybeOwnedPtr<Type>        return_type,
                        std::unique_ptr<BlockExpression> block)
         : _name(std::move(name)),
           _arguments(std::move(arguments)),
-          _return_type(return_type),
+          _return_type(std::move(return_type)),
           _block(std::move(block)) {}
 
-    [[nodiscard]] bool compile_time_capable() const noexcept override {
-        // TODO: Should this always return true?
-        // Sure, we can always compile the function, but the function could access global mutable
-        // variables. We should probably check for that.
-        return true;
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
+        return serial::ExpressionKind::Function;
     }
-
+    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr bool   is_named() const noexcept { return _name.has_value(); }
     [[nodiscard]] std::string_view name_or_empty() const noexcept {
         return _name.value_or(std::string_view());
@@ -62,17 +67,25 @@ class FunctionExpression : public Expression {
         return _return_type != nullptr;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> return_type() const noexcept {
-        return _return_type;
+        return _return_type.get();
     }
 
     [[nodiscard]] constexpr bool has_arguments() const noexcept { return !_arguments.empty(); }
-    [[nodiscard]] constexpr const std::vector<FunctionArgument>& arguments() const noexcept {
-        return _arguments;
+    [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
+
+    [[nodiscard]] absl::Nonnull<BlockExpression*> block() const noexcept { return _block.get(); }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        // TODO: Should this always return true?
+        // Sure, we can always compile the function, but the function could access global mutable
+        // variables. We should probably check for that.
+        return true;
     }
 
-    [[nodiscard]] absl::Nullable<BlockExpression*> block() const noexcept { return _block.get(); }
-
     util::Result<void> validate(Scope& scope) override;
+
+  protected:
+    util::Result<void> _validate_without_adding_to_scope(Scope& scope);
 };
 
 }  // namespace rain::lang::ast

@@ -6,40 +6,44 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/hash/hash.h"
-#include "rain/lang/ast/type/function.hpp"
-#include "rain/lang/ast/type/type.hpp"
-#include "rain/lang/ast/var/function.hpp"
-#include "rain/lang/ast/var/variable.hpp"
+#include "llvm/ADT/SmallVector.h"
 
 namespace rain::lang::ast {
+
+class Type;
+class FunctionType;
+
+class Variable;
+class FunctionVariable;
 
 class ModuleScope;
 class BuiltinScope;
 
-class TypeList : public llvm::SmallVector<absl::Nonnull<Type*>, 4> {
-  public:
-    using llvm::SmallVector<Type*, 4>::SmallVector;
-
-    template <typename H>
-    friend H AbslHashValue(H h, const TypeList& type_list) {
-        return h.combine_contiguous(std::move(h), type_list.data(), type_list.size());
-    }
-};
-
-using FunctionTypeKey = std::tuple<TypeList, Type*>;
-
 class Scope {
+  public:
+    class TypeList : public llvm::SmallVector<absl::Nonnull<Type*>, 4> {
+      public:
+        using llvm::SmallVector<Type*, 4>::SmallVector;
+
+        template <typename H>
+        friend H AbslHashValue(H h, const TypeList& type_list) {
+            return h.combine_contiguous(std::move(h), type_list.data(), type_list.size());
+        }
+    };
+
   protected:
+    using FunctionTypeKey =
+        std::tuple<TypeList /*argument_types*/, absl::Nullable<Type*> /*return_type*/>;
+    using MethodVariableKey = std::tuple<absl::Nonnull<Type*> /*callee*/, TypeList /*arguments*/,
+                                         std::string_view /*name*/>;
+
     absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>        _named_types;
     absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>> _function_types;
     absl::flat_hash_set<std::unique_ptr<Type>>                         _owned_types;
 
-    absl::flat_hash_map<std::tuple<absl::Nonnull<Type*> /*callee*/, TypeList /*arguments*/,
-                                   std::string_view /*name*/>,
-                        absl::Nonnull<FunctionVariable*>>
-                                                                    _methods;
-    absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>> _named_variables;
-    absl::flat_hash_set<std::unique_ptr<Variable>>                  _owned_variables;
+    absl::flat_hash_map<MethodVariableKey, absl::Nonnull<FunctionVariable*>> _method_variables;
+    absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>          _named_variables;
+    absl::flat_hash_set<std::unique_ptr<Variable>>                           _owned_variables;
 
   public:
     virtual ~Scope() = default;
@@ -76,3 +80,6 @@ class Scope {
 };
 
 }  // namespace rain::lang::ast
+
+#include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/var/variable.hpp"

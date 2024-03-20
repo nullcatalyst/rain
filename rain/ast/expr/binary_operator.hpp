@@ -7,6 +7,7 @@ namespace rain::ast {
 
 enum class BinaryOperatorKind {
     Unknown,
+    Assign,
     Add,
     Subtract,
     Multiply,

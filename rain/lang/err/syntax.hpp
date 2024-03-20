@@ -21,7 +21,8 @@ class SyntaxError : public util::Error {
     ~SyntaxError() override = default;
 
     [[nodiscard]] std::string message() const noexcept override {
-        const auto  source_line = _location.whole_line().text();
+        const auto source_line = _location.whole_line().text();
+
         std::string under_line;
         under_line.reserve(source_line.size() + ANSI_GREEN.size() + ANSI_RESET.size());
 
@@ -35,9 +36,20 @@ class SyntaxError : public util::Error {
         }
         under_line += ANSI_RESET;
 
+#define RAIN_PRINT_ERROR_MULTILINE 1
+#if RAIN_PRINT_ERROR_MULTILINE
+        const auto previous_line = _location.previous_line();
+        const auto next_line     = _location.next_line();
+        return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _location.line, ":",
+                            _location.column, ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET,
+                            ANSI_BOLD, _msg, ANSI_RESET, "\n", previous_line.text(), source_line,
+                            "\n", under_line, "\n", next_line.text(),
+                            (next_line.text().empty() ? "" : "\n"));
+#else
         return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _location.line, ":",
                             _location.column, ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET,
                             ANSI_BOLD, _msg, ANSI_RESET, "\n", source_line, "\n", under_line, "\n");
+#endif  // RAIN_PRINT_ERROR_MULTILINE
     }
 };
 

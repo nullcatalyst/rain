@@ -11,9 +11,9 @@ struct BuiltinType {
 };
 
 struct FunctionType {
+    uint32_t argument_type_start;
+    uint32_t argument_type_end;
     uint32_t return_type_id;
-    uint32_t parameter_type_start;
-    uint32_t parameter_type_end;
 };
 
 struct OptionalType {

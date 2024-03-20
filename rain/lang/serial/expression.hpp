@@ -78,9 +78,9 @@ struct BlockExpression {
 };
 
 struct FunctionExpression {
-    uint32_t type_id;        // FunctionType
-    uint32_t parameters_id;  // Tuple
-    uint32_t body_id;        // Block
+    uint32_t type_id;       // FunctionType
+    uint32_t arguments_id;  // Tuple
+    uint32_t body_id;       // Block
 };
 
 struct IfExpression {

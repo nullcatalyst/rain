@@ -4,6 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}",
+                "${workspaceFolder}/third_party/tl_expected",
                 "${workspaceFolder}/external/_main~_repo_rules~wabt/include",
                 "${workspaceFolder}/external/abseil-cpp~",
                 "${workspaceFolder}/external/google_benchmark~/benchmark/include",

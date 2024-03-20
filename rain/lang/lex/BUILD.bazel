@@ -21,3 +21,16 @@ cc_library(
         "//rain/util",
     ],
 )
+
+cc_test(
+    name = "test",
+    size = "small",
+    timeout = "short",
+    srcs = [
+        "location.test.cpp",
+    ],
+    deps = [
+        ":lex",
+        "@googletest//:gtest_main",
+    ],
+)

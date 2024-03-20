@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "rain/lang/ast/expr/method.hpp"
+#include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/lang/parse/all.hpp"
@@ -58,8 +59,12 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
                        "expected '(' before function arguments");
     }
 
+    auto  body       = std::make_unique<ast::BlockExpression>(*module_scope);
+    auto& body_scope = body->scope();
+
     // Check if the method takes a 'self' argument.
-    bool has_self_argument = false;
+    bool                                                has_self_argument = false;
+    llvm::SmallVector<absl::Nonnull<ast::Variable*>, 4> arguments;
     if (callee_type != nullptr) {
         if (auto self_token = lexer.peek(); self_token.kind == lex::TokenKind::Self) {
             lexer.next();  // Consume the 'self' token
@@ -76,36 +81,39 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             }
 
             has_self_argument = true;
+
+            auto self_argument = std::make_unique<ast::BlockVariable>("self", callee_type.get());
+            arguments.push_back(self_argument.get());
+            body_scope.add_variable("self", std::move(self_argument));
         }
     }
 
-    std::vector<ast::FunctionArgument> arguments;
-    auto                               result = parse_list(
+    auto result = parse_list(
         lexer, lex::TokenKind::Comma, lex::TokenKind::RRoundBracket,
         [&](lex::Lexer& lexer) -> util::Result<void> {
             const auto argument_name = lexer.next();
             if (argument_name.kind != lex::TokenKind::Identifier) {
                 return ERR_PTR(err::SyntaxError, lexer, argument_name.location,
-                                                             "expected identifier for function argument name");
+                               "expected identifier for function argument name");
             }
 
             if (const auto colon_token = lexer.next(); colon_token.kind != lex::TokenKind::Colon) {
                 return ERR_PTR(err::SyntaxError, lexer, colon_token.location,
-                                                             "expected ':' between argument name and argument type");
+                               "expected ':' between argument name and argument type");
             }
 
             auto argument_type = parse_any_type(lexer, scope);
             FORWARD_ERROR(argument_type);
 
-            arguments.emplace_back(ast::FunctionArgument{
-                                              .name = argument_name.text(),
-                                              .type = std::move(argument_type).value(),
-            });
+            auto argument = std::make_unique<ast::BlockVariable>(argument_name.text(),
+                                                                 std::move(argument_type).value());
+            arguments.push_back(argument.get());
+            body_scope.add_variable(argument_name.text(), std::move(argument));
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
             return ERR_PTR(err::SyntaxError, lexer, token.location,
-                                                         "expected ',' or ')' after function argument");
+                           "expected ',' or ')' after function argument");
         });
     FORWARD_ERROR(result);
 
@@ -120,16 +128,30 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         return_type = std::move(return_type_result).value();
     }
 
-    auto body = parse_block(lexer, *module_scope);
-    FORWARD_ERROR(body);
+    if (const auto lbracket_token = lexer.next();
+        lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
+        // This function should only be called if we already know the next token starts a block.
+        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location,
+                       "expected '{' before function body");
+    }
+
+    auto body_result = parse_many(
+        lexer, lex::TokenKind::RCurlyBracket, [&](lex::Lexer& lexer) -> util::Result<void> {
+            auto expression_result = parse_any_expression(lexer, body_scope);
+            FORWARD_ERROR(expression_result);
+            auto expression = std::move(expression_result).value();
+            body->add_expression(std::move(expression));
+            return {};
+        });
+    FORWARD_ERROR(body_result);
 
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(std::move(callee_type), fn_name.value(),
                                                        std::move(arguments), std::move(return_type),
-                                                       std::move(body).value(), has_self_argument);
+                                                       std::move(body), has_self_argument);
     }
-    return std::make_unique<ast::FunctionExpression>(
-        std::move(fn_name), std::move(arguments), std::move(return_type), std::move(body).value());
+    return std::make_unique<ast::FunctionExpression>(std::move(fn_name), std::move(arguments),
+                                                     std::move(return_type), std::move(body));
 }
 
 }  // namespace rain::lang::parse

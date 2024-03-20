@@ -6,6 +6,9 @@
 #include "rain/lang/lex/list_lexer.hpp"
 #include "rain/lang/parse/all.hpp"
 
+using namespace rain;
+using namespace rain::lang;
+
 TEST(Lang, struct) {
     //     const std::string_view code = R"(
     // struct Point {
@@ -24,10 +27,11 @@ TEST(Lang, struct) {
 fn i32.double(self) -> i32 {
     2 * self
 }
-)";
 
-    using namespace rain;
-    using namespace rain::lang;
+fn do_something() -> i32 {
+    4.double()
+}
+)";
 
     auto              lexer = lex::LazyLexer::using_source(code);
     ast::BuiltinScope builtin_scope;
@@ -36,6 +40,9 @@ fn i32.double(self) -> i32 {
 
     auto mod = std::move(module_result).value();
     ASSERT_EQ(mod->expressions().size(), 2);
+
+    auto validate_result = mod->validate();
+    ASSERT_TRUE(check_success(validate_result));
 
     // auto struct_point = mod->expressions()[0].get();
     // ASSERT_EQ(struct_point->kind(), ast::ExpressionKind::Struct);

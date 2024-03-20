@@ -31,6 +31,61 @@ enum class ExpressionKind {
     // Declarations
     Function,
     Let,
+    Type,
+
+    Count,
+};
+
+enum class UnaryOperatorKind {
+    Unknown,
+
+    // Arithmetic
+    Positive,
+    Negative,
+
+    // Logical
+    Not,
+
+    // Bitwise
+    BitwiseNot,
+
+    Count,
+};
+
+enum class BinaryOperatorKind {
+    Unknown,
+
+    // Assignment
+    Assign,
+
+    // Arithmetic
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
+
+    // Comparison
+    Equal,
+    NotEqual,
+    Less,
+    Greater,
+    LessEqual,
+    GreaterEqual,
+
+    // Logical
+    And,
+    Or,
+    Not,
+    Xor,
+
+    // Bitwise
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseNot,
+    LeftShift,
+    RightShift,
 
     Count,
 };
@@ -51,6 +106,8 @@ enum class TypeKind {
     Alias,
     Struct,
     Interface,
+
+    Unresolved,
 
     Count,
 };

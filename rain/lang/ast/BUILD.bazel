@@ -1,46 +1,25 @@
 cc_library(
     name = "ast",
-    srcs = [
-        "expr/block.cpp",
-        "expr/function.cpp",
-        "expr/integer.cpp",
-        "scope/block.cpp",
-        "scope/builtin.cpp",
-        "scope/module.cpp",
-        "scope/scope.cpp",
-    ],
-    hdrs = [
-        "expr/block.hpp",
-        "expr/expression.hpp",
-        "expr/function.hpp",
-        "expr/integer.hpp",
-        "expr/method.hpp",
-        "expr/module.hpp",
-        "expr/type.hpp",
-        "scope/block.hpp",
-        "scope/builtin.hpp",
-        "scope/module.hpp",
-        "scope/scope.hpp",
-        "type/function.hpp",
-        "type/opaque.hpp",
-        "type/struct.hpp",
-        "type/type.hpp",
-        "type/unresolved.hpp",
-        "var/builtin_function.hpp",
-        "var/function.hpp",
-        "var/variable.hpp",
-    ],
     visibility = [
         "//rain:__subpackages__",
     ],
     deps = [
-        "//rain/lang/err",
-        "//rain/lang/serial",
-        "//rain/util",
-        "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/container:flat_hash_set",
-        "@llvm-project//llvm:Core",
-        "@llvm-project//llvm:Support",
+        "//rain/lang/ast/expr",
+        "//rain/lang/ast/scope",
+        "//rain/lang/ast/type",
+        "//rain/lang/ast/var",
+    ],
+)
+
+cc_library(
+    name = "hdrs",
+    visibility = [
+        ":__subpackages__",
+    ],
+    deps = [
+        "//rain/lang/ast/expr:hdrs",
+        "//rain/lang/ast/scope:hdrs",
+        "//rain/lang/ast/type:hdrs",
+        "//rain/lang/ast/var:hdrs",
     ],
 )

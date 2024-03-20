@@ -1,0 +1,46 @@
+cc_library(
+    name = "var",
+    srcs = [
+        "block.cpp",
+        "builtin_function.cpp",
+        "function.cpp",
+        "variable.cpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang/ast:hdrs",
+        "//rain/lang/err",
+        "//rain/lang/serial",
+        "//rain/util",
+        "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@llvm-project//llvm:Core",
+        "@llvm-project//llvm:Support",
+    ],
+)
+
+cc_library(
+    name = "hdrs",
+    hdrs = [
+        "block.hpp",
+        "builtin_function.hpp",
+        "function.hpp",
+        "variable.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang/err",
+        "//rain/lang/serial",
+        "//rain/util",
+        "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@llvm-project//llvm:Core",
+        "@llvm-project//llvm:Support",
+    ],
+)

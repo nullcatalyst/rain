@@ -14,12 +14,13 @@ class MethodExpression : public FunctionExpression {
     /** The type of the callee. */
     util::MaybeOwnedPtr<Type> _callee_type;
 
-    bool _has_self_argument = false;
+    [[maybe_unused]] bool _has_self_argument = false;
 
   public:
     MethodExpression(util::MaybeOwnedPtr<Type> callee_type, std::string_view name,
-                     std::vector<FunctionArgument> arguments, absl::Nullable<Type*> return_type,
-                     std::unique_ptr<BlockExpression> block, bool has_self_argument)
+                     llvm::SmallVector<absl::Nonnull<Variable*>, 4> arguments,
+                     util::MaybeOwnedPtr<Type> return_type, std::unique_ptr<BlockExpression> block,
+                     bool has_self_argument)
         : FunctionExpression(name, std::move(arguments), std::move(return_type), std::move(block)),
           _callee_type(std::move(callee_type)),
           _has_self_argument(has_self_argument) {}
@@ -31,7 +32,11 @@ class MethodExpression : public FunctionExpression {
         return true;
     }
 
-    [[nodiscard]] absl::Nonnull<Type*> callee_type() const noexcept { return _callee_type; }
+    [[nodiscard]] absl::Nonnull<Type*> callee_type() const noexcept {
+        return _callee_type.get_nonnull();
+    }
+
+    util::Result<void> validate(Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

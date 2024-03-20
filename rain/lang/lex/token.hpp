@@ -79,6 +79,16 @@ struct Token {
     TokenKind kind = TokenKind::Undefined;
     Location  location;
 
+    /**
+     * Denotes whether there was whitespace between this token and the one before it.
+     *
+     * It is useful for disambiguating some parsings of the code.
+     * eg:
+     *      do_something(1, 2)
+     *      (3, 4) // <- Is this a function call or a parenthesized tuple expression?
+     */
+    bool whitespace_before = false;
+
     constexpr std::string_view text() const { return location.text(); }
 };
 

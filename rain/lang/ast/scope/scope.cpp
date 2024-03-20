@@ -1,4 +1,9 @@
-#include "rain/lang/ast/scope/module.hpp"
+#include "rain/lang/ast/scope/scope.hpp"
+
+#include "rain/lang/ast/type/function.hpp"
+#include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/var/function.hpp"
+#include "rain/lang/ast/var/variable.hpp"
 
 namespace rain::lang::ast {
 
@@ -37,8 +42,8 @@ absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexce
 absl::Nullable<FunctionVariable*> Scope::find_method(absl::Nonnull<Type*>   callee_type,
                                                      const TypeList&        argument_types,
                                                      const std::string_view name) const noexcept {
-    if (const auto it = _methods.find(std::make_tuple(callee_type, argument_types, name));
-        it != _methods.end()) {
+    if (const auto it = _method_variables.find(std::make_tuple(callee_type, argument_types, name));
+        it != _method_variables.end()) {
         return it->second;
     }
     return nullptr;
@@ -59,7 +64,7 @@ void Scope::add_type(const std::string_view name, std::unique_ptr<Type> type) no
 void Scope::add_method(absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
                        const std::string_view            name,
                        std::unique_ptr<FunctionVariable> method) noexcept {
-    _methods.emplace(std::make_tuple(callee_type, argument_types, name), method.get());
+    _method_variables.emplace(std::make_tuple(callee_type, argument_types, name), method.get());
     _owned_variables.emplace(std::move(method));
 }
 

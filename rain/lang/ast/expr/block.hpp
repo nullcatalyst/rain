@@ -15,13 +15,19 @@ class BlockExpression : public Expression {
 
     BlockScope _scope;
 
+    absl::Nullable<Type*> _type = nullptr;
+
   public:
     BlockExpression(Scope& parent) : _scope(parent) {}
 
-    [[nodiscard]] constexpr const decltype(_expressions)& expressions() const noexcept {
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
+        return serial::ExpressionKind::Block;
+    }
+    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr const llvm::SmallVector<std::unique_ptr<Expression>, 8>& expressions()
+        const noexcept {
         return _expressions;
     }
-
     [[nodiscard]] constexpr BlockScope& scope() noexcept { return _scope; }
 
     void add_expression(std::unique_ptr<Expression> expression) {
