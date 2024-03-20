@@ -1,3 +1,5 @@
+#include "rain/decompile.hpp"
+
 #include <memory>
 #include <span>
 #include <vector>
@@ -18,9 +20,6 @@
 #include "wabt/validator.h"
 #include "wabt/wast-lexer.h"
 #include "wabt/wat-writer.h"
-
-#define RAIN_INCLUDE_DECOMPILE
-#include "rain/rain.hpp"
 
 namespace rain {
 
