@@ -60,7 +60,7 @@ int main(const int argc, const char* const argv[]) {
     //     return #fib(6)
     // }
     // )";
-    const std::string_view code = R"(
+    const std::string_view source = R"(
 fn i32.double(self) -> i32 {
     2 * self
 }
@@ -69,10 +69,10 @@ fn do_something() -> i32 {
     4.double()
 }
 )";
-    rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, code, "\n");
+    rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
 
     initialize();
-    compile(&*code.cbegin(), &*code.cend());
+    compile(&*source.cbegin(), &*source.cend());
     return 0;
 }
 

@@ -5,22 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(test) Lang",
+            "name": "rainc",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/rain/lang/test",
+            "program": "${workspaceFolder}/bazel-bin/rain/rainc",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "lldb",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}"
+            }
         },
         {
-            "name": "Launch",
+            "name": "rain2llvm",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/rain/rainc",
+            "program": "${workspaceFolder}/bazel-bin/rain/rain2llvm",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
