@@ -5,6 +5,9 @@
 
 WASM_EXPORT("init")
 void initialize() {
+#if defined(__wasm__)
+    __wasm_call_ctors();
+#endif  // defined(__wasm__)
     rain::lang::code::initialize_llvm();
     // load_external_functions_into_llvm();
 }

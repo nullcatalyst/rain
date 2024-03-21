@@ -9,6 +9,11 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
     llvm::Function* llvm_function = llvm::Function::Create(
         llvm_type, llvm::Function::ExternalLinkage, function.name_or_empty(), ctx.llvm_module());
 
+    if (function.is_named()) {
+        llvm_function->addFnAttr(llvm::Attribute::get(
+            llvm_function->getContext(), "wasm-export-name", function.name_or_empty()));
+    }
+
     auto& ir         = ctx.llvm_builder();
     auto* prev_block = ir.GetInsertBlock();
 

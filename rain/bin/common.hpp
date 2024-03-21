@@ -36,8 +36,8 @@ void* memory_allocate(size_t size) { return malloc(size); }
 WASM_EXPORT("free")
 void memory_free(void* ptr) { return free(ptr); }
 
+}  // namespace rain
+
 #if defined(__wasm__)
 extern "C" void __wasm_call_ctors();
 #endif  // defined(__wasm__)
-
-}  // namespace rain

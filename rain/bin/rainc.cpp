@@ -5,6 +5,9 @@
 
 WASM_EXPORT("init")
 void initialize() {
+#if defined(__wasm__)
+    __wasm_call_ctors();
+#endif  // defined(__wasm__)
     rain::lang::code::initialize_llvm();
 
     // load_external_functions_into_llvm();
@@ -12,6 +15,8 @@ void initialize() {
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
+    using namespace rain;
+
     static std::string prev_result;
     prev_result.clear();
 
@@ -47,12 +52,10 @@ void compile(const char* source_start, const char* source_end) {
         return;
     }
     auto wasm = std::move(link_result).value();
-    callback(rain::Action::CompileLLVM, &*wasm->string().begin(), &*wasm->string().begin());
+    callback(rain::Action::CompileLLVM, &*wasm->string().begin(), &*wasm->string().end());
 
     // Decompile the WebAssembly into WAT.
-    auto decompile_result =
-        rain::decompile(std::span{reinterpret_cast<const uint8_t*>(source_start),
-                                  reinterpret_cast<const uint8_t*>(source_end)});
+    auto decompile_result = rain::decompile(wasm->data());
     if (!decompile_result.has_value()) {
         const auto msg = decompile_result.error()->message();
         callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());

@@ -3,6 +3,9 @@
 
 WASM_EXPORT("init")
 void initialize() {
+#if defined(__wasm__)
+    __wasm_call_ctors();
+#endif  // defined(__wasm__)
     // Do nothing. Nothing additional to initialize.
 }
 

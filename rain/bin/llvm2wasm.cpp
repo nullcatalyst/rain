@@ -4,7 +4,12 @@
 #include "rain/util/wasm.hpp"
 
 WASM_EXPORT("init")
-void initialize() { rain::lang::code::initialize_llvm(); }
+void initialize() {
+#if defined(__wasm__)
+    __wasm_call_ctors();
+#endif  // defined(__wasm__)
+    rain::lang::code::initialize_llvm();
+}
 
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {

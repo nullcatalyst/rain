@@ -3,7 +3,11 @@
 #include <string_view>
 
 #if !defined(RAIN_OUTPUT_COLORS)
+#if defined(__wasm__)
+#define RAIN_OUTPUT_COLORS 0
+#else
 #define RAIN_OUTPUT_COLORS 1
+#endif  // defined(__wasm__)
 #endif  // !defined(RAIN_OUTPUT_COLORS)
 
 #if RAIN_OUTPUT_COLORS

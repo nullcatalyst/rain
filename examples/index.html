@@ -1,145 +1,119 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>demo</title>
-  </head>
 
-  <body>
-    <script>
-      async function load_wasm(url, callback) {
-        let memory;
-        const wasm = await WebAssembly.instantiateStreaming(fetch(url), {
-          console: {
-            log: (msg_start, msg_end) => {
-              const text = new TextDecoder("utf8").decode(
-                memory.buffer.slice(msg_start, msg_end)
-              );
-              console.log(text);
-            },
-            error: (msg_start, msg_end) => {
-              const text = new TextDecoder("utf8").decode(
-                memory.buffer.slice(msg_start, msg_end)
-              );
-              console.error(text);
-            },
-          },
-          math: Math,
-          time: {
-            now_perf: () => performance.now(),
-            now_unix: () => Date.now(),
-          },
-          env: {
-            throw: (msg_start, msg_end) => {
-              const text = new TextDecoder("utf8").decode(
-                memory.buffer.slice(msg_start, msg_end)
-              );
-              throw new Error(text);
-            },
-            callback: (action, msg_start, msg_end) => {
-              if (callback) {
-                callback(msg_start, msg_end);
-              } else {
-                const text = new TextDecoder("utf8").decode(
-                  memory.buffer.slice(msg_start, msg_end)
-                );
-                console.log(text);
-              }
-            },
-          },
-        });
-        memory = wasm.instance.exports.memory;
-        return {
-          do_with_copy: (uint8_array, callback) => {
-            const len = uint8_array.length;
-            const ptr = wasm.instance.exports.malloc(len);
-            const buffer = new Uint8Array(memory.buffer, ptr, len);
-            buffer.set(uint8_array);
-            callback(ptr, ptr + len, buffer);
-            wasm.instance.exports.malloc(ptr);
-          },
-          ...wasm.instance.exports,
-        };
-      }
+<head>
+  <title>demo</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-      (async () => {
-        const should_download_wasm = false; // Set to true to download the compiled WebAssembly binary
+    html,
+    body {
+      margin: 0;
+      padding: 0;
 
-        const rain = await load_wasm("rain2llvm.wasm", (msg_start, msg_end) => {
-          const data = new Uint8Array(
-            rain.memory.buffer,
-            msg_start,
-            msg_end - msg_start
-          );
-          const text = new TextDecoder("utf8").decode(data);
-          console.log("Compiled LLVM IR:");
-          console.log(text);
+      background-color: #1e1e1e;
+    }
 
-          llvm.do_with_copy(data, (msg_start, msg_end, llvm_uint8_array) => {
-            llvm.compile(msg_start, msg_end);
-          });
-        });
+    .editor-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-        const llvm = await load_wasm("llvm2wasm.wasm", (msg_start, msg_end) => {
-          const data = new Uint8Array(
-            llvm.memory.buffer,
-            msg_start,
-            msg_end - msg_start
-          );
-          console.log("Compiled WebAssembly binary:");
-          console.log(data);
+    .editor-tab-list {
+      display: flex;
+      gap: 2px;
+      padding: 8px 16px 0 16px;
 
-          if (should_download_wasm) {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(
-              new Blob([data], { type: "application/wasm" })
-            );
-            a.download = "output.wasm";
-            a.click();
-          }
+      background-color: #252526;
+      border-bottom: #1e1e1e 12px solid;
+    }
 
-          wat.do_with_copy(data, (msg_start, msg_end, wat_uint8_array) => {
-            wat.decompile(msg_start, msg_end);
-          });
-        });
+    .editor-tab {
+      padding: 8px 24px;
+      /* margin-bottom: -8px; */
+      border: none;
+      background-color: #2d2d2d;
+      color: #fff;
+      cursor: pointer;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
 
-        const wat = await load_wasm("wasm2wat.wasm", (msg_start, msg_end) => {
-          const data = new Uint8Array(
-            wat.memory.buffer,
-            msg_start,
-            msg_end - msg_start
-          );
-          const text = new TextDecoder("utf8").decode(data);
+    .editor-tab.active {
+      background-color: #1e1e1e;
+    }
 
-          console.log("Decompiled WebAssembly text:");
-          console.log(text);
-        });
+    #editor {
+      flex: 1;
+    }
 
-        rain.init();
-        llvm.init();
-        wat.init();
+    .editor-action-list {
+      position: absolute;
+      bottom: 32px;
+      right: 48px;
+      z-index: 10;
 
-        function compile(src) {
-          console.log("Compiling source code:");
-          console.log(src);
+      display: flex;
+      gap: 8px;
+    }
 
-          const encoder = new TextEncoder();
-          const encoded = encoder.encode(src);
-          const len = encoded.length;
-          const ptr = rain.malloc(len);
-          new Uint8Array(rain.memory.buffer, ptr, len).set(
-            new Uint8Array(encoded)
-          );
-          rain.compile(ptr, ptr + len);
-          rain.free(ptr);
-        }
+    #compile,
+    #download {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background-color: #569cd6;
+      color: #fff;
+      cursor: pointer;
 
-        compile(`
-export fn double(n: i32) -> i32 {
-    let n = n * 2
-    return n
+      font-family: Menlo, Monaco, "Courier New", monospace;
+    }
+
+    #compile:hover,
+    #download:hover {
+      background-color: #9ac4e6;
+    }
+
+    #download.disabled {
+      background-color: #2d2d2d;
+      color: #7f7f7f;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <script id="source-code" type="x-application/rain">fn i32.double(self) -> i32 {
+    2 * self
 }
-`);
-      })();
-    </script>
-  </body>
+
+fn do_something() -> i32 {
+    42.double()
+}
+</script>
+  <div class="editor-container">
+    <div class="editor-tab-list">
+      <button id="rain-tab" class="editor-tab active" data-language="rain">Source</button>
+      <button id="llvm-ir-tab" class="editor-tab" data-language="llvm">LLVM IR</button>
+      <button id="wat-tab" class="editor-tab" data-language="wat">WebAssembly (text)</button>
+    </div>
+    <div id="editor" style="height: 90vh; width: 100%;"></div>
+
+    <div class="editor-action-list">
+      <button id="compile">Compile</button>
+      <button id="download" class="disabled">Download .wasm</button>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs/loader.min.js"
+    integrity="sha512-ZG31AN9z/CQD1YDDAK4RUAvogwbJHv6bHrumrnMLzdCrVu4HeAqrUX7Jsal/cbUwXGfaMUNmQU04tQ8XXl5Znw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="./editor.js"></script>
+</body>
+
 </html>

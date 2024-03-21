@@ -36,7 +36,7 @@ class SyntaxError : public util::Error {
         }
         under_line += ANSI_RESET;
 
-#define RAIN_PRINT_ERROR_MULTILINE 1
+#define RAIN_PRINT_ERROR_MULTILINE 0
 #if RAIN_PRINT_ERROR_MULTILINE
         const auto previous_line = _location.previous_line();
         const auto next_line     = _location.next_line();
