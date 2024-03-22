@@ -29,6 +29,7 @@ enum class ExpressionKind {
     Return,
 
     // Declarations
+    Export,
     Function,
     Let,
     Type,

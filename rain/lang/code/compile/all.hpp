@@ -6,6 +6,7 @@
 #include "rain/lang/ast/expr/binary_operator.hpp"
 #include "rain/lang/ast/expr/block.hpp"
 #include "rain/lang/ast/expr/call.hpp"
+#include "rain/lang/ast/expr/export.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
@@ -34,6 +35,7 @@ llvm::Value* compile_parenthesis(Context& ctx, ast::ParenthesisExpression& paren
 llvm::Value* compile_block(Context& ctx, ast::BlockExpression& block);
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function);
 llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
+llvm::Value*    compile_export(Context& ctx, ast::ExportExpression& export_);
 
 // Types
 llvm::Type* compile_type(Context& ctx, ast::Type& type);

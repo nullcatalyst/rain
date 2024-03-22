@@ -29,8 +29,15 @@ void compile_module(Context& ctx, ast::Module& module) {
                 compile_function(ctx, static_cast<ast::FunctionExpression&>(*expression));
                 break;
 
-            default:
+            case serial::ExpressionKind::Export:
+                compile_export(ctx, static_cast<ast::ExportExpression&>(*expression));
                 break;
+
+            default:
+                util::console_error(
+                    "failed to compile top-level expression: unknown expression kind: ",
+                    static_cast<int>(expression->kind()));
+                std::abort();
         }
     }
 }

@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "absl/base/nullability.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Target/TargetMachine.h"
@@ -10,9 +12,10 @@
 namespace rain::lang::code {
 
 class Module {
-    std::unique_ptr<llvm::LLVMContext>   _llvm_ctx;
-    std::unique_ptr<llvm::Module>        _llvm_module;
-    std::unique_ptr<llvm::TargetMachine> _llvm_target_machine;
+    std::unique_ptr<llvm::LLVMContext>     _llvm_ctx;
+    absl::Nonnull<llvm::Module*>           _llvm_module;
+    std::unique_ptr<llvm::TargetMachine>   _llvm_target_machine;
+    std::unique_ptr<llvm::ExecutionEngine> _llvm_engine;
 
   public:
     Module();
@@ -34,6 +37,10 @@ class Module {
         return *_llvm_module;
     }
     [[nodiscard]] constexpr llvm::Module& llvm_module() noexcept { return *_llvm_module; }
+    [[nodiscard]] constexpr const llvm::ExecutionEngine& llvm_engine() const noexcept {
+        return *_llvm_engine;
+    }
+    [[nodiscard]] constexpr llvm::ExecutionEngine& llvm_engine() noexcept { return *_llvm_engine; }
     [[nodiscard]] constexpr const llvm::TargetMachine& llvm_target_machine() const noexcept {
         return *_llvm_target_machine;
     }

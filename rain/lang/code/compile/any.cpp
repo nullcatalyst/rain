@@ -33,8 +33,13 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::If:
             return compile_if(ctx, static_cast<ast::IfExpression&>(expression));
 
+        case serial::ExpressionKind::Export:
+            return compile_export(ctx, static_cast<ast::ExportExpression&>(expression));
+
         default:
-            break;
+            util::console_error("failed to compile expression: unknown expression kind: ",
+                                static_cast<int>(expression.kind()));
+            std::abort();
     }
 
     return nullptr;

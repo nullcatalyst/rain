@@ -7,14 +7,9 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
         reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(function.type()));
     assert(llvm_type != nullptr && "Function type not found");
     llvm::Function* llvm_function = llvm::Function::Create(
-        llvm_type, llvm::Function::ExternalLinkage, function.name_or_empty(), ctx.llvm_module());
+        llvm_type, llvm::Function::InternalLinkage, function.name_or_empty(), ctx.llvm_module());
     if (const auto* function_variable = function.variable(); function_variable != nullptr) {
         ctx.set_llvm_value(function_variable, llvm_function);
-    }
-
-    if (function.is_named()) {
-        llvm_function->addFnAttr(llvm::Attribute::get(
-            llvm_function->getContext(), "wasm-export-name", function.name_or_empty()));
     }
 
     auto& ir         = ctx.llvm_builder();

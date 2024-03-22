@@ -1,6 +1,9 @@
 #include "rain/lang/code/module.hpp"
 
+#include <string>
+
 #include "llvm/IR/LegacyPassManager.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/StandardInstrumentations.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -18,16 +21,51 @@
 
 namespace rain::lang::code {
 
+namespace {
+
+std::unique_ptr<llvm::ExecutionEngine> create_interpreter(
+    std::unique_ptr<llvm::Module>        llvm_module,
+    std::unique_ptr<llvm::TargetMachine> llvm_target_machine) {
+    llvm::EngineBuilder builder{std::move(llvm_module)};
+    std::string         error;
+    builder.setErrorStr(&error);
+    builder.setEngineKind(llvm::EngineKind::Interpreter);
+    std::unique_ptr<llvm::ExecutionEngine> engine{builder.create(llvm_target_machine.release())};
+    assert(engine != nullptr && "failed to create interpreter engine");
+    return engine;
+}
+
+std::unique_ptr<llvm::TargetMachine> clone_target_machine(
+    const llvm::TargetMachine& llvm_target_machine) {
+    llvm_target_machine.getTargetTriple();
+    std::string error;
+
+    std::string         target_triple = llvm_target_machine.getTargetTriple().str();
+    const llvm::Target* llvm_target   = &llvm_target_machine.getTarget();
+
+    std::string cpu;
+    std::string features = llvm_target_machine.getTargetFeatureString().str();
+    return std::unique_ptr<llvm::TargetMachine>(
+        llvm_target->createTargetMachine(target_triple, cpu, features, llvm::TargetOptions(),
+                                         std::nullopt, std::nullopt, llvm::CodeGenOpt::Default));
+}
+
+}  // namespace
+
 Module::Module() : Module(wasm::target_machine()) {}
 
 Module::Module(std::unique_ptr<llvm::TargetMachine> llvm_target_machine)
     : _llvm_ctx(std::make_unique<llvm::LLVMContext>()),
-      _llvm_module(std::make_unique<llvm::Module>("rain", *_llvm_ctx)),
       _llvm_target_machine(std::move(llvm_target_machine)) {
     assert(_llvm_target_machine);
 
-    _llvm_module->setDataLayout(_llvm_target_machine->createDataLayout());
-    _llvm_module->setTargetTriple(_llvm_target_machine->getTargetTriple().str());
+    auto llvm_module = std::make_unique<llvm::Module>("rain", *_llvm_ctx);
+    llvm_module->setDataLayout(_llvm_target_machine->createDataLayout());
+    llvm_module->setTargetTriple(_llvm_target_machine->getTargetTriple().str());
+
+    _llvm_module = llvm_module.get();
+    _llvm_engine =
+        create_interpreter(std::move(llvm_module), clone_target_machine(*_llvm_target_machine));
 }
 
 void Module::optimize() {

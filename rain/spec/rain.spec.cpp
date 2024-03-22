@@ -16,7 +16,7 @@ fn double_double(x: i32) -> i32 {
     x.double().double()
 }
 
-fn fib(n: i32) -> i32 {
+export fn fib(n: i32) -> i32 {
     if n < 2 {
         1
     } else {
