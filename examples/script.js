@@ -382,7 +382,7 @@ function registerWatLanguage(monaco) {
             tokenizer: {
                 root: [
                     // Comments
-                    [/\;\;/, 'comment'],
+                    [/\;\;.*$/, 'comment'],
                     // S-Expression opening
                     [/\(/, 'delimiter.paren.open'],
                     // S-Expression closing
@@ -410,18 +410,17 @@ require.config({
 });
 
 require(['vs/editor/editor.main'], async () => {
+    registerRainLanguage(monaco);
     registerLlvmIrLanguage(monaco);
     registerWatLanguage(monaco);
-    registerRainLanguage(monaco);
 
-    let rainSrc = document.getElementById('source-code').textContent;
-    let llvmIr = "";
-    let wat = "";
+    const rainModel = monaco.editor.createModel(document.getElementById('source-code').textContent, 'rain');
+    const llvmIrModel = monaco.editor.createModel('; Compile to see output here\n', 'llvm-ir');
+    const watModel = monaco.editor.createModel(';; Compile to see output here\n', 'wat');
     let wasmBin = null;
 
     const editor = monaco.editor.create(document.getElementById('editor'), {
-        value: rainSrc,
-        language: 'rain',
+        model: rainModel,
         automaticLayout: true,
         // lineNumbers: 'off',
         // minimap: { enabled: false },
@@ -440,8 +439,8 @@ require(['vs/editor/editor.main'], async () => {
         llvmIrTab.classList.remove('active');
         watTab.classList.remove('active');
 
-        editor.setValue(rainSrc);
-        editor.updateOptions({ language: 'rain' });
+        editor.setModel(rainModel);
+        editor.updateOptions({ readOnly: false });
     });
 
     llvmIrTab.addEventListener('click', () => {
@@ -449,8 +448,8 @@ require(['vs/editor/editor.main'], async () => {
         llvmIrTab.classList.add('active');
         watTab.classList.remove('active');
 
-        editor.setValue(llvmIr);
-        editor.updateOptions({ language: 'llvm-ir' });
+        editor.setModel(llvmIrModel);
+        editor.updateOptions({ readOnly: true });
     });
 
     watTab.addEventListener('click', () => {
@@ -458,8 +457,8 @@ require(['vs/editor/editor.main'], async () => {
         llvmIrTab.classList.remove('active');
         watTab.classList.add('active');
 
-        editor.setValue(wat);
-        editor.updateOptions({ language: 'wat' });
+        editor.setModel(watModel);
+        editor.updateOptions({ readOnly: true });
     });
 
     const rainc = await load_wasm("rainc.wasm", (event, msg_start, msg_end) => {
@@ -476,15 +475,14 @@ require(['vs/editor/editor.main'], async () => {
                 const text = new TextDecoder("utf8").decode(data);
                 console.log("Compiled LLVM IR:");
                 console.log(text);
-                llvmIr = text;
+                llvmIrModel.setValue(text);
                 break;
             }
 
             case EVENT_LINK: {
-                // Download the WebAssembly binary?
+                console.log("Linked WebAssembly binary:", wasmBin);
                 wasmBin = new Uint8Array(data.byteLength);
                 wasmBin.set(data);
-                console.log("Linked WebAssembly binary:", wasmBin);
                 break;
             }
 
@@ -492,7 +490,7 @@ require(['vs/editor/editor.main'], async () => {
                 const text = new TextDecoder("utf8").decode(data);
                 console.log("Compiled WAT:");
                 console.log(text);
-                wat = text;
+                watModel.setValue(text);
                 break;
             }
 

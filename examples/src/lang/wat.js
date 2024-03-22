@@ -8,7 +8,7 @@ export function registerWatLanguage(monaco) {
             tokenizer: {
                 root: [
                     // Comments
-                    [/\;\;/, 'comment'],
+                    [/\;\;.*$/, 'comment'],
                     // S-Expression opening
                     [/\(/, 'delimiter.paren.open'],
                     // S-Expression closing
