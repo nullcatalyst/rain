@@ -58,6 +58,9 @@
     }
 
     .editor-action-list {
+      display: flex;
+      flex-direction: column;
+
       position: absolute;
       bottom: 32px;
       right: 48px;
@@ -89,6 +92,63 @@
       color: #7f7f7f;
       cursor: not-allowed;
     }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    label>span {
+      height: 100%;
+      color: #fff;
+      font-size: 12px;
+      font-family: Menlo, Monaco, "Courier New", monospace;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      position: relative;
+      width: 20px;
+      height: 20px;
+      margin: 0;
+
+      --bg-color: #569cd6;
+    }
+
+    input[type="checkbox"]:hover {
+      --bg-color: #9ac4e6;
+    }
+
+    input[type="checkbox"]::before {
+      content: "";
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--bg-color);
+      border-radius: 6px;
+      margin: 0;
+    }
+
+    input[type="checkbox"]:checked::before {
+      background-color: var(--bg-color);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: block;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      width: 8px;
+      height: 14px;
+      transform: translate(-50%, -50%) translateY(-1.5px) rotate(45deg);
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -97,8 +157,16 @@
     2 * self
 }
 
-fn do_something() -> i32 {
-    42.double()
+fn double_double() -> i32 {
+    4.double().double()
+}
+
+fn fib(n: i32) -> i32 {
+    if n < 2 {
+        1
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
 }
 </script>
   <div class="editor-container">
@@ -110,8 +178,16 @@ fn do_something() -> i32 {
     <div id="editor" style="height: 90vh; width: 100%;"></div>
 
     <div class="editor-action-list">
-      <button id="compile">Compile</button>
-      <button id="download" class="disabled">Download .wasm</button>
+      <div>
+        <button id="compile">Compile</button>
+        <button id="download" class="disabled">Download .wasm</button>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" id="optimize" checked />
+          <span>Optimize</span>
+        </label>
+      </div>
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs/loader.min.js"
