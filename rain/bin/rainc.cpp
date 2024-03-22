@@ -14,7 +14,7 @@ void initialize() {
 }
 
 WASM_EXPORT("compile")
-void compile(const char* source_start, const char* source_end) {
+void compile(const char* source_start, const char* source_end, bool optimize) {
     using namespace rain;
 
     static std::string prev_result;
@@ -31,8 +31,10 @@ void compile(const char* source_start, const char* source_end) {
     }
     auto rain_module = std::move(compile_result).value();
 
-    // Optimize the module.
-    rain_module.optimize();
+    if (optimize) {
+        // Optimize the module.
+        rain_module.optimize();
+    }
 
     // Get the LLVM IR.
     auto ir_result = rain_module.emit_ir();
@@ -68,127 +70,23 @@ void compile(const char* source_start, const char* source_end) {
 #if !defined(__wasm__)
 
 int main(const int argc, const char* const argv[]) {
-    //     const std::string_view source = R"(
-    // fn f32.cos(self) -> f32 {
-    //     return __builtin_cos(self as f64) as f32;
-    // }
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <wasm file>" << std::endl;
+        return 1;
+    }
 
-    // fn f32.sin(self) -> f32 {
-    //     return __builtin_sin(self as f64) as f32;
-    // }
+    std::ifstream file(argv[1]);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file: " << argv[1] << std::endl;
+        return 1;
+    }
 
-    // export fn f32x4.new(x: f32, y: f32, z: f32, w: f32) -> f32x4 {
-    //     return f32x4 { x: x, y: y, z: z, w: w };
-    // }
+    std::string source;
+    file.seekg(0, std::ios::end);
+    contents.resize(file.tellg());
+    file.seekg(0, std::ios::beg);
+    file.read(contents.data(), contents.size());
 
-    // export fn f32x4.splat(x: f32) -> f32x4 {
-    //     return f32x4 { x: x, y: x, z: x, w: x };
-    // }
-
-    // export fn f32x4.zero() -> f32x4 {
-    //     return f32x4.splat(0.0);
-    // }
-
-    // // export
-    // struct f32x4x4 {
-    //     x: f32x4,
-    //     y: f32x4,
-    //     z: f32x4,
-    //     w: f32x4,
-    // }
-
-    // export fn f32x4x4.zero() -> f32x4x4 {
-    //     return f32x4x4 {
-    //         x: f32x4.splat(0.0),
-    //         y: f32x4.splat(0.0),
-    //         z: f32x4.splat(0.0),
-    //         w: f32x4.splat(0.0),
-    //     };
-    // }
-
-    // export fn f32x4x4.identity() -> f32x4x4 {
-    //     return f32x4x4 {
-    //         x: f32x4.new(1.0, 0.0, 0.0, 0.0),
-    //         y: f32x4.new(0.0, 1.0, 0.0, 0.0),
-    //         z: f32x4.new(0.0, 0.0, 1.0, 0.0),
-    //         w: f32x4.new(0.0, 0.0, 0.0, 1.0),
-    //     };
-    // }
-
-    // export fn f32x4x4.new(
-    //     xx: f32, xy: f32, xz: f32, xw: f32,
-    //     yx: f32, yy: f32, yz: f32, yw: f32,
-    //     zx: f32, zy: f32, zz: f32, zw: f32,
-    //     wx: f32, wy: f32, wz: f32, ww: f32,
-    // ) -> f32x4x4 {
-    //     return f32x4x4 {
-    //         x: f32x4.new(xx, xy, xz, xw),
-    //         y: f32x4.new(yx, yy, yz, yw),
-    //         z: f32x4.new(zx, zy, zz, zw),
-    //         w: f32x4.new(wx, wy, wz, ww),
-    //     };
-    // }
-
-    // export fn f32x4x4.rotation_x(radians: f32) -> f32x4x4 {
-    //     let c = radians.cos();
-    //     let s = radians.sin();
-    //     return f32x4x4 {
-    //         x: f32x4.new(1.0, 0.0, 0.0, 0.0),
-    //         y: f32x4.new(0.0,   c,  -s, 0.0),
-    //         z: f32x4.new(0.0,   s,   c, 0.0),
-    //         w: f32x4.new(0.0, 0.0, 0.0, 1.0),
-    //     };
-    // }
-
-    // export fn f32x4x4.rotation_y(radians: f32) -> f32x4x4 {
-    //     let c = radians.cos();
-    //     let s = radians.sin();
-    //     return f32x4x4 {
-    //         x: f32x4.new(  c, 0.0,   s, 0.0),
-    //         y: f32x4.new(0.0, 1.0, 0.0, 0.0),
-    //         z: f32x4.new( -s, 0.0,   c, 0.0),
-    //         w: f32x4.new(0.0, 0.0, 0.0, 1.0),
-    //     };
-    // }
-
-    // export fn f32x4x4.rotation_z(radians: f32) -> f32x4x4 {
-    //     let c = radians.cos();
-    //     let s = radians.sin();
-    //     return f32x4x4 {
-    //         x: f32x4.new(  c,  -s, 0.0, 0.0),
-    //         y: f32x4.new(  s,   c, 0.0, 0.0),
-    //         z: f32x4.new(0.0, 0.0, 1.0, 0.0),
-    //         w: f32x4.new(0.0, 0.0, 0.0, 1.0),
-    //     };
-    // }
-
-    // export fn f32x4x4.translation(translation: f32x4) -> f32x4x4 {
-    //     return f32x4x4 {
-    //         x: f32x4.new(1.0, 0.0, 0.0, translation.x),
-    //         y: f32x4.new(0.0, 1.0, 0.0, translation.y),
-    //         z: f32x4.new(0.0, 0.0, 1.0, translation.z),
-    //         w: f32x4.new(0.0, 0.0, 0.0, translation.w),
-    //     };
-    // }
-
-    // export fn f32x4x4.scaling(scale: f32x4) -> f32x4x4 {
-    //     return f32x4x4 {
-    //         x: f32x4.new(scale.x,     0.0,     0.0,     0.0),
-    //         y: f32x4.new(    0.0, scale.y,     0.0,     0.0),
-    //         z: f32x4.new(    0.0,     0.0, scale.z,     0.0),
-    //         w: f32x4.new(    0.0,     0.0,     0.0, scale.w),
-    //     };
-    // }
-    // )";
-    const std::string_view source = R"(
-fn i32.double(self) -> i32 {
-    2 * self
-}
-
-fn do_something() -> i32 {
-    4.double()
-}
-)";
     rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
 
     initialize();

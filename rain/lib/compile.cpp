@@ -1,12 +1,13 @@
+#include "rain/compile.hpp"
+
 #include <string_view>
 
-#include "rain/compile.hpp"
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/code/compile/all.hpp"
 #include "rain/lang/code/context.hpp"
 #include "rain/lang/err/simple.hpp"
 #include "rain/lang/lex/lazy.hpp"
-// #include "rain/lang/lex/lazy_list.hpp"
+#include "rain/lang/lex/lazy_list.hpp"
 #include "rain/lang/parse/all.hpp"
 #include "rain/util/result.hpp"
 
@@ -20,8 +21,8 @@ util::Result<code::Module> compile(const std::string_view source) {
 
 util::Result<code::Module> compile(const std::string_view     source,
                                    llvm::function_ref<void()> init_compiler) {
-    auto lexer = lex::LazyLexer::using_source(source, "<unknown>");
-    // lex::LazyListLexer list_lexer = lex::LazyListLexer::using_lexer(lexer);
+    auto               lexer      = lex::LazyLexer::using_source(source, "<unknown>");
+    lex::LazyListLexer list_lexer = lex::LazyListLexer::using_lexer(lexer);
 
     ast::BuiltinScope builtin;
     auto              parse_result = parse::parse_module(lexer, builtin);

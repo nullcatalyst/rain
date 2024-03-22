@@ -31,6 +31,13 @@ class LazyListLexer : public Lexer {
         return _lexer->file_name();
     }
 
+    [[nodiscard]] State save_state() const noexcept override {
+        return State{
+            .index = static_cast<int>(_next_token),
+        };
+    }
+    void restore_state(State state) noexcept override { _next_token = state.index; }
+
     Token next() override {
         if (_next_token < _tokens.size()) {
             return _tokens[_next_token++];

@@ -49,7 +49,9 @@ class ListLexer : public Lexer {
     }
 
     [[nodiscard]] State save_state() const noexcept override {
-        return State{.index = static_cast<int>(_next_token)};
+        return State{
+            .index = static_cast<int>(_next_token),
+        };
     }
     void restore_state(State state) noexcept override { _next_token = state.index; }
 

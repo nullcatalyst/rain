@@ -7,26 +7,13 @@
 #include "rain/rain.hpp"
 
 TEST(Lang, struct) {
-    //     const std::string_view code = R"(
-    // struct Point {
-    //     x: i32,
-    //     y: i32,
-    // }
-
-    // fn Point.__add__(self, other: Point) -> Point {
-    //     Point{
-    //         x: self.x + other.x,
-    //         y: self.y + other.y,
-    //     }
-    // }
-    // )";
     const std::string_view code = R"(
 fn i32.double(self) -> i32 {
     2 * self
 }
 
-fn do_something() -> i32 {
-    4.double()
+fn double_double(x: i32) -> i32 {
+    x.double().double()
 }
 
 fn fib(n: i32) -> i32 {
@@ -35,6 +22,10 @@ fn fib(n: i32) -> i32 {
     } else {
         fib(n - 1) + fib(n - 2)
     }
+}
+
+fn compile_time_fib_6() -> i32 {
+    fib(6)
 }
 )";
 
@@ -51,31 +42,4 @@ fn fib(n: i32) -> i32 {
     auto ir = std::move(ir_result).value();
 
     std::cout << ir << std::endl;
-
-    // auto              lexer = lex::LazyLexer::using_source(code);
-    // ast::BuiltinScope builtin_scope;
-    // auto              module_result = parse::parse_module(lexer, builtin_scope);
-    // ASSERT_TRUE(check_success(module_result));
-
-    // auto parse_module = std::move(module_result).value();
-    // ASSERT_EQ(parse_module->expressions().size(), 2);
-
-    // auto validate_result = parse_module->validate();
-    // ASSERT_TRUE(check_success(validate_result));
-
-    // code::initialize_llvm();
-
-    // code::Module  code_module;
-    // code::Context ctx(code_module);
-    // code::compile_module(ctx, parse_module);
-    // // ASSERT_TRUE(check_success(compile_result));
-
-    // code_module.optimize();
-    // std::cout << code_module.emit_ir() << std::endl;
-
-    // auto struct_point = mod->expressions()[0].get();
-    // ASSERT_EQ(struct_point->kind(), ast::ExpressionKind::Struct);
-
-    // auto main_function = mod->expressions()[1].get();
-    // ASSERT_EQ(main_function->kind(), ast::ExpressionKind::Function);
 }
