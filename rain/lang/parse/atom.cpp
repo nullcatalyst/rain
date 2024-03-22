@@ -58,9 +58,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
-            // case TokenKind::LRoundBracket:
-            //     expression = parse_parenthesis(lexer);
-            //     break;
+        case lex::TokenKind::LRoundBracket: {
+            auto result = parse_parenthesis(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
 
         case lex::TokenKind::LCurlyBracket: {
             auto result = parse_block(lexer, scope);
@@ -91,10 +94,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             //     return ERR_PTR(err::SyntaxError, lexer, token.location, "unexpected end of
             //     file");
 
-        default:
-            return ERR_PTR(
-                err::SyntaxError, lexer, token.location,
-                absl::StrCat("unexpected token '", token.text(), "' while parsing expression"));
+        default: {
+            auto result = parse_unary(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
     }
 
     auto next_token = lexer.peek();

@@ -13,7 +13,9 @@ cc_library(
         "member.cpp",
         "method.cpp",
         "module.cpp",
+        "parenthesis.cpp",
         "type.cpp",
+        "unary_operator.cpp",
     ],
     visibility = [
         "//rain:__subpackages__",
@@ -46,7 +48,9 @@ cc_library(
         "member.hpp",
         "method.hpp",
         "module.hpp",
+        "parenthesis.hpp",
         "type.hpp",
+        "unary_operator.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

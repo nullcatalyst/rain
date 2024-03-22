@@ -16,6 +16,7 @@
 #include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
+#include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 
 // Types
@@ -41,16 +42,19 @@ util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexe
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>> parse_unary(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> lhs_expression);
 util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> owner);
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> callee);
-util::Result<std::unique_ptr<ast::BlockExpression>>    parse_block(lex::Lexer& lexer,
-                                                                   ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
+util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex::Lexer& lexer,
+                                                                            ast::Scope& scope);
+util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(lex::Lexer& lexer,
+                                                                         ast::Scope& scope);
 util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast::Scope& scope);
 
 // Types

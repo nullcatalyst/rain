@@ -13,7 +13,9 @@ cc_library(
         "list.hpp",
         "member.cpp",
         "module.cpp",
+        "parenthesis.cpp",
         "struct.cpp",
+        "unary_operator.cpp",
     ],
     hdrs = [
         "all.hpp",
