@@ -11,7 +11,8 @@
 
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::Expression>> parse_unary(lex::Lexer& lexer, ast::Scope& scope) {
+util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& lexer,
+                                                                    ast::Scope& scope) {
     serial::UnaryOperatorKind op = serial::UnaryOperatorKind::Unknown;
 
     const auto token = lexer.peek();

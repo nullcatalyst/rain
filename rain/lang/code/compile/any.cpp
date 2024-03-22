@@ -14,11 +14,18 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
             return compile_binary_operator(ctx,
                                            static_cast<ast::BinaryOperatorExpression&>(expression));
 
+        case serial::ExpressionKind::UnaryOperator:
+            return compile_unary_operator(ctx,
+                                          static_cast<ast::UnaryOperatorExpression&>(expression));
+
             // case serial::ExpressionKind::Member:
             //     return compile_member(ctx, static_cast<ast::MemberExpression&>(expression));
 
         case serial::ExpressionKind::Call:
             return compile_call(ctx, static_cast<ast::CallExpression&>(expression));
+
+        case serial::ExpressionKind::Parenthesis:
+            return compile_parenthesis(ctx, static_cast<ast::ParenthesisExpression&>(expression));
 
         case serial::ExpressionKind::Block:
             return compile_block(ctx, static_cast<ast::BlockExpression&>(expression));

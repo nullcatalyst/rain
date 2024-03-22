@@ -25,7 +25,7 @@ fn fib(n: i32) -> i32 {
 }
 
 fn compile_time_fib_6() -> i32 {
-    fib(6)
+    -(fib(6))
 }
 )";
 

@@ -42,7 +42,8 @@ util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexe
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope);
-util::Result<std::unique_ptr<ast::Expression>> parse_unary(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> lhs_expression);
 util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(

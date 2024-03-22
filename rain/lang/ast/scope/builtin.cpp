@@ -29,6 +29,13 @@ BuiltinScope::BuiltinScope() {
     } while (0)
 
     {
+        auto  i32_unop_args = Scope::TypeList{_i32_type};
+        auto* i32_unop_type = get_function_type(i32_unop_args, _i32_type);
+        ADD_BUILTIN_METHOD("__neg__", _i32_type, i32_unop_type, i32_unop_args,
+                           { return builder.CreateNeg(arguments[0]); });
+        ADD_BUILTIN_METHOD("__pos__", _i32_type, i32_unop_type, i32_unop_args,
+                           { return arguments[0]; });
+
         auto  i32_binop_args      = Scope::TypeList{_i32_type, _i32_type};
         auto* i32_arithmetic_type = get_function_type(i32_binop_args, _i32_type);
 

@@ -95,7 +95,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             //     file");
 
         default: {
-            auto result = parse_unary(lexer, scope);
+            auto result = parse_unary_operator(lexer, scope);
             FORWARD_ERROR(result);
             expression = std::move(result).value();
             break;

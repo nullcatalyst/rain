@@ -13,7 +13,9 @@
 #include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
+#include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/expr/type.hpp"
+#include "rain/lang/ast/expr/unary_operator.hpp"
 
 namespace rain::lang::code {
 
@@ -25,8 +27,10 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression);
 llvm::Value* compile_integer(Context& ctx, ast::IntegerExpression& integer);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator);
+llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& unary_operator);
 llvm::Value* compile_member(Context& ctx, ast::MemberExpression& member);
 llvm::Value* compile_call(Context& ctx, ast::CallExpression& call);
+llvm::Value* compile_parenthesis(Context& ctx, ast::ParenthesisExpression& parenthesis);
 llvm::Value* compile_block(Context& ctx, ast::BlockExpression& block);
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function);
 llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
