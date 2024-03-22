@@ -22,6 +22,18 @@ std::optional<std::string_view> get_operator_method_name(serial::BinaryOperatorK
             return "__div__";
         case serial::BinaryOperatorKind::Modulo:
             return "__rem__";
+        case serial::BinaryOperatorKind::Equal:
+            return "__eq__";
+        case serial::BinaryOperatorKind::NotEqual:
+            return "__ne__";
+        case serial::BinaryOperatorKind::Less:
+            return "__lt__";
+        case serial::BinaryOperatorKind::LessEqual:
+            return "__le__";
+        case serial::BinaryOperatorKind::Greater:
+            return "__gt__";
+        case serial::BinaryOperatorKind::GreaterEqual:
+            return "__ge__";
         default:
             return std::nullopt;
     }
@@ -48,7 +60,7 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
         // First check if there is a method that takes self exactly.
         const Scope::TypeList argument_types{_lhs->type(), _rhs->type()};
 
-        _method = scope.find_method(_lhs->type(), argument_types, method_name.value());
+        _method = scope.find_function(_lhs->type(), argument_types, method_name.value());
         if (_method == nullptr) {
             return ERR_PTR(
                 err::SimpleError,
@@ -62,6 +74,7 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
         // TODO: Check if the method can be called with a reference.
     }
 
+    _type = _method->function_type()->return_type();
     return {};
 }
 

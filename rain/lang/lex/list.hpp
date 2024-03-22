@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rain/lang/lex/lazy_lexer.hpp"
+#include "rain/lang/lex/lazy.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/lang/lex/token.hpp"
 

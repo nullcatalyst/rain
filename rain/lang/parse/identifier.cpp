@@ -8,6 +8,7 @@
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope) {
     const auto token = lexer.next();

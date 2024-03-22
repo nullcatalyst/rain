@@ -19,10 +19,6 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
     auto& ir = ctx.llvm_builder();
 
     switch (call.callee()->kind()) {
-        case serial::ExpressionKind::Variable:
-            std::abort();
-            break;
-
         case serial::ExpressionKind::Member: {
             ast::MemberExpression& member     = static_cast<ast::MemberExpression&>(*call.callee());
             llvm::Value*           self_value = compile_any_expression(ctx, *member.lhs());
@@ -46,6 +42,22 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
                     "arguments");
                 std::abort();
             }
+        }
+
+        case serial::ExpressionKind::Variable: {
+            if (call.function() != nullptr) {
+                ast::FunctionVariable* function = call.function();
+                llvm::FunctionType*    llvm_function_type =
+                    reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(function->function_type()));
+                llvm::Value* llvm_function = ctx.llvm_value(function);
+
+                const auto arguments = get_arguments();
+                return ir.CreateCall(llvm_function_type, llvm_function, arguments);
+            }
+
+            // The identifier is not referring to a function, so treat it as a variable that has a
+            // callable type.
+            [[fallthrough]];
         }
 
         default:

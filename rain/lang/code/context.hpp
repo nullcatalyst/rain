@@ -23,6 +23,8 @@ class Context {
     absl::flat_hash_map<const ast::Type*, llvm::Type*>      _llvm_types;
     absl::flat_hash_map<const ast::Variable*, llvm::Value*> _llvm_values;
 
+    bool _returned = false;
+
   public:
     Context(Module& module) : _module(module), _llvm_builder(module.llvm_context()) {}
     Context(const Context&)            = delete;
@@ -50,6 +52,9 @@ class Context {
     // }
 
     [[nodiscard]] constexpr llvm::IRBuilder<>& llvm_builder() noexcept { return _llvm_builder; }
+
+    [[nodiscard]] constexpr bool returned() const noexcept { return _returned; }
+    constexpr void               set_returned(bool returned) noexcept { _returned = returned; }
 
     void                      set_llvm_type(const ast::Type* type, llvm::Type* llvm_type);
     [[nodiscard]] llvm::Type* llvm_type(const ast::Type* type) const;

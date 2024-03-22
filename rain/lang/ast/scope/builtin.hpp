@@ -51,11 +51,11 @@ class BuiltinScope : public Scope {
         std::abort();
     }
 
-    absl::Nonnull<FunctionVariable*> add_method(
+    absl::Nonnull<FunctionVariable*> add_function(
         absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
         const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override {
         util::console_error(
-            "the builtin scope is immutable and cannot have custom methods added to it");
+            "the builtin scope is immutable and cannot have custom functions added to it");
         std::abort();
     }
 

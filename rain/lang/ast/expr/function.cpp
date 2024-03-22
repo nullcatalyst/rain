@@ -11,10 +11,11 @@ util::Result<void> FunctionExpression::validate(Scope& scope) {
     }
 
     if (_name.has_value()) {
-        scope.add_variable(_name.value(), std::make_unique<FunctionVariable>(_name.value(), _type));
+        _variable = scope.add_function(nullptr, _type->argument_types(), _name.value(),
+                                       std::make_unique<FunctionVariable>(_name.value(), _type));
     }
 
-    return {};
+    return _block->validate(scope);
 }
 
 util::Result<void> FunctionExpression::_validate_without_adding_to_scope(Scope& scope) {
@@ -36,9 +37,6 @@ util::Result<void> FunctionExpression::_validate_without_adding_to_scope(Scope& 
         argument_types.push_back(argument->type());
     }
     _type = scope.get_function_type(argument_types, _return_type.get());
-
-    auto result = _block->validate(scope);
-    FORWARD_ERROR(result);
 
     return {};
 }

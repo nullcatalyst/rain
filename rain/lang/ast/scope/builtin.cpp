@@ -23,25 +23,39 @@ BuiltinScope::BuiltinScope() {
     do {                                                                                           \
         auto method = make_builtin_function_variable(name, function_type,                          \
                                                      [](auto& builder, auto& arguments) { impl }); \
-        _method_variables.emplace(std::make_tuple(callee_type, argument_types, name),              \
-                                  method.get());                                                   \
+        _function_variables.emplace(std::make_tuple(callee_type, argument_types, name),            \
+                                    method.get());                                                 \
         _owned_variables.emplace(std::move(method));                                               \
     } while (0)
 
     {
-        auto  i32_binop_args = Scope::TypeList{_i32_type, _i32_type};
-        auto* i32_binop_type = get_function_type(i32_binop_args, _i32_type);
+        auto  i32_binop_args      = Scope::TypeList{_i32_type, _i32_type};
+        auto* i32_arithmetic_type = get_function_type(i32_binop_args, _i32_type);
 
-        ADD_BUILTIN_METHOD("__add__", _i32_type, i32_binop_type, i32_binop_args,
+        ADD_BUILTIN_METHOD("__add__", _i32_type, i32_arithmetic_type, i32_binop_args,
                            { return builder.CreateAdd(arguments[0], arguments[1]); });
-        ADD_BUILTIN_METHOD("__sub__", _i32_type, i32_binop_type, i32_binop_args,
+        ADD_BUILTIN_METHOD("__sub__", _i32_type, i32_arithmetic_type, i32_binop_args,
                            { return builder.CreateSub(arguments[0], arguments[1]); });
-        ADD_BUILTIN_METHOD("__mul__", _i32_type, i32_binop_type, i32_binop_args,
+        ADD_BUILTIN_METHOD("__mul__", _i32_type, i32_arithmetic_type, i32_binop_args,
                            { return builder.CreateMul(arguments[0], arguments[1]); });
-        ADD_BUILTIN_METHOD("__div__", _i32_type, i32_binop_type, i32_binop_args,
+        ADD_BUILTIN_METHOD("__div__", _i32_type, i32_arithmetic_type, i32_binop_args,
                            { return builder.CreateSDiv(arguments[0], arguments[1]); });
-        ADD_BUILTIN_METHOD("__rem__", _i32_type, i32_binop_type, i32_binop_args,
+        ADD_BUILTIN_METHOD("__rem__", _i32_type, i32_arithmetic_type, i32_binop_args,
                            { return builder.CreateSRem(arguments[0], arguments[1]); });
+
+        auto* i32_comparison_type = get_function_type(i32_binop_args, _bool_type);
+        ADD_BUILTIN_METHOD("__eq__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpEQ(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__ne__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpNE(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__lt__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpSLT(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__le__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpSLE(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__gt__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpSGT(arguments[0], arguments[1]); });
+        ADD_BUILTIN_METHOD("__ge__", _i32_type, i32_comparison_type, i32_binop_args,
+                           { return builder.CreateICmpSGE(arguments[0], arguments[1]); });
 
         auto  i32_as_f32_args = Scope::TypeList{_i32_type, _f32_type};
         auto* i32_as_f32_type = get_function_type(i32_as_f32_args, _f32_type);

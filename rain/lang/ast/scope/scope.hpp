@@ -8,6 +8,15 @@
 #include "absl/hash/hash.h"
 #include "llvm/ADT/SmallVector.h"
 
+namespace llvm {
+
+template <typename H, typename T>
+inline H AbslHashValue(H h, const llvm::SmallVector<T*, 4>& vec) {
+    return H::combine_contiguous(std::move(h), vec.data(), vec.size());
+}
+
+}  // namespace llvm
+
 namespace rain::lang::ast {
 
 class Type;
@@ -21,29 +30,21 @@ class BuiltinScope;
 
 class Scope {
   public:
-    class TypeList : public llvm::SmallVector<absl::Nonnull<Type*>, 4> {
-      public:
-        using llvm::SmallVector<Type*, 4>::SmallVector;
-
-        template <typename H>
-        friend H AbslHashValue(H h, const TypeList& type_list) {
-            return h.combine_contiguous(std::move(h), type_list.data(), type_list.size());
-        }
-    };
+    using TypeList = llvm::SmallVector<Type*, 4>;
 
   protected:
     using FunctionTypeKey =
         std::tuple<TypeList /*argument_types*/, absl::Nullable<Type*> /*return_type*/>;
-    using MethodVariableKey = std::tuple<absl::Nonnull<Type*> /*callee*/, TypeList /*arguments*/,
-                                         std::string_view /*name*/>;
+    using FunctionVariableKey = std::tuple<absl::Nullable<Type*> /*callee*/, TypeList /*arguments*/,
+                                           std::string_view /*name*/>;
 
     absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>        _named_types;
     absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>> _function_types;
     absl::flat_hash_set<std::unique_ptr<Type>>                         _owned_types;
 
-    absl::flat_hash_map<MethodVariableKey, absl::Nonnull<FunctionVariable*>> _method_variables;
-    absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>          _named_variables;
-    absl::flat_hash_set<std::unique_ptr<Variable>>                           _owned_variables;
+    absl::flat_hash_map<FunctionVariableKey, absl::Nonnull<FunctionVariable*>> _function_variables;
+    absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>            _named_variables;
+    absl::flat_hash_set<std::unique_ptr<Variable>>                             _owned_variables;
 
   public:
     virtual ~Scope() = default;
@@ -67,8 +68,12 @@ class Scope {
     [[nodiscard]] virtual absl::Nullable<Type*> find_type(
         const std::string_view name) const noexcept;
 
-    [[nodiscard]] virtual absl::Nullable<FunctionVariable*> find_method(
-        absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
+    /**
+     * The passed in `callee_type` can be null for any function that is not a method, and does not
+     * need a callee object.
+     */
+    [[nodiscard]] virtual absl::Nullable<FunctionVariable*> find_function(
+        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
         const std::string_view name) const noexcept;
 
     [[nodiscard]] virtual absl::Nullable<Variable*> find_variable(
@@ -77,9 +82,9 @@ class Scope {
     virtual absl::Nonnull<Type*> add_type(const std::string_view name,
                                           std::unique_ptr<Type>  type) noexcept;
 
-    virtual absl::Nonnull<FunctionVariable*> add_method(
-        Type* callee_type, const TypeList& argument_types, const std::string_view name,
-        std::unique_ptr<FunctionVariable> method) noexcept;
+    virtual absl::Nonnull<FunctionVariable*> add_function(
+        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+        const std::string_view name, std::unique_ptr<FunctionVariable> method) noexcept;
 
     virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
                                                   std::unique_ptr<Variable> variable) noexcept;

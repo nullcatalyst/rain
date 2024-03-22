@@ -11,19 +11,19 @@
 namespace rain::lang::err {
 
 class BinaryOperatorError : public util::Error {
-    const lex::Lexer& _lexer;
-    lex::Location     _lhs_location;
-    lex::Location     _rhs_location;
-    lex::Location     _op_location;
-    std::string       _msg;
+    lex::Location _lhs_location;
+    lex::Location _rhs_location;
+    lex::Location _op_location;
+    std::string   _file_name;
+    std::string   _msg;
 
   public:
     BinaryOperatorError(const lang::Lexer& lexer, lang::Location lhs_location,
                         lang::Location rhs_location, lang::Location op_location, std::string msg)
-        : _lexer(lexer),
-          _lhs_location(lhs_location),
+        : _lhs_location(lhs_location),
           _rhs_location(rhs_location),
           _op_location(op_location),
+          _file_name(lexer.file_name()),
           _msg(std::move(msg)) {}
     ~BinaryOperatorError() override = default;
 
@@ -67,7 +67,7 @@ class BinaryOperatorError : public util::Error {
             under_line += ANSI_RESET;
         }
 
-        return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _op_location.line(), ":",
+        return absl::StrCat(ANSI_BOLD, _file_name, ":", _op_location.line(), ":",
                             _op_location.column(), ANSI_RESET, ": ", ANSI_RED,
                             "error: ", ANSI_RESET, ANSI_BOLD, _msg, ANSI_RESET, "\n", source_line,
                             "\n", under_line, "\n");

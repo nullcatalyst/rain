@@ -11,13 +11,13 @@
 namespace rain::lang::err {
 
 class SyntaxError : public util::Error {
-    const lex::Lexer& _lexer;
-    lex::Location     _location;
-    std::string       _msg;
+    lex::Location _location;
+    std::string   _file_name;
+    std::string   _msg;
 
   public:
     SyntaxError(const lex::Lexer& lexer, lex::Location location, std::string msg)
-        : _lexer(lexer), _location(location), _msg(std::move(msg)) {}
+        : _location(location), _file_name(lexer.file_name()), _msg(std::move(msg)) {}
     ~SyntaxError() override = default;
 
     [[nodiscard]] std::string message() const noexcept override {
@@ -40,15 +40,14 @@ class SyntaxError : public util::Error {
 #if RAIN_PRINT_ERROR_MULTILINE
         const auto previous_line = _location.previous_line();
         const auto next_line     = _location.next_line();
-        return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _location.line, ":",
-                            _location.column, ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET,
-                            ANSI_BOLD, _msg, ANSI_RESET, "\n", previous_line.text(), source_line,
-                            "\n", under_line, "\n", next_line.text(),
-                            (next_line.text().empty() ? "" : "\n"));
+        return absl::StrCat(ANSI_BOLD, _file_name, ":", _location.line, ":", _location.column,
+                            ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET, ANSI_BOLD, _msg,
+                            ANSI_RESET, "\n", previous_line.text(), source_line, "\n", under_line,
+                            "\n", next_line.text(), (next_line.text().empty() ? "" : "\n"));
 #else
-        return absl::StrCat(ANSI_BOLD, _lexer.file_name(), ":", _location.line, ":",
-                            _location.column, ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET,
-                            ANSI_BOLD, _msg, ANSI_RESET, "\n", source_line, "\n", under_line, "\n");
+        return absl::StrCat(ANSI_BOLD, _file_name, ":", _location.line, ":", _location.column,
+                            ANSI_RESET, ": ", ANSI_RED, "error: ", ANSI_RESET, ANSI_BOLD, _msg,
+                            ANSI_RESET, "\n", source_line, "\n", under_line, "\n");
 #endif  // RAIN_PRINT_ERROR_MULTILINE
     }
 };

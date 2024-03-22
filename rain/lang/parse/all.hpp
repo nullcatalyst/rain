@@ -7,10 +7,12 @@
 
 // Expressions
 #include "rain/lang/ast/expr/block.hpp"
+#include "rain/lang/ast/expr/boolean.hpp"
 #include "rain/lang/ast/expr/call.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
+#include "rain/lang/ast/expr/if.hpp"
 #include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
@@ -49,6 +51,7 @@ util::Result<std::unique_ptr<ast::BlockExpression>>    parse_block(lex::Lexer& l
                                                                    ast::Scope& scope);
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
+util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast::Scope& scope);
 
 // Types
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);

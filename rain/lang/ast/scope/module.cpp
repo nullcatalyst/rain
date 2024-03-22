@@ -17,12 +17,13 @@ absl::Nullable<Type*> ModuleScope::find_type(const std::string_view name) const 
     return _builtin.find_type(name);
 }
 
-absl::Nullable<FunctionVariable*> ModuleScope::find_method(
-    Type* callee_type, const TypeList& argument_types, const std::string_view name) const noexcept {
-    if (const auto it = Scope::find_method(callee_type, argument_types, name); it != nullptr) {
+absl::Nullable<FunctionVariable*> ModuleScope::find_function(
+    absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+    const std::string_view name) const noexcept {
+    if (const auto it = Scope::find_function(callee_type, argument_types, name); it != nullptr) {
         return it;
     }
-    return _builtin.find_method(callee_type, argument_types, name);
+    return _builtin.find_function(callee_type, argument_types, name);
 }
 
 absl::Nullable<Variable*> ModuleScope::find_variable(const std::string_view name) const noexcept {

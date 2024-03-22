@@ -23,6 +23,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Block:
             return compile_block(ctx, static_cast<ast::BlockExpression&>(expression));
 
+        case serial::ExpressionKind::If:
+            return compile_if(ctx, static_cast<ast::IfExpression&>(expression));
+
         default:
             break;
     }

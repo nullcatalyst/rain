@@ -22,15 +22,17 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
 
     const auto token = lexer.peek();
     switch (token.kind) {
-            // case lex::TokenKind::False:
-            //     lexer.next();
-            //     expression = ast::BooleanExpression::alloc(false, token.location);
-            //     break;
+        case lex::TokenKind::False: {
+            lexer.next();  // Consume the `false` token
+            expression = std::make_unique<ast::BooleanExpression>(false);
+            break;
+        }
 
-            // case lex::TokenKind::True:
-            //     lexer.next();
-            //     expression = ast::BooleanExpression::alloc(true, token.location);
-            //     break;
+        case lex::TokenKind::True: {
+            lexer.next();  // Consume the `true` token
+            expression = std::make_unique<ast::BooleanExpression>(true);
+            break;
+        }
 
         case lex::TokenKind::Integer: {
             auto result = parse_integer(lexer, scope);
@@ -67,9 +69,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
-            // case TokenKind::If:
-            //     expression = parse_if(lexer);
-            //     break;
+        case lex::TokenKind::If: {
+            auto result = parse_if(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
 
         case lex::TokenKind::Fn: {
             auto result = parse_function(lexer, scope);

@@ -8,6 +8,7 @@ cc_library(
         "compile/call.cpp",
         "compile/function.cpp",
         "compile/identifier.cpp",
+        "compile/if.cpp",
         "compile/integer.cpp",
         "compile/module.cpp",
         "compile/type.cpp",

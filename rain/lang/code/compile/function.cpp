@@ -8,6 +8,9 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
     assert(llvm_type != nullptr && "Function type not found");
     llvm::Function* llvm_function = llvm::Function::Create(
         llvm_type, llvm::Function::ExternalLinkage, function.name_or_empty(), ctx.llvm_module());
+    if (const auto* function_variable = function.variable(); function_variable != nullptr) {
+        ctx.set_llvm_value(function_variable, llvm_function);
+    }
 
     if (function.is_named()) {
         llvm_function->addFnAttr(llvm::Attribute::get(
@@ -35,9 +38,6 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
 
     ir.SetInsertPoint(prev_block);
 
-    if (const auto* function_variable = function.variable(); function_variable != nullptr) {
-        ctx.set_llvm_value(function_variable, llvm_function);
-    }
     return llvm_function;
 }
 

@@ -8,6 +8,7 @@ cc_library(
         "call.cpp",
         "function.cpp",
         "identifier.cpp",
+        "if.cpp",
         "integer.cpp",
         "list.hpp",
         "member.cpp",

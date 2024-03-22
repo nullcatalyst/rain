@@ -27,6 +27,7 @@ cc_test(
     size = "small",
     timeout = "short",
     srcs = [
+        "lexer.test.cpp",
         "location.test.cpp",
     ],
     deps = [

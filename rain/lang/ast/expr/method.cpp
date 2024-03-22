@@ -13,17 +13,13 @@ util::Result<void> MethodExpression::validate(Scope& scope) {
         FORWARD_ERROR(result);
     }
 
-    Scope::TypeList argument_types;
-    argument_types.reserve(_arguments.size());
-    for (const auto& argument : _arguments) {
-        argument_types.push_back(argument->type());
-    }
     _callee_type = std::move(callee_type).value();
 
-    _variable = scope.add_method(_callee_type.get_nonnull(), argument_types, _name.value(),
-                                 std::make_unique<FunctionVariable>(_name.value(), _type));
+    _variable =
+        scope.add_function(_callee_type.get_nonnull(), _type->argument_types(), _name.value(),
+                           std::make_unique<FunctionVariable>(_name.value(), _type));
 
-    return {};
+    return _block->validate(scope);
 }
 
 }  // namespace rain::lang::ast

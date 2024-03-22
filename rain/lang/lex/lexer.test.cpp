@@ -2,8 +2,8 @@
 
 #include "gtest/gtest.h"
 #include "rain/lang/ast/scope/builtin.hpp"
-#include "rain/lang/lex/lazy_lexer.hpp"
-#include "rain/lang/lex/list_lexer.hpp"
+#include "rain/lang/lex/lazy.hpp"
+#include "rain/lang/lex/list.hpp"
 #include "rain/lang/parse/all.hpp"
 
 TEST(Lexer, lazy) {

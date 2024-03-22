@@ -39,11 +39,12 @@ absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexce
     return nullptr;
 }
 
-absl::Nullable<FunctionVariable*> Scope::find_method(absl::Nonnull<Type*>   callee_type,
-                                                     const TypeList&        argument_types,
-                                                     const std::string_view name) const noexcept {
-    if (const auto it = _method_variables.find(std::make_tuple(callee_type, argument_types, name));
-        it != _method_variables.end()) {
+absl::Nullable<FunctionVariable*> Scope::find_function(absl::Nullable<Type*>  callee_type,
+                                                       const TypeList&        argument_types,
+                                                       const std::string_view name) const noexcept {
+    if (const auto it =
+            _function_variables.find(std::make_tuple(callee_type, argument_types, name));
+        it != _function_variables.end()) {
         return it->second;
     }
     return nullptr;
@@ -66,15 +67,15 @@ absl::Nonnull<Type*> Scope::add_type(const std::string_view name,
     return type_ptr;
 }
 
-absl::Nonnull<FunctionVariable*> Scope::add_method(
-    absl::Nonnull<Type*> callee_type, const TypeList& argument_types, const std::string_view name,
-    std::unique_ptr<FunctionVariable> method) noexcept {
-    assert(method != nullptr);
+absl::Nonnull<FunctionVariable*> Scope::add_function(
+    absl::Nullable<Type*> callee_type, const TypeList& argument_types, const std::string_view name,
+    std::unique_ptr<FunctionVariable> function) noexcept {
+    assert(function != nullptr);
 
-    auto* method_ptr = method.get();
-    _method_variables.emplace(std::make_tuple(callee_type, argument_types, name), method_ptr);
-    _owned_variables.emplace(std::move(method));
-    return method_ptr;
+    auto* function_ptr = function.get();
+    _function_variables.emplace(std::make_tuple(callee_type, argument_types, name), function_ptr);
+    _owned_variables.emplace(std::move(function));
+    return function_ptr;
 }
 
 absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,

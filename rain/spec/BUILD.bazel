@@ -3,10 +3,10 @@ cc_test(
     size = "small",
     timeout = "short",
     srcs = [
-        "lexer.spec.cpp",
         "rain.spec.cpp",
     ],
     deps = [
+        "//rain:lib",
         "//rain/lang",
         "@googletest//:gtest_main",
     ],

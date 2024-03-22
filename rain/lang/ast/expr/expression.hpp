@@ -12,10 +12,13 @@ namespace rain::lang::ast {
 
 class Expression {
   public:
+    Expression() = default;
+    // Expression(lex::Location location) : _location(location) {}
     virtual ~Expression() = default;
 
     [[nodiscard]] virtual serial::ExpressionKind kind() const noexcept = 0;
     [[nodiscard]] virtual absl::Nullable<Type*>  type() const noexcept = 0;
+    // [[nodiscard]] virtual lex::Location          location() const noexcept = 0;
 
     [[nodiscard]] virtual bool compile_time_capable() const noexcept { return false; }
     virtual util::Result<void> validate(Scope& scope) = 0;
