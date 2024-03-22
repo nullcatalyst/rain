@@ -21,3 +21,23 @@ TEST(SHA256, hello) {
     const auto digest = hash(reinterpret_cast<const uint8_t*>("hello"), 5);
     EXPECT_EQ(digest, EXPECTED_DIGEST);
 }
+
+TEST(SHA256, world) {
+    using namespace rain::crypto::sha256;
+
+    // Ran on macos:
+    // echo -n world | shasum -a 256
+    // 486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7  -
+
+    constexpr std::array<uint8_t, 32> EXPECTED_DIGEST{
+        // clang-format off
+        0x48, 0x6e, 0xa4, 0x62, 0x24, 0xd1, 0xbb, 0x4f,
+        0xb6, 0x80, 0xf3, 0x4f, 0x7c, 0x9a, 0xd9, 0x6a,
+        0x8f, 0x24, 0xec, 0x88, 0xbe, 0x73, 0xea, 0x8e,
+        0x5a, 0x6c, 0x65, 0x26, 0x0e, 0x9c, 0xb8, 0xa7,
+        // clang-format on
+    };
+
+    const auto digest = hash(reinterpret_cast<const uint8_t*>("world"), 5);
+    EXPECT_EQ(digest, EXPECTED_DIGEST);
+}
