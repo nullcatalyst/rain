@@ -17,7 +17,7 @@ enum class ExpressionKind {
     // Operations
     Ctor,
     Call,
-    Exec,
+    CompileTime,
     Member,
     UnaryOperator,
     BinaryOperator,

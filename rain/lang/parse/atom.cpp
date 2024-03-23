@@ -86,9 +86,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
-            // case lex::TokenKind::Hash:
-            //     expression = parse_exec(lexer);
-            //     break;
+        case lex::TokenKind::Hash: {
+            auto result = parse_compile_time(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
 
             // case lex::TokenKind::EndOfFile:
             //     return ERR_PTR(err::SyntaxError, lexer, token.location, "unexpected end of

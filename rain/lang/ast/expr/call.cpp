@@ -8,6 +8,17 @@
 
 namespace rain::lang::ast {
 
+bool CallExpression::compile_time_capable() const noexcept {
+    if (_function == nullptr) {
+        return (_callee == nullptr || _callee->compile_time_capable()) &&
+               std::all_of(_arguments.begin(), _arguments.end(),
+                           [](const auto& argument) { return argument->compile_time_capable(); });
+    } else {
+        return std::all_of(_arguments.begin(), _arguments.end(),
+                           [](const auto& argument) { return argument->compile_time_capable(); });
+    }
+}
+
 util::Result<void> CallExpression::validate(Scope& scope) {
     const auto validate_arguments =
         [&](absl::Nullable<Type*> callee_type) -> util::Result<Scope::TypeList> {

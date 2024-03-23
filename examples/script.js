@@ -433,6 +433,8 @@ require(['vs/editor/editor.main'], async () => {
     const rainTab = document.getElementById('rain-tab');
     const llvmIrTab = document.getElementById('llvm-ir-tab');
     const watTab = document.getElementById('wat-tab');
+    const compileButton = document.getElementById('compile');
+    const optimizeCheckbox = document.getElementById('optimize');
 
     rainTab.addEventListener('click', () => {
         rainTab.classList.add('active');
@@ -561,10 +563,10 @@ require(['vs/editor/editor.main'], async () => {
         new Uint8Array(rainc.memory.buffer, ptr, len).set(
             new Uint8Array(encoded)
         );
-        rainc.compile(ptr, ptr + len);
+        rainc.compile(ptr, ptr + len, optimizeCheckbox.checked);
         rainc.free(ptr);
     }
-    document.getElementById('compile').addEventListener('click', () => {
+    compileButton.addEventListener('click', () => {
         const src = monaco.editor.getModels()[0].getValue();
         compile(src);
 

@@ -6,6 +6,7 @@ cc_library(
         "compile/binary_operator.cpp",
         "compile/block.cpp",
         "compile/call.cpp",
+        "compile/compile_time.cpp",
         "compile/export.cpp",
         "compile/function.cpp",
         "compile/identifier.cpp",

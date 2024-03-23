@@ -41,6 +41,10 @@ std::optional<std::string_view> get_operator_method_name(serial::BinaryOperatorK
 
 }  // namespace
 
+bool BinaryOperatorExpression::compile_time_capable() const noexcept {
+    return _lhs->compile_time_capable() && _rhs->compile_time_capable();
+}
+
 util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
     {
         auto result = _lhs->validate(scope);

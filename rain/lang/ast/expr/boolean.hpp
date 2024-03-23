@@ -23,6 +23,7 @@ class BooleanExpression : public Expression {
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr bool                  value() const noexcept { return _value; }
 
+    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
     util::Result<void> validate(Scope& scope) override;
 };
 

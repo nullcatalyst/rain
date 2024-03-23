@@ -29,9 +29,9 @@ class CallExpression : public Expression {
         const {
         return _arguments;
     }
-
     [[nodiscard]] absl::Nullable<FunctionVariable*> function() const noexcept { return _function; }
 
+    [[nodiscard]] bool compile_time_capable() const noexcept override;
     util::Result<void> validate(Scope& scope) override;
 };
 

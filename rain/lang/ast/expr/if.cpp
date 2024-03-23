@@ -7,6 +7,11 @@
 
 namespace rain::lang::ast {
 
+bool IfExpression::compile_time_capable() const noexcept {
+    return _condition->compile_time_capable() && _then->compile_time_capable() &&
+           (!_else.has_value() || _else.value()->compile_time_capable());
+}
+
 util::Result<void> IfExpression::validate(Scope& scope) {
     {
         auto result = _condition->validate(scope);

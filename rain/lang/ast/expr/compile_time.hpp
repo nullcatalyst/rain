@@ -7,15 +7,15 @@
 
 namespace rain::lang::ast {
 
-class ParenthesisExpression : public Expression {
+class CompileTimeExpression : public Expression {
     std::unique_ptr<ast::Expression> _expression;
 
   public:
-    ParenthesisExpression(std::unique_ptr<Expression> expression)
+    CompileTimeExpression(std::unique_ptr<Expression> expression)
         : _expression(std::move(expression)) {}
 
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::Parenthesis;
+        return serial::ExpressionKind::CompileTime;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override {
         return _expression->type();

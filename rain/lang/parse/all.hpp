@@ -9,6 +9,7 @@
 #include "rain/lang/ast/expr/block.hpp"
 #include "rain/lang/ast/expr/boolean.hpp"
 #include "rain/lang/ast/expr/call.hpp"
+#include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
@@ -50,6 +51,8 @@ util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> owner);
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> callee);
+util::Result<std::unique_ptr<ast::CompileTimeExpression>> parse_compile_time(lex::Lexer& lexer,
+                                                                             ast::Scope& scope);
 util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex::Lexer& lexer,
                                                                             ast::Scope& scope);
 util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer& lexer,

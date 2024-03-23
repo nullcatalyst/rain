@@ -33,6 +33,7 @@ class BinaryOperatorExpression : public Expression {
         return _method;
     }
 
+    [[nodiscard]] bool compile_time_capable() const noexcept override;
     util::Result<void> validate(Scope& scope) override;
 };
 

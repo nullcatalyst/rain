@@ -16,8 +16,7 @@
 namespace rain::lang::code {
 
 class Context {
-    Module& _module;
-    // llvm::ExecutionEngine _engine;
+    Module&           _module;
     llvm::IRBuilder<> _llvm_builder;
 
     absl::flat_hash_map<const ast::Type*, llvm::Type*>      _llvm_types;
@@ -32,25 +31,28 @@ class Context {
     Context(Context&&)                 = delete;
     Context& operator=(Context&&)      = delete;
 
-    [[nodiscard]] constexpr llvm::LLVMContext& llvm_context() noexcept {
-        return _module.llvm_context();
-    }
     [[nodiscard]] constexpr const llvm::LLVMContext& llvm_context() const noexcept {
         return _module.llvm_context();
     }
-
-    [[nodiscard]] constexpr llvm::Module& llvm_module() noexcept { return _module.llvm_module(); }
+    [[nodiscard]] constexpr llvm::LLVMContext& llvm_context() noexcept {
+        return _module.llvm_context();
+    }
     [[nodiscard]] constexpr const llvm::Module& llvm_module() const noexcept {
         return _module.llvm_module();
     }
-
+    [[nodiscard]] constexpr llvm::Module& llvm_module() noexcept { return _module.llvm_module(); }
+    [[nodiscard]] constexpr const llvm::ExecutionEngine& llvm_engine() const noexcept {
+        return _module.llvm_engine();
+    }
+    [[nodiscard]] constexpr llvm::ExecutionEngine& llvm_engine() noexcept {
+        return _module.llvm_engine();
+    }
     [[nodiscard]] constexpr const llvm::TargetMachine& llvm_target_machine() const noexcept {
         return _module.llvm_target_machine();
     }
-
-    // [[nodiscard]] constexpr llvm::ExecutionEngine& llvm_engine() const noexcept { return _engine;
-    // }
-
+    [[nodiscard]] constexpr llvm::TargetMachine& llvm_target_machine() noexcept {
+        return _module.llvm_target_machine();
+    }
     [[nodiscard]] constexpr llvm::IRBuilder<>& llvm_builder() noexcept { return _llvm_builder; }
 
     [[nodiscard]] constexpr bool returned() const noexcept { return _returned; }

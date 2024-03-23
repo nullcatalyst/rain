@@ -16,7 +16,7 @@ fn double_double(x: i32) -> i32 {
     x.double().double()
 }
 
-export fn fib(n: i32) -> i32 {
+fn fib(n: i32) -> i32 {
     if n < 2 {
         1
     } else {
@@ -24,8 +24,8 @@ export fn fib(n: i32) -> i32 {
     }
 }
 
-fn compile_time_fib_6() -> i32 {
-    -(fib(6))
+export fn compile_time_fib_6() -> i32 {
+    #fib(6)
 }
 )";
 
