@@ -8,6 +8,7 @@ cc_library(
         "compile/call.cpp",
         "compile/compile_time.cpp",
         "compile/export.cpp",
+        "compile/float.cpp",
         "compile/function.cpp",
         "compile/identifier.cpp",
         "compile/if.cpp",

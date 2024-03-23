@@ -7,6 +7,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Integer:
             return compile_integer(ctx, static_cast<ast::IntegerExpression&>(expression));
 
+        case serial::ExpressionKind::Float:
+            return compile_float(ctx, static_cast<ast::FloatExpression&>(expression));
+
         case serial::ExpressionKind::Variable:
             return compile_identifier(ctx, static_cast<ast::IdentifierExpression&>(expression));
 

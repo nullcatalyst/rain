@@ -9,6 +9,7 @@
 #include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/export.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/float.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
@@ -27,6 +28,7 @@ void compile_module(Context& ctx, ast::Module& module);
 llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression);
 
 llvm::Value* compile_integer(Context& ctx, ast::IntegerExpression& integer);
+llvm::Value* compile_float(Context& ctx, ast::FloatExpression& float_);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator);
 llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& unary_operator);

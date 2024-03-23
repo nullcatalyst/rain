@@ -15,6 +15,22 @@ void compile_module(Context& ctx, ast::Module& module) {
         compile_type(ctx, *type);
     }
 
+    for (auto& external_function : builtin.external_functions()) {
+        auto* llvm_function_type =
+            reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(external_function->type()));
+
+        auto* llvm_function =
+            llvm::Function::Create(llvm_function_type, llvm::Function::ExternalLinkage,
+                                   external_function->name(), ctx.llvm_module());
+
+        llvm_function->addFnAttr(llvm::Attribute::get(ctx.llvm_context(), "wasm-import-module",
+                                                      external_function->wasm_namespace()));
+        llvm_function->addFnAttr(llvm::Attribute::get(ctx.llvm_context(), "wasm-import-name",
+                                                      external_function->wasm_function_name()));
+
+        ctx.set_llvm_value(external_function.get(), llvm_function);
+    }
+
     for (auto& type : module.scope().owned_types()) {
         compile_type(ctx, *type);
     }

@@ -11,6 +11,7 @@
 #include "rain/lang/ast/expr/call.hpp"
 #include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/float.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
@@ -40,6 +41,8 @@ util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& 
 
 util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexer& lexer,
                                                                        ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FloatExpression>>      parse_float(lex::Lexer& lexer,
+                                                                     ast::Scope& scope);
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope);

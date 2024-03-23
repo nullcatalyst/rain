@@ -37,7 +37,8 @@ util::Result<std::unique_ptr<llvm::ExecutionEngine>> create_interpreter(
 void use_external_function(const std::string_view function_name,
                            llvm::GenericValue (*external_function)(
                                llvm::FunctionType*, llvm::ArrayRef<llvm::GenericValue>)) {
-    llvm::InterpreterRegisterExternalFunction(std::string(function_name), external_function);
+    llvm::InterpreterRegisterExternalFunction(absl::StrCat("lle_X_", function_name),
+                                              external_function);
 }
 
 }  // namespace rain::lang::code::target

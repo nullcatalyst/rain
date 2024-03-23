@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "block.cpp",
         "builtin_function.cpp",
+        "external_function.cpp",
         "function.cpp",
         "variable.cpp",
     ],
@@ -27,6 +28,7 @@ cc_library(
     hdrs = [
         "block.hpp",
         "builtin_function.hpp",
+        "external_function.hpp",
         "function.hpp",
         "variable.hpp",
     ],

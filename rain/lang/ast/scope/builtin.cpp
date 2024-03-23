@@ -100,4 +100,11 @@ absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
     return type;
 }
 
+void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
+    _function_variables.emplace(
+        std::make_tuple(nullptr, variable->function_type()->argument_types(), variable->name()),
+        variable.get());
+    _external_functions.emplace_back(std::move(variable));
+}
+
 }  // namespace rain::lang::ast

@@ -1,6 +1,6 @@
 #include "rain/bin/common.hpp"
-#include "rain/bin/compile_time_functions.hpp"
 #include "rain/lang/code/target/default.hpp"
+#include "rain/lib/compile_time_functions.hpp"
 #include "rain/rain.hpp"
 
 WASM_EXPORT("init")
@@ -8,9 +8,9 @@ void initialize() {
 #if defined(__wasm__)
     __wasm_call_ctors();
 #endif  // defined(__wasm__)
-    rain::lang::code::initialize_llvm();
 
-    // load_external_functions_into_llvm();
+    rain::lang::code::initialize_llvm();
+    rain::load_external_functions_into_llvm_interpreter();
 }
 
 WASM_EXPORT("compile")
@@ -21,9 +21,8 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
     prev_result.clear();
 
     // Compile the source code.
-    auto compile_result = rain::compile(std::string_view{source_start, source_end}, []() {
-        // add_external_functions_to_compiler(compiler);
-    });
+    auto compile_result = rain::compile(std::string_view{source_start, source_end},
+                                        rain::add_external_functions_to_module);
     if (!compile_result.has_value()) {
         const auto msg = compile_result.error()->message();
         callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());

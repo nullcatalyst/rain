@@ -16,7 +16,7 @@ class FunctionVariable : public Variable {
     absl::Nonnull<FunctionType*> _function_type;
 
   public:
-    FunctionVariable(std::string_view name, absl::Nonnull<FunctionType*> type)
+    FunctionVariable(const std::string_view name, absl::Nonnull<FunctionType*> type)
         : _name(name), _function_type(type) {}
     ~FunctionVariable() override = default;
 

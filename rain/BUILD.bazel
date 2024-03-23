@@ -9,6 +9,7 @@ cc_library(
     deps = [
         ":lib_compile",
         ":lib_decompile",
+        ":lib_extras",
         ":lib_link",
     ],
 )
@@ -61,14 +62,21 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "lib_extras",
+    srcs = ["lib/compile_time_functions.cpp"],
+    hdrs = ["lib/compile_time_functions.hpp"],
+    deps = [
+        "//rain/lang",
+        "//rain/util",
+    ],
+)
+
 # Shared components between each of the standalone tools.
 # This is useful to avoid duplicating the framework to get the WASM binaries to be easily callable.
 cc_library(
     name = "bin_common",
-    hdrs = [
-        "bin/common.hpp",
-        "bin/compile_time_functions.hpp",
-    ],
+    hdrs = ["bin/common.hpp"],
     deps = ["//rain/util"],
 )
 

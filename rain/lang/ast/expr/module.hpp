@@ -2,8 +2,10 @@
 
 #include <vector>
 
+#include "absl/base/nullability.h"
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/scope/module.hpp"
+#include "rain/lang/ast/type/function.hpp"
 
 namespace rain::lang::ast {
 

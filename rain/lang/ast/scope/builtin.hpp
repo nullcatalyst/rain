@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cstdlib>
-#include <tuple>
+#include <memory>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/var/external_function.hpp"
 #include "rain/util/log.hpp"
 
 namespace rain::lang::ast {
@@ -19,6 +21,8 @@ class BuiltinScope : public Scope {
     absl::Nonnull<Type*> _i64_type;
     absl::Nonnull<Type*> _f32_type;
     absl::Nonnull<Type*> _f64_type;
+
+    std::vector<std::unique_ptr<ExternalFunctionVariable>> _external_functions;
 
   public:
     BuiltinScope();
@@ -40,6 +44,10 @@ class BuiltinScope : public Scope {
     [[nodiscard]] absl::Nonnull<Type*> i64_type() const noexcept { return _i64_type; }
     [[nodiscard]] absl::Nonnull<Type*> f32_type() const noexcept { return _f32_type; }
     [[nodiscard]] absl::Nonnull<Type*> f64_type() const noexcept { return _f64_type; }
+    [[nodiscard]] const std::vector<std::unique_ptr<ExternalFunctionVariable>>& external_functions()
+        const noexcept {
+        return _external_functions;
+    }
 
     [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
         const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
@@ -65,6 +73,8 @@ class BuiltinScope : public Scope {
             "the builtin scope is immutable and cannot have custom variables added to it");
         std::abort();
     }
+
+    void declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable);
 };
 
 }  // namespace rain::lang::ast

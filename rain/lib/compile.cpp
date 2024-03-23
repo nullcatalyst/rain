@@ -16,11 +16,11 @@ namespace rain {
 using namespace lang;
 
 util::Result<code::Module> compile(const std::string_view source) {
-    return compile(source, []() {});
+    return compile(source, [](lang::ast::Module&) {});
 }
 
-util::Result<code::Module> compile(const std::string_view     source,
-                                   llvm::function_ref<void()> init_compiler) {
+util::Result<code::Module> compile(const std::string_view                       source,
+                                   llvm::function_ref<void(lang::ast::Module&)> init_compiler) {
     auto               lexer      = lex::LazyLexer::using_source(source, "<unknown>");
     lex::LazyListLexer list_lexer = lex::LazyListLexer::using_lexer(lexer);
 
@@ -28,6 +28,8 @@ util::Result<code::Module> compile(const std::string_view     source,
     auto              parse_result = parse::parse_module(lexer, builtin);
     FORWARD_ERROR(parse_result);
     auto parse_module = std::move(parse_result).value();
+
+    init_compiler(*parse_module);
 
     auto validate_result = parse_module->validate();
     FORWARD_ERROR(validate_result);

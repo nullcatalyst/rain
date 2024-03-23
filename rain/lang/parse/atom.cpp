@@ -41,9 +41,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
-            // case lex::TokenKind::Float:
-            //     expression = parse_float(lexer);
-            //     break;
+        case lex::TokenKind::Float: {
+            auto result = parse_float(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
 
         case lex::TokenKind::Identifier: {
             auto result = parse_identifier(lexer, scope);
