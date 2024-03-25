@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 int vsnprintf(char* str, size_t size, const char* format, va_list arg);
@@ -12,7 +13,7 @@ int vsnprintf(char* str, size_t size, const char* format, va_list arg);
 int sprintf(char* str, const char* format, ...) {
     va_list args;
     va_start(args, format);
-    int ret = vsnprintf(str, SIZE_T_MAX, format, args);
+    int ret = vsnprintf(str, SIZE_MAX, format, args);
     va_end(args);
     return ret;
 }

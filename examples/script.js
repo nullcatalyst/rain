@@ -1,3 +1,113 @@
+// EVENT_ERROR will eventually be removed when the compiler outputs a list of diagnostics, instead
+// of just a single error message.
+const EVENT_ERROR = -1;
+const EVENT_COMPILE = 1;
+const EVENT_LINK = 2;
+const EVENT_DECOMPILE = 3;
+
+const CONSOLE_SUCCESS_STYLE = "color: #32a852; font-weight: bold;";
+const CONSOLE_INFO_STYLE = "color: #4287f5; font-weight: bold;";
+const CONSOLE_ERROR_STYLE = "color: #eb4034; font-weight: bold;";
+
+async function loadCompiler(onCompile, onLink, onDecompile, onError) {
+    const rainc = await loadWasm("rainc.wasm", (event, dataStart, dataEnd) => {
+        switch (event) {
+            case EVENT_COMPILE: {
+                const text = decodeText(rainc.memory, dataStart, dataEnd);
+                console.log("%cCompiled LLVM IR:", CONSOLE_INFO_STYLE);
+                console.log(text);
+                onCompile(text);
+                break;
+            }
+
+            case EVENT_LINK: {
+                // Create a copy of the data, since the passed in data will be deallocated after.
+                const data = memoryView(rainc.memory, dataStart, dataEnd);
+                const out = new Uint8Array(data.byteLength);
+                out.set(data);
+                console.log("%Linked WebAssembly binary:", CONSOLE_INFO_STYLE, out);
+                onLink(out);
+                break;
+            }
+
+            case EVENT_DECOMPILE: {
+                const text = decodeText(rainc.memory, dataStart, dataEnd);
+                console.log("%cCompiled WAT:", CONSOLE_INFO_STYLE);
+                console.log(text);
+                onDecompile(text);
+                console.log("%cSuccess!", CONSOLE_SUCCESS_STYLE);
+                break;
+            }
+
+            case EVENT_ERROR: {
+                const text = decodeText(rainc.memory, dataStart, dataEnd);
+                console.error("%cError:", CONSOLE_ERROR_STYLE, text);
+                onError(text);
+                break;
+            }
+        }
+    });
+
+    rainc.init();
+
+    return function compile(src, optimize) {
+        monaco.editor.removeAllMarkers("compilation");
+
+        console.log("%cCompiling source code:", CONSOLE_INFO_STYLE);
+        console.log(src);
+
+        const encoded = new TextEncoder().encode(src);
+        const len = encoded.length;
+        const ptr = rainc.malloc(len + 1);
+
+        const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
+        memoryView.set(new Uint8Array(encoded));
+        // Null-terminate the string.
+        // This shouldn't be necessary, but is useful in case of off-by-one bugs in the compiler.
+        memoryView[len] = 0;
+        rainc.compile(ptr, ptr + len, optimize);
+        rainc.free(ptr);
+    };
+}
+
+async function loadWasm(url, callback) {
+    let memory;
+    const wasm = await WebAssembly.instantiateStreaming(fetch(url), {
+        console: {
+            log: (dataStart, dataEnd) => {
+                console.log(decodeText(memory, dataStart, dataEnd));
+            },
+            error: (dataStart, dataEnd) => {
+                console.error(decodeText(memory, dataStart, dataEnd));
+            },
+        },
+        math: Math,
+        time: {
+            now_perf: () => performance.now(),
+            now_unix: () => Date.now(),
+        },
+        env: {
+            callback: (event, dataStart, dataEnd) => {
+                if (callback) {
+                    callback(event, dataStart, dataEnd);
+                } else {
+                    console.log(decodeText(memory, dataStart, dataEnd));
+                }
+            },
+        },
+    });
+    memory = wasm.instance.exports.memory;
+    return wasm.instance.exports;
+}
+
+function memoryView(memory, start, end) {
+    return new Uint8Array(memory.buffer, start, end - start);
+}
+
+function decodeText(memory, start, end) {
+    return new TextDecoder("utf8").decode(memoryView(memory, start, end));
+}
+
 function registerLanguage(monaco, langId, tokensProvider, config) {
     // if (languageIsInitialized(monaco, langId)) {
     //     return;
@@ -408,233 +518,143 @@ function registerWatLanguage(monaco) {
     )
 }
 
-require.config({
-    'paths': {
-        'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs',
-    },
-});
-
-require(['vs/editor/editor.main'], async () => {
-    registerRainLanguage(monaco);
-    registerLlvmIrLanguage(monaco);
-    registerWatLanguage(monaco);
-
-    const rainModel = monaco.editor.createModel(document.getElementById('source-code').textContent, 'rain');
-    const llvmIrModel = monaco.editor.createModel('; Compile to see output here\n', 'llvm-ir');
-    const watModel = monaco.editor.createModel(';; Compile to see output here\n', 'wat');
-    let wasmBin = null;
-
-    const editor = monaco.editor.create(document.getElementById('editor'), {
-        model: rainModel,
-        automaticLayout: true,
-        // lineNumbers: 'off',
-        // minimap: { enabled: false },
-        // padding: { top: 5, right: 5, bottom: 5, left: 5 },
-        overviewRulerLanes: 0,
-        overviewRulerBorder: false,
-        theme: 'vs-dark',
+async function loadEditor() {
+    require.config({
+        'paths': {
+            'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs',
+        },
     });
+
+    return new Promise((resolve, reject) => {
+        require(['vs/editor/editor.main'], async () => {
+            registerRainLanguage(monaco);
+            registerLlvmIrLanguage(monaco);
+            registerWatLanguage(monaco);
+
+            const sourceCode = document.getElementById('source-code').textContent;
+            const rain = monaco.editor.createModel(sourceCode, 'rain');
+            const llvmIr = monaco.editor.createModel('; Compile to see output here\n', 'llvm-ir');
+            const wat = monaco.editor.createModel(';; Compile to see output here\n', 'wat');
+
+            const editor = monaco.editor.create(document.getElementById('editor'), {
+                model: rain,
+                automaticLayout: true,
+                overviewRulerLanes: 0,
+                overviewRulerBorder: false,
+                theme: 'vs-dark',
+            });
+
+            resolve({
+                monaco,
+                editor,
+                rain,
+                llvmIr,
+                wat,
+            });
+        });
+    });
+}
+
+function download(fileName, data, mimeType) {
+    const blob = new Blob([data], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+}
+
+async function main() {
+    let wasm = null;
+    const onCompile = (text) => { llvmIr.setValue(text); };
+    const onLink = (_wasm) => { wasm = _wasm; };
+    const onDecompile = (text) => { wat.setValue(text); };
+    const onError = (text) => {
+        debugger;
+        const parseErrorMsg = (msg) => {
+            const parts = msg.split(":");
+            const fileName = parts[0];
+            const line = Number(parts[1]);
+            const column = Number(parts[2]);
+            const message = parts.slice(3).join(":");
+            return [fileName, line, column, message];
+        };
+
+        if (text.startsWith("<unknown>:")) {
+            const lines = text.split("\n");
+            const [_fileName, line, column, message] = parseErrorMsg(lines[0]);
+
+            const underlineSrcMsg = lines[2];
+            let firstNonSpace = -1;
+            let lastNonSpace = underlineSrcMsg.length;
+            for (let i = 0; i < underlineSrcMsg.length; ++i) {
+                const c = underlineSrcMsg[i];
+                if (firstNonSpace === -1 && c !== " ") {
+                    firstNonSpace = i;
+                } else if (underlineSrcMsg[i - 1] !== " " && c === " ") {
+                    lastNonSpace = i;
+                }
+            }
+
+            monaco.editor.setModelMarkers(
+                wat,
+                "error",
+                [
+                    {
+                        startLineNumber: line,
+                        startColumn: column,
+                        endLineNumber: line,
+                        endColumn: lastNonSpace,
+                        message: message,
+                        severity: monaco.MarkerSeverity.Error,
+                    },
+                ]
+            );
+        }
+    };
+
+    const [_editor, compile] = await Promise.all([
+        loadEditor(),
+        loadCompiler(onCompile, onLink, onDecompile, onError),
+    ]);
+    const { monaco, editor, rain, llvmIr, wat } = _editor;
+    const models = [rain, llvmIr, wat];
 
     const rainTab = document.getElementById('rain-tab');
     const llvmIrTab = document.getElementById('llvm-ir-tab');
     const watTab = document.getElementById('wat-tab');
+    const tabs = [rainTab, llvmIrTab, watTab];
+
     const compileButton = document.getElementById('compile');
+    const downloadButton = document.getElementById('download');
     const optimizeCheckbox = document.getElementById('optimize');
 
-    rainTab.addEventListener('click', () => {
-        rainTab.classList.add('active');
-        llvmIrTab.classList.remove('active');
-        watTab.classList.remove('active');
+    // Change to the correct tab on click.
+    tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => {
+            tabs.forEach((tab) => tab.classList.remove('active'));
+            tab.classList.add('active');
 
-        editor.setModel(rainModel);
-        editor.updateOptions({ readOnly: false });
+            editor.setModel(models[i]);
+            editor.updateOptions({ readOnly: i !== 0 });
+        });
     });
 
-    llvmIrTab.addEventListener('click', () => {
-        rainTab.classList.remove('active');
-        llvmIrTab.classList.add('active');
-        watTab.classList.remove('active');
-
-        editor.setModel(llvmIrModel);
-        editor.updateOptions({ readOnly: true });
-    });
-
-    watTab.addEventListener('click', () => {
-        rainTab.classList.remove('active');
-        llvmIrTab.classList.remove('active');
-        watTab.classList.add('active');
-
-        editor.setModel(watModel);
-        editor.updateOptions({ readOnly: true });
-    });
-
-    const rainc = await load_wasm("rainc.wasm", (event, msg_start, msg_end) => {
-        console.log("Received event:", event, "with message:", msg_start, msg_end);
-
-        const data = new Uint8Array(
-            rainc.memory.buffer,
-            msg_start,
-            msg_end - msg_start
-        );
-
-        switch (event) {
-            case EVENT_COMPILE: {
-                const text = new TextDecoder("utf8").decode(data);
-                console.log("Compiled LLVM IR:");
-                console.log(text);
-                llvmIrModel.setValue(text);
-                break;
-            }
-
-            case EVENT_LINK: {
-                wasmBin = new Uint8Array(data.byteLength);
-                wasmBin.set(data);
-                console.log("Linked WebAssembly binary:", wasmBin);
-                break;
-            }
-
-            case EVENT_DECOMPILE: {
-                const text = new TextDecoder("utf8").decode(data);
-                console.log("Compiled WAT:");
-                console.log(text);
-                watModel.setValue(text);
-                break;
-            }
-
-            case EVENT_ERROR: {
-                const text = new TextDecoder("utf8").decode(data);
-                console.error("Error:", text);
-
-                const parseErrorMsg = (msg) => {
-                    const parts = msg.split(":");
-                    const fileName = parts[0];
-                    const line = Number(parts[1]);
-                    const column = Number(parts[2]);
-                    const message = parts.slice(3).join(":");
-                    return [fileName, line, column, message];
-                };
-
-                if (text.startsWith("<unknown>:")) {
-                    const lines = text.split("\n");
-                    const [_fileName, line, column, message] = parseErrorMsg(lines[0]);
-
-                    const underlineSrcMsg = lines[2];
-                    let firstNonSpace = -1;
-                    let lastNonSpace = -1;
-                    for (const i in underlineSrcMsg) {
-                        const c = underlineSrcMsg[i];
-                        if (firstNonSpace === -1 && c !== " ") {
-                            firstNonSpace = i;
-                        } else if (underlineSrcMsg[i - 1] !== " " && c === " ") {
-                            lastNonSpace = i;
-                        }
-                    }
-
-                    monaco.editor.setModelMarkers(
-                        monaco.editor.getModels()[0],
-                        "compilation",
-                        [
-                            {
-                                startLineNumber: line,
-                                startColumn: column,
-                                endLineNumber: line,
-                                endColumn: lastNonSpace,
-                                message: message,
-                                severity: monaco.MarkerSeverity.Error,
-                            },
-                        ]
-                    );
-                }
-                break;
-            }
-        }
-    });
-
-    rainc.init();
-
-    function compile(src) {
-        wasmBin = null;
-        monaco.editor.removeAllMarkers("compilation");
-
-        console.log("Compiling source code:");
-        console.log(src);
-
-        const encoder = new TextEncoder();
-        const encoded = encoder.encode(src);
-        const len = encoded.length;
-        const ptr = rainc.malloc(len + 1);
-        console.log("Allocated memory at:", ptr);
-
-        const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
-        memoryView.set(new Uint8Array(encoded));
-        memoryView[len] = 0; // Null-terminate the string.
-        rainc.compile(ptr, ptr + len, optimizeCheckbox.checked);
-        rainc.free(ptr);
-    }
     compileButton.addEventListener('click', () => {
-        const src = monaco.editor.getModels()[0].getValue();
-        compile(src);
+        compile(rain.getValue(), optimizeCheckbox.checked);
 
-        if (wasmBin !== null) {
-            download.classList.remove("disabled");
+        if (wasm !== null) {
+            downloadButton.classList.remove("disabled");
         } else {
-            download.classList.add("disabled");
+            downloadButton.classList.add("disabled");
         }
     });
 
-    const download = document.getElementById('download');
-    download.addEventListener('click', () => {
-        if (wasmBin !== null) {
-            const blob = new Blob([wasmBin], { type: "application/wasm" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "out.wasm";
-            a.click();
+    downloadButton.addEventListener('click', () => {
+        if (wasm !== null) {
+            download("out.wasm", wasm, "application/wasm");
         }
     });
-});
-
-const EVENT_ERROR = -1;
-const EVENT_COMPILE = 1;
-const EVENT_LINK = 2;
-const EVENT_DECOMPILE = 3;
-
-async function load_wasm(url, callback) {
-    let memory;
-    const wasm = await WebAssembly.instantiateStreaming(fetch(url), {
-        console: {
-            log: (msg_start, msg_end) => {
-                const text = new TextDecoder("utf8").decode(
-                    memory.buffer.slice(msg_start, msg_end)
-                );
-                console.log(text);
-            },
-            error: (msg_start, msg_end) => {
-                const text = new TextDecoder("utf8").decode(
-                    memory.buffer.slice(msg_start, msg_end)
-                );
-                console.error(text);
-            },
-        },
-        math: Math,
-        time: {
-            now_perf: () => performance.now(),
-            now_unix: () => Date.now(),
-        },
-        env: {
-            callback: (event, msg_start, msg_end) => {
-                if (callback) {
-                    callback(event, msg_start, msg_end);
-                } else {
-                    const text = new TextDecoder("utf8").decode(
-                        memory.buffer.slice(msg_start, msg_end)
-                    );
-                    console.log(text);
-                }
-            },
-        },
-    });
-    memory = wasm.instance.exports.memory;
-    return wasm.instance.exports;
 }
+
+main();

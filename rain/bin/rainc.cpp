@@ -31,8 +31,6 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
     auto rain_module = std::move(compile_result).value();
 
     if (optimize) {
-        // Optimize the module.
-        util::console_log("Optimizing module...");
         rain_module.optimize();
     }
 

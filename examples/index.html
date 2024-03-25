@@ -169,6 +169,20 @@ fn double_double() -> i32 {
     4.double().double()
 }
 
+// These 3 __builtin_* functions are currently automatically defined by the compiler -- at least
+// until a way to define imports is added. They are WebAssembly imports from JavaScript.
+fn f64.sqrt(self) -> f64 {
+    __builtin_sqrt(self)
+}
+
+fn f64.cos(self) -> f64 {
+    __builtin_cos(self)
+}
+
+fn f64.sin(self) -> f64 {
+    __builtin_sin(self)
+}
+
 // Only exported functions are exported from WASM so they can be called from JavaScript.
 // This is useful to optimize away unused code.
 fn fib(n: i32) -> i32 {
@@ -196,18 +210,6 @@ export fn compile_time_fib() -> i32 {
 // number, is why float's cannot be used in C++ templates. But I'm also under the impression that
 // most developers wouldn't care, and would just be happy to be 100% sure that their optimization is
 // guaranteed to be run at compile-time instead of run-time.
-fn f64.sqrt(self) -> f64 {
-    __builtin_sqrt(self)
-}
-
-fn f64.cos(self) -> f64 {
-    __builtin_cos(self)
-}
-
-fn f64.sin(self) -> f64 {
-    __builtin_sin(self)
-}
-
 export fn root_2() -> f64 {
     #2.0.sqrt()
 }
