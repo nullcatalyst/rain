@@ -24,6 +24,11 @@ export function registerRainLanguage(monaco) {
                 ],
             },
         },
-        {}
+        {
+            comments: {
+                lineComment: "//",
+                // blockComment: [ "/*", "*/" ]
+            },
+        }
     )
 }

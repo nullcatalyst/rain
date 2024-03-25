@@ -40,7 +40,7 @@ llvm::Constant* create_constant_from_generic_value(llvm::Type*               llv
 llvm::Value* compile_compile_time(Context& ctx, ast::CompileTimeExpression& compile_time) {
     if (!compile_time.compile_time_capable()) {
         // TODO: Emit warning
-        std::cout << "WARNING: expression is not compile-time capable" << std::endl;
+        util::console_log("WARNING: expression is not compile-time capable");
         return compile_any_expression(ctx, compile_time.expression());
     }
 

@@ -20,9 +20,28 @@ util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(lex::Lexer& lexe
     }
 
     double value = 0.0;
-    if (!absl::SimpleAtod(float_token.text(), &value)) {
-        return ERR_PTR(err::SyntaxError, lexer, float_token.location,
-                       absl::StrCat("invalid float literal \"", float_token.text(), "\""));
+
+    const std::string_view text = float_token.location.text();
+    const char*            it   = text.data();
+    const char*            end  = it + text.size();
+
+    // Parse the integer part of the float
+    for (const char c : text) {
+        ++it;
+
+        if (c == '.') {
+            break;
+        }
+
+        value *= 10.0;
+        value += static_cast<double>(c - '0');
+    }
+
+    // Parse the fractional part of the float
+    double multiplier = 0.1;
+    for (const char c : std::string_view{it + 1, end}) {
+        value += static_cast<double>(c - '0') * multiplier;
+        multiplier *= 0.1;
     }
 
     return std::make_unique<ast::FloatExpression>(value);

@@ -34,7 +34,12 @@ function registerRainLanguage(monaco) {
                 ],
             },
         },
-        {}
+        {
+            comments: {
+                lineComment: "//",
+                // blockComment: [ "/*", "*/" ]
+            },
+        }
     )
 }
 
@@ -482,9 +487,9 @@ require(['vs/editor/editor.main'], async () => {
             }
 
             case EVENT_LINK: {
-                console.log("Linked WebAssembly binary:", wasmBin);
                 wasmBin = new Uint8Array(data.byteLength);
                 wasmBin.set(data);
+                console.log("Linked WebAssembly binary:", wasmBin);
                 break;
             }
 
@@ -549,7 +554,6 @@ require(['vs/editor/editor.main'], async () => {
 
     function compile(src) {
         wasmBin = null;
-        console.log(editor);
         monaco.editor.removeAllMarkers("compilation");
 
         console.log("Compiling source code:");
@@ -558,11 +562,12 @@ require(['vs/editor/editor.main'], async () => {
         const encoder = new TextEncoder();
         const encoded = encoder.encode(src);
         const len = encoded.length;
-        const ptr = rainc.malloc(len);
+        const ptr = rainc.malloc(len + 1);
         console.log("Allocated memory at:", ptr);
-        new Uint8Array(rainc.memory.buffer, ptr, len).set(
-            new Uint8Array(encoded)
-        );
+
+        const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
+        memoryView.set(new Uint8Array(encoded));
+        memoryView[len] = 0; // Null-terminate the string.
         rainc.compile(ptr, ptr + len, optimizeCheckbox.checked);
         rainc.free(ptr);
     }

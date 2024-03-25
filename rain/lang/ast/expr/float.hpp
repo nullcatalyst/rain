@@ -14,14 +14,14 @@ class FloatExpression : public Expression {
     absl::Nullable<Type*> _type = nullptr;
 
   public:
-    FloatExpression(uint64_t value) : _value(value) {}
+    FloatExpression(double value) : _value(value) {}
     ~FloatExpression() override = default;
 
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::Float;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr uint64_t              value() const noexcept { return _value; }
+    [[nodiscard]] constexpr double                value() const noexcept { return _value; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
     util::Result<void> validate(Scope& scope) override;

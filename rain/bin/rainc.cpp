@@ -32,6 +32,7 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
 
     if (optimize) {
         // Optimize the module.
+        util::console_log("Optimizing module...");
         rain_module.optimize();
     }
 
@@ -68,6 +69,8 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
 
 #if !defined(__wasm__)
 
+#include <fstream>
+
 int main(const int argc, const char* const argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <wasm file>" << std::endl;
@@ -82,9 +85,9 @@ int main(const int argc, const char* const argv[]) {
 
     std::string source;
     file.seekg(0, std::ios::end);
-    contents.resize(file.tellg());
+    source.resize(file.tellg());
     file.seekg(0, std::ios::beg);
-    file.read(contents.data(), contents.size());
+    file.read(source.data(), source.size());
 
     rain::util::console_log(ANSI_CYAN, "Source code:\n", ANSI_RESET, source, "\n");
 
