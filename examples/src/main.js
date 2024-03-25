@@ -8,7 +8,6 @@ async function main() {
     const onLink = (_wasm) => { wasm = _wasm; };
     const onDecompile = (text) => { wat.setValue(text); };
     const onError = (text) => {
-        debugger;
         const parseErrorMsg = (msg) => {
             const parts = msg.split(":");
             const fileName = parts[0];
@@ -24,7 +23,7 @@ async function main() {
 
             const underlineSrcMsg = lines[2];
             let firstNonSpace = -1;
-            let lastNonSpace = underlineSrcMsg.length;
+            let lastNonSpace = underlineSrcMsg.length + 1;
             for (let i = 0; i < underlineSrcMsg.length; ++i) {
                 const c = underlineSrcMsg[i];
                 if (firstNonSpace === -1 && c !== " ") {
@@ -35,8 +34,8 @@ async function main() {
             }
 
             monaco.editor.setModelMarkers(
-                wat,
-                "error",
+                rain,
+                "compilation",
                 [
                     {
                         startLineNumber: line,
@@ -65,6 +64,7 @@ async function main() {
 
     const compileButton = document.getElementById('compile');
     const downloadButton = document.getElementById('download');
+    const downloadSizeDiv = document.getElementById('download-size');
     const optimizeCheckbox = document.getElementById('optimize');
 
     // Change to the correct tab on click.
@@ -83,6 +83,7 @@ async function main() {
 
         if (wasm !== null) {
             downloadButton.classList.remove("disabled");
+            downloadSizeDiv.innerText = `(${humanReadableBytes(wasm.length)})`;
         } else {
             downloadButton.classList.add("disabled");
         }
@@ -96,3 +97,13 @@ async function main() {
 }
 
 main();
+
+function humanReadableBytes(size) {
+    if (size > 1024 * 1024) {
+        return `${(size / (1024 * 1024)).toFixed(2)} MiB`;
+    } else if (size > 1024) {
+        return `${(size / 1024).toFixed(2)} KiB`;
+    } else {
+        return `${size} bytes`;
+    }
+}

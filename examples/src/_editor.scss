@@ -1,0 +1,47 @@
+.editor-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.editor-tab-list {
+    display: flex;
+    gap: 2px;
+    padding: 8px 16px 0 16px;
+}
+
+.editor-tab {
+    padding: 8px 24px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+}
+
+#editor {
+    flex: 1;
+}
+
+.editor-action-list {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    bottom: 32px;
+    right: 48px;
+    z-index: 10;
+
+    display: flex;
+    gap: 8px;
+}
+
+.editor-option-list {
+    position: relative;
+}
+
+#download-size {
+    position: absolute;
+    right: 8px;
+    top: -4px;
+    font-size: 10px;
+}

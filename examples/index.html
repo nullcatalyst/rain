@@ -3,153 +3,7 @@
 
 <head>
   <title>demo</title>
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-
-      background-color: #1e1e1e;
-    }
-
-    .editor-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    .editor-tab-list {
-      display: flex;
-      gap: 2px;
-      padding: 8px 16px 0 16px;
-
-      background-color: #252526;
-      border-bottom: #1e1e1e 12px solid;
-    }
-
-    .editor-tab {
-      padding: 8px 24px;
-      /* margin-bottom: -8px; */
-      border: none;
-      background-color: #2d2d2d;
-      color: #fff;
-      cursor: pointer;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-
-    .editor-tab:hover {
-      background-color: #3a3a3a;
-    }
-
-    .editor-tab.active {
-      background-color: #1e1e1e;
-    }
-
-    #editor {
-      flex: 1;
-    }
-
-    .editor-action-list {
-      display: flex;
-      flex-direction: column;
-
-      position: absolute;
-      bottom: 32px;
-      right: 48px;
-      z-index: 10;
-
-      display: flex;
-      gap: 8px;
-    }
-
-    #compile,
-    #download {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      background-color: #569cd6;
-      color: #fff;
-      cursor: pointer;
-
-      font-family: Menlo, Monaco, "Courier New", monospace;
-    }
-
-    #compile:hover,
-    #download:hover {
-      background-color: #9ac4e6;
-    }
-
-    #download.disabled {
-      background-color: #2d2d2d;
-      color: #7f7f7f;
-      cursor: not-allowed;
-    }
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-
-    label>span {
-      height: 100%;
-      color: #fff;
-      font-size: 12px;
-      font-family: Menlo, Monaco, "Courier New", monospace;
-    }
-
-    input[type="checkbox"] {
-      appearance: none;
-      position: relative;
-      width: 20px;
-      height: 20px;
-      margin: 0;
-
-      --bg-color: #569cd6;
-    }
-
-    input[type="checkbox"]:hover {
-      --bg-color: #9ac4e6;
-    }
-
-    input[type="checkbox"]::before {
-      content: "";
-      position: absolute;
-      display: block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--bg-color);
-      border-radius: 6px;
-      margin: 0;
-    }
-
-    input[type="checkbox"]:checked::before {
-      background-color: var(--bg-color);
-    }
-
-    input[type="checkbox"]:checked::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      display: block;
-      border-right: 2px solid #fff;
-      border-bottom: 2px solid #fff;
-      width: 8px;
-      height: 14px;
-      transform: translate(-50%, -50%) translateY(-1.5px) rotate(45deg);
-      pointer-events: none;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
@@ -227,7 +81,8 @@ export fn root_2() -> f64 {
         <button id="compile">Compile</button>
         <button id="download" class="disabled">Download .wasm</button>
       </div>
-      <div>
+      <div class="editor-option-list">
+        <div id="download-size"></div>
         <label>
           <input type="checkbox" id="optimize" checked />
           <span>Optimize</span>

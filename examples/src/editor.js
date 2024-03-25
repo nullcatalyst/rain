@@ -25,8 +25,16 @@ export async function loadEditor() {
                 automaticLayout: true,
                 overviewRulerLanes: 0,
                 overviewRulerBorder: false,
-                theme: 'vs-dark',
+                theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                    ? 'vs-dark'
+                    : 'vs',
             });
+
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    editor.updateOptions({ theme: e.matches ? 'vs-dark' : 'vs' });
+                });
+            }
 
             resolve({
                 monaco,

@@ -21,7 +21,8 @@ cd examples
 
 # Bundle the js files into a single file that will be used by our example webpage.
 rollup src/main.js -o script.js
-# terser script.js --module --compress --mangle --output script.js
+terser script.js --module --compress --mangle --output script.js
+sass --style=compressed src/style.scss style.css
 
 # Pass a port number to start a server to serve the examples (0 will choose a port for you)
 if [ ! -z "$1" ]; then

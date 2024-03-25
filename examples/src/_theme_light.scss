@@ -1,0 +1,49 @@
+html,
+body {
+    background-color: #fff;
+    color: #616161;
+}
+
+.editor-tab-list {
+    background-color: #ececec;
+    border-bottom: #fff 12px solid;
+}
+
+.editor-tab {
+    background-color: #dddddd;
+    color: #616161;
+
+    &:hover {
+        background-color: #f3f3f3;
+    }
+
+    &.active {
+        background-color: #fff;
+    }
+}
+
+input[type="checkbox"] {
+    --input-color: #569cd6;
+
+    &:hover {
+        --input-color: #9ac4e6;
+    }
+
+    &:checked::after {
+        color: #fff;
+    }
+}
+
+button {
+    background-color: #569cd6;
+    color: #fff;
+
+    &:hover {
+        background-color: #9ac4e6;
+    }
+
+    &.disabled {
+        background-color: #e0e0e0;
+        color: #7f7f7f;
+    }
+}

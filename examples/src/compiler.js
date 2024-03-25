@@ -27,7 +27,7 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
                 const data = memoryView(rainc.memory, dataStart, dataEnd);
                 const out = new Uint8Array(data.byteLength);
                 out.set(data);
-                console.log("%Linked WebAssembly binary:", CONSOLE_INFO_STYLE, out);
+                console.log("%cLinked WebAssembly binary:", CONSOLE_INFO_STYLE, out);
                 onLink(out);
                 break;
             }

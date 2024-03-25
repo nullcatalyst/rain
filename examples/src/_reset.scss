@@ -1,0 +1,82 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body,
+button {
+    font-family: Menlo, Monaco, "Courier New", monospace;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    >span {
+        height: 100%;
+        font-size: 12px;
+    }
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+
+    &::before {
+        content: "";
+        position: absolute;
+        display: block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--input-color);
+        border-radius: 6px;
+        margin: 0;
+    }
+
+    &:checked {
+        &::before {
+            background-color: var(--input-color);
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            display: block;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            width: 8px;
+            height: 14px;
+            transform: translate(-50%, -50%) translateY(-1.5px) rotate(45deg);
+            pointer-events: none;
+        }
+    }
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+
+    font-family: Menlo, Monaco, "Courier New", monospace;
+
+    &.disabled {
+        cursor: not-allowed;
+    }
+}
