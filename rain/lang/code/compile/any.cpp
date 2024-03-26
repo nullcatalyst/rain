@@ -13,6 +13,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Variable:
             return compile_identifier(ctx, static_cast<ast::IdentifierExpression&>(expression));
 
+        case serial::ExpressionKind::Let:
+            return compile_let(ctx, static_cast<ast::LetExpression&>(expression));
+
         case serial::ExpressionKind::BinaryOperator:
             return compile_binary_operator(ctx,
                                            static_cast<ast::BinaryOperatorExpression&>(expression));

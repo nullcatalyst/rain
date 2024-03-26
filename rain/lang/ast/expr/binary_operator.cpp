@@ -55,6 +55,14 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
         FORWARD_ERROR(result);
     }
 
+    if (_op == serial::BinaryOperatorKind::Assign) {
+        if (!_lhs->is_assignable()) {
+            return ERR_PTR(err::SimpleError,
+                           "left-hand side of assignment must be an assignable expression");
+        }
+        return {};
+    }
+
     const auto method_name = get_operator_method_name(_op);
     if (!method_name.has_value()) {
         return ERR_PTR(err::SimpleError, "invalid binary operator");

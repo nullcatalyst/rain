@@ -13,6 +13,7 @@ cc_library(
         "compile/identifier.cpp",
         "compile/if.cpp",
         "compile/integer.cpp",
+        "compile/let.cpp",
         "compile/module.cpp",
         "compile/parenthesis.cpp",
         "compile/type.cpp",

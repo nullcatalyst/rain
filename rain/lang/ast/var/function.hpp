@@ -22,6 +22,7 @@ class FunctionVariable : public Variable {
 
     [[nodiscard]] std::string_view     name() const noexcept override { return _name; }
     [[nodiscard]] absl::Nonnull<Type*> type() const noexcept override { return _function_type; }
+    [[nodiscard]] bool                 mutable_() const noexcept override { return false; }
     [[nodiscard]] absl::Nonnull<FunctionType*> function_type() const noexcept {
         return _function_type;
     }

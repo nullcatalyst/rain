@@ -61,6 +61,13 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
+        case lex::TokenKind::Let: {
+            auto result = parse_let(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
+
         case lex::TokenKind::LRoundBracket: {
             auto result = parse_parenthesis(lexer, scope);
             FORWARD_ERROR(result);

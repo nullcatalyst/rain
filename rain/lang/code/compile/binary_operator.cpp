@@ -3,13 +3,34 @@
 namespace rain::lang::code {
 
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator) {
-    auto* method = binary_operator.method();
+    if (binary_operator.op() == serial::BinaryOperatorKind::Assign) {
+        switch (binary_operator.lhs().kind()) {
+            case serial::ExpressionKind::Member: {
+                util::console_error(
+                    "failed to compile binary operator: member assignment not implemented");
+                std::abort();
+            }
 
+            case serial::ExpressionKind::Variable: {
+                auto& lhs = reinterpret_cast<ast::IdentifierExpression&>(binary_operator.lhs());
+                llvm::Value* llvm_alloca = ctx.llvm_value(lhs.variable());
+                llvm::Value* rhs         = compile_any_expression(ctx, binary_operator.rhs());
+                ctx.llvm_builder().CreateStore(rhs, llvm_alloca);
+                return rhs;
+            }
+
+            default:
+                util::console_error(
+                    "failed to compile binary operator: unknown left hand side kind: ");
+                std::abort();
+        }
+    }
+
+    auto*                               method = binary_operator.method();
     llvm::SmallVector<llvm::Value*, 4U> llvm_values{
         compile_any_expression(ctx, binary_operator.lhs()),
         compile_any_expression(ctx, binary_operator.rhs()),
     };
-
     return method->build_call(ctx.llvm_builder(), llvm_values);
 }
 

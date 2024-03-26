@@ -16,6 +16,7 @@
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
 #include "rain/lang/ast/expr/integer.hpp"
+#include "rain/lang/ast/expr/let.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
@@ -45,11 +46,12 @@ util::Result<std::unique_ptr<ast::FloatExpression>>      parse_float(lex::Lexer&
                                                                      ast::Scope& scope);
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
-util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope);
-util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& lexer,
-                                                                    ast::Scope& scope);
-util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
-    lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> lhs_expression);
+util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>>    parse_atom(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>>    parse_unary_operator(lex::Lexer& lexer,
+                                                                       ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>>    parse_rhs(
+       lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> lhs_expression);
 util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> owner);
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(

@@ -21,7 +21,9 @@ class Expression {
     // [[nodiscard]] virtual lex::Location          location() const noexcept = 0;
 
     [[nodiscard]] virtual bool compile_time_capable() const noexcept { return false; }
-    virtual util::Result<void> validate(Scope& scope) = 0;
+    [[nodiscard]] virtual bool is_assignable() const noexcept { return false; }
+
+    [[nodiscard]] virtual util::Result<void> validate(Scope& scope) = 0;
 };
 
 }  // namespace rain::lang::ast
