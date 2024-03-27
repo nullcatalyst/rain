@@ -12,8 +12,8 @@ fn four() -> i32 {
     4
 }
 
-// Methods can be added to any type, at any time.
-// But are only available in the scope they are defined.
+// Methods can be added to any type, at any time, but are only available in the
+// scope they are defined.
 fn i32.double(self) -> i32 {
     2 * self
 }
@@ -23,22 +23,18 @@ fn double_double() -> i32 {
     4.double().double()
 }
 
-// These 3 __builtin_* functions are currently automatically defined by the compiler -- at least
-// until a way to define imports is added. They are WebAssembly imports from JavaScript.
-fn f64.sqrt(self) -> f64 {
-    __builtin_sqrt(self)
-}
+// These 3 `__builtin_*` functions are currently automatically defined by the
+// compiler -- at least until a way to define imports is added. They are
+// WebAssembly imports from JavaScript.
+//
+// If you export a function that uses any of these, you can see the import in
+// the generated `*.wat` code.
+fn f64.sqrt(self) -> f64 { __builtin_sqrt(self) }
+fn f64.cos(self) -> f64 { __builtin_cos(self) }
+fn f64.sin(self) -> f64 { __builtin_sin(self) }
 
-fn f64.cos(self) -> f64 {
-    __builtin_cos(self)
-}
-
-fn f64.sin(self) -> f64 {
-    __builtin_sin(self)
-}
-
-// Only exported functions are exported from WASM so they can be called from JavaScript.
-// This is useful to optimize away unused code.
+// Only exported functions are exported from WASM so they can be called from
+// JavaScript. This is useful to optimize away unused code.
 export fn fib_recursion(n: i32) -> i32 {
     if n < 2 {
         1
@@ -51,8 +47,8 @@ export fn fib_iteration(n: i32) -> i32 {
     let a = 0
     let b = 1
 
-    // Function arguments are immutable by default. But a variable can be redeclared with the same
-    // name, similar to how this can be done in Rust.
+    // Function arguments are immutable by default. But a variable can be
+    // redeclared with the same name, similar to how this can be done in Rust.
     let n = n
 
     while n > 0 {
@@ -64,25 +60,26 @@ export fn fib_iteration(n: i32) -> i32 {
     a
 }
 
-// Putting a # before any expression causes the expression
-// to be evaluated at compile-time.
+// Putting a `#` before any expression causes the expression to be evaluated at
+// compile-time.
 //
-// The safety rails of this feature are pretty minimal at the moment,
-// so please be careful with it (no infinite loops, etc).
+// NOTE: The safety rails of this feature are pretty minimal at the moment, so
+// please be careful with it (no infinite loops, etc).
 export fn compile_time_fib() -> i32 {
     #fib_recursion(8)
 }
 
 // Even floating point numbers can be used at compile-time.
-// Just be aware that the exact value may depend on the host machine (due to rounding and floating
-// point precision).
+// Just be aware that the exact value may depend on the host machine (due to
+// rounding and floating point precision).
 //
-// It's my undestanding, this slight imprecision in the last couple of bits of a floating point
-// number, is why float's cannot be used in C++ templates. But I'm also under the impression that
-// most developers wouldn't care, and would just be happy to be 100% sure that their optimization is
-// guaranteed to be run at compile-time -- without having to deal with the idiosyncrasies of
+// It's my undestanding, this slight imprecision in the last couple of bits of a
+// floating point number, is why float's cannot be used in C++ templates. But
+// I'm also under the impression that most developers wouldn't care, and would
+// just be happy to be 100% sure that their optimization is guaranteed to be run
+// at compile-time -- without having to deal with the idiosyncrasies of
 // `constexpr` or `consteval`.
-export fn root_2() -> f64 {
+export fn sqrt_2() -> f64 {
     #2.0.sqrt()
 }
 </script>
