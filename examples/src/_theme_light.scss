@@ -46,4 +46,16 @@ button {
         background-color: #e0e0e0;
         color: #7f7f7f;
     }
+
+    &.transition {
+        transition: background-color 0.4s ease-out;
+    }
+
+    &.success {
+        background-color: #32a852;
+    }
+
+    &.error {
+        background-color: #eb4034;
+    }
 }

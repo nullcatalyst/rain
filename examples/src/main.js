@@ -6,8 +6,13 @@ async function main() {
     let wasm = null;
     const onCompile = (text) => { llvmIr.setValue(text); };
     const onLink = (_wasm) => { wasm = _wasm; };
-    const onDecompile = (text) => { wat.setValue(text); };
+    const onDecompile = (text) => {
+        wat.setValue(text);
+        updateCompileButton("success");
+    };
     const onError = (text) => {
+        updateCompileButton("error");
+
         const parseErrorMsg = (msg) => {
             const parts = msg.split(":");
             const fileName = parts[0];
@@ -88,6 +93,20 @@ async function main() {
             downloadButton.classList.add("disabled");
         }
     });
+
+    function updateCompileButton(className) {
+        compileButton.classList.remove("success");
+        compileButton.classList.remove("error");
+        compileButton.classList.add(className);
+        setTimeout(() => {
+            compileButton.addEventListener("transitionend", () => {
+                compileButton.classList.remove("transition");
+            }, { once: true });
+            compileButton.classList.add("transition");
+
+            requestAnimationFrame(() => compileButton.classList.remove(className));
+        }, 2000);
+    }
 
     downloadButton.addEventListener('click', () => {
         if (wasm !== null) {

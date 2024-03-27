@@ -50,7 +50,11 @@ export fn fib_recursion(n: i32) -> i32 {
 export fn fib_iteration(n: i32) -> i32 {
     let a = 0
     let b = 1
+
+    // Function arguments are immutable by default. But a variable can be redeclared with the same
+    // name, similar to how this can be done in Rust.
     let n = n
+
     while n > 0 {
         let tmp = a
         a = b
@@ -76,7 +80,8 @@ export fn compile_time_fib() -> i32 {
 // It's my undestanding, this slight imprecision in the last couple of bits of a floating point
 // number, is why float's cannot be used in C++ templates. But I'm also under the impression that
 // most developers wouldn't care, and would just be happy to be 100% sure that their optimization is
-// guaranteed to be run at compile-time instead of run-time.
+// guaranteed to be run at compile-time -- without having to deal with the idiosyncrasies of
+// `constexpr` or `consteval`.
 export fn root_2() -> f64 {
     #2.0.sqrt()
 }

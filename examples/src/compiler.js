@@ -6,10 +6,10 @@ const EVENT_COMPILE = 1;
 const EVENT_LINK = 2;
 const EVENT_DECOMPILE = 3;
 
-const CONSOLE_SUCCESS_STYLE = "color: #32a852; font-weight: bold;";
-const CONSOLE_INFO_STYLE = "color: #4287f5; font-weight: bold;";
-const CONSOLE_WARNING_STYLE = "color: #fcba03; font-weight: bold;";
-const CONSOLE_ERROR_STYLE = "color: #eb4034; font-weight: bold;";
+const CONSOLE_SUCCESS_STYLE = "color:#32a852;font-weight:bold;";
+const CONSOLE_INFO_STYLE = "color:#4287f5;font-weight:bold;";
+const CONSOLE_WARNING_STYLE = "color:#fcba03;font-weight:bold;";
+const CONSOLE_ERROR_STYLE = "color:#eb4034;font-weight:bold;";
 
 export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
     const rainc = await loadWasm("rainc.wasm", (event, dataStart, dataEnd) => {
@@ -61,7 +61,7 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
         const encoded = new TextEncoder().encode(src);
         const len = encoded.length;
 
-        const protector = 16;
+        const protector = 0;
         const ptr = rainc.malloc(len + protector);
 
         const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
