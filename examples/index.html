@@ -39,12 +39,25 @@ fn f64.sin(self) -> f64 {
 
 // Only exported functions are exported from WASM so they can be called from JavaScript.
 // This is useful to optimize away unused code.
-fn fib(n: i32) -> i32 {
+export fn fib_recursion(n: i32) -> i32 {
     if n < 2 {
         1
     } else {
-        fib(n - 1) + fib(n - 2)
+      fib_recursion(n - 1) + fib_recursion(n - 2)
     }
+}
+
+export fn fib_iteration(n: i32) -> i32 {
+    let a = 0
+    let b = 1
+    let n = n
+    while n > 0 {
+        let tmp = a
+        a = b
+        b = tmp + b
+        n = n - 1
+    }
+    a
 }
 
 // Putting a # before any expression causes the expression
@@ -53,7 +66,7 @@ fn fib(n: i32) -> i32 {
 // The safety rails of this feature are pretty minimal at the moment,
 // so please be careful with it (no infinite loops, etc).
 export fn compile_time_fib() -> i32 {
-    #fib(8)
+    #fib_recursion(8)
 }
 
 // Even floating point numbers can be used at compile-time.

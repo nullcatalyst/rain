@@ -60,13 +60,20 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
 
         const encoded = new TextEncoder().encode(src);
         const len = encoded.length;
-        const ptr = rainc.malloc(len + 1);
+
+        const protector = 16;
+        const ptr = rainc.malloc(len + protector);
 
         const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
         memoryView.set(new Uint8Array(encoded));
+
+        // Zero out the protector bytes.
+        for (let i = len; i < len + protector; ++i) {
+            memoryView[i] = 0;
+        }
+
         // Null-terminate the string.
         // This shouldn't be necessary, but is useful in case of off-by-one bugs in the compiler.
-        memoryView[len] = 0;
         rainc.compile(ptr, ptr + len, optimize);
         rainc.free(ptr);
     };

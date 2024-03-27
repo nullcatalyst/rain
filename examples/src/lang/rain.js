@@ -29,6 +29,25 @@ export function registerRainLanguage(monaco) {
                 lineComment: "//",
                 // blockComment: [ "/*", "*/" ]
             },
+            brackets: [
+                ['{', '}'],
+                ['[', ']'],
+                ['(', ')'],
+            ],
+            autoClosingPairs: [
+                { open: '[', close: ']' },
+                { open: '{', close: '}' },
+                { open: '(', close: ')' },
+                { open: "'", close: "'", notIn: ['string', 'comment'] },
+                { open: '"', close: '"', notIn: ['string'] },
+            ],
+            surroundingPairs: [
+                { open: '{', close: '}' },
+                { open: '[', close: ']' },
+                { open: '(', close: ')' },
+                { open: '"', close: '"' },
+                { open: "'", close: "'" },
+            ],
         }
     )
 }
