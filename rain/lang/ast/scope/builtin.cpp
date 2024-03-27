@@ -7,25 +7,25 @@
 namespace rain::lang::ast {
 
 BuiltinScope::BuiltinScope() {
-    _bool_type = _owned_types.emplace(std::make_unique<OpaqueType>("bool")).first->get();
-    _i32_type  = _owned_types.emplace(std::make_unique<OpaqueType>("i32")).first->get();
-    _i64_type  = _owned_types.emplace(std::make_unique<OpaqueType>("i64")).first->get();
-    _f32_type  = _owned_types.emplace(std::make_unique<OpaqueType>("f32")).first->get();
-    _f64_type  = _owned_types.emplace(std::make_unique<OpaqueType>("f64")).first->get();
+    _bool_type = _owned_types.insert(std::make_unique<OpaqueType>("bool")).first->get();
+    _i32_type  = _owned_types.insert(std::make_unique<OpaqueType>("i32")).first->get();
+    _i64_type  = _owned_types.insert(std::make_unique<OpaqueType>("i64")).first->get();
+    _f32_type  = _owned_types.insert(std::make_unique<OpaqueType>("f32")).first->get();
+    _f64_type  = _owned_types.insert(std::make_unique<OpaqueType>("f64")).first->get();
 
-    _named_types.emplace("bool", _bool_type);
-    _named_types.emplace("i32", _i32_type);
-    _named_types.emplace("i64", _i64_type);
-    _named_types.emplace("f32", _f32_type);
-    _named_types.emplace("f64", _f64_type);
+    _named_types.insert_or_assign("bool", _bool_type);
+    _named_types.insert_or_assign("i32", _i32_type);
+    _named_types.insert_or_assign("i64", _i64_type);
+    _named_types.insert_or_assign("f32", _f32_type);
+    _named_types.insert_or_assign("f64", _f64_type);
 
 #define ADD_BUILTIN_METHOD(name, callee_type, function_type, argument_types, impl)                 \
     do {                                                                                           \
         auto method = make_builtin_function_variable(name, function_type,                          \
                                                      [](auto& builder, auto& arguments) { impl }); \
-        _function_variables.emplace(std::make_tuple(callee_type, argument_types, name),            \
-                                    method.get());                                                 \
-        _owned_variables.emplace(std::move(method));                                               \
+        _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name),   \
+                                             method.get());                                        \
+        _owned_variables.insert(std::move(method));                                                \
     } while (0)
 
     {
@@ -101,7 +101,7 @@ absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
 }
 
 void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
-    _function_variables.emplace(
+    _function_variables.insert_or_assign(
         std::make_tuple(nullptr, variable->function_type()->argument_types(), variable->name()),
         variable.get());
     _external_functions.emplace_back(std::move(variable));

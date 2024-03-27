@@ -27,8 +27,8 @@ absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument
 
     auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type);
     auto* function_type_ptr = function_type.get();
-    _function_types.emplace(key, function_type_ptr);
-    _owned_types.emplace(std::move(function_type));
+    _function_types.insert_or_assign(key, function_type_ptr);
+    _owned_types.insert(std::move(function_type));
     return function_type_ptr;
 }
 
@@ -62,8 +62,8 @@ absl::Nonnull<Type*> Scope::add_type(const std::string_view name,
     assert(type != nullptr);
 
     auto* type_ptr = type.get();
-    _named_types.emplace(name, type_ptr);
-    _owned_types.emplace(std::move(type));
+    _named_types.insert_or_assign(name, type_ptr);
+    _owned_types.insert(std::move(type));
     return type_ptr;
 }
 
@@ -73,8 +73,9 @@ absl::Nonnull<FunctionVariable*> Scope::add_function(
     assert(function != nullptr);
 
     auto* function_ptr = function.get();
-    _function_variables.emplace(std::make_tuple(callee_type, argument_types, name), function_ptr);
-    _owned_variables.emplace(std::move(function));
+    _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name),
+                                         function_ptr);
+    _owned_variables.insert(std::move(function));
     return function_ptr;
 }
 
@@ -83,8 +84,8 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
     assert(variable != nullptr);
 
     auto* variable_ptr = variable.get();
-    _named_variables.emplace(name, variable_ptr);
-    _owned_variables.emplace(std::move(variable));
+    _named_variables.insert_or_assign(name, variable_ptr);
+    _owned_variables.insert(std::move(variable));
     return variable_ptr;
 }
 
