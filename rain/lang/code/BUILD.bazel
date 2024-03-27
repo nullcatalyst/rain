@@ -18,6 +18,7 @@ cc_library(
         "compile/parenthesis.cpp",
         "compile/type.cpp",
         "compile/unary_operator.cpp",
+        "compile/while.cpp",
         "context.cpp",
         "module.cpp",
     ],

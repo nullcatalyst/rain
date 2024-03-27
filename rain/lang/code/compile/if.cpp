@@ -40,11 +40,15 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
 
     llvm_ir.SetInsertPoint(llvm_merge_block);
 
-    llvm::Type* const llvm_type   = llvm_then_result->getType();
-    llvm::PHINode*    llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
-    llvm_result->addIncoming(llvm_then_result, llvm_then_block);
-    llvm_result->addIncoming(llvm_else_result, llvm_else_block);
-    return llvm_result;
+    if (if_.has_else() && !ctx.returned()) {
+        llvm::Type* const llvm_type   = llvm_then_result->getType();
+        llvm::PHINode*    llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
+        llvm_result->addIncoming(llvm_then_result, llvm_then_block);
+        llvm_result->addIncoming(llvm_else_result, llvm_else_block);
+        return llvm_result;
+    }
+
+    return nullptr;
 }
 
 }  // namespace rain::lang::code

@@ -20,6 +20,7 @@
 #include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/expr/unary_operator.hpp"
+#include "rain/lang/ast/expr/while.hpp"
 
 namespace rain::lang::code {
 
@@ -41,6 +42,7 @@ llvm::Value* compile_parenthesis(Context& ctx, ast::ParenthesisExpression& paren
 llvm::Value* compile_block(Context& ctx, ast::BlockExpression& block);
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function);
 llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
+llvm::Value*    compile_while(Context& ctx, ast::WhileExpression& while_);
 llvm::Value*    compile_export(Context& ctx, ast::ExportExpression& export_);
 
 // Types

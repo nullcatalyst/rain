@@ -26,6 +26,7 @@ enum class ExpressionKind {
     // Control flow
     Block,
     If,
+    While,
     Return,
 
     // Declarations

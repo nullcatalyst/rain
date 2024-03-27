@@ -15,7 +15,7 @@ util::Result<void> LetExpression::validate(Scope& scope) {
     }
 
     if (type() == nullptr) {
-        return ERR_PTR(err::SimpleError, "let expression must have a type");
+        return ERR_PTR(err::SimpleError, "let variable declaration initial value must have a type");
     }
 
     _variable = scope.add_variable(_name, std::make_unique<BlockVariable>(_name, type(), true));

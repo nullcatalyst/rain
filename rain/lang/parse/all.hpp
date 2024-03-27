@@ -21,6 +21,7 @@
 #include "rain/lang/ast/expr/module.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/expr/type.hpp"
+#include "rain/lang/ast/expr/while.hpp"
 
 // Types
 #include "rain/lang/ast/type/struct.hpp"
@@ -64,7 +65,9 @@ util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer
                                                                       ast::Scope& scope);
 util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(lex::Lexer& lexer,
                                                                          ast::Scope& scope);
-util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::IfExpression>>    parse_if(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::WhileExpression>> parse_while(lex::Lexer& lexer,
+                                                                ast::Scope& scope);
 
 // Types
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);

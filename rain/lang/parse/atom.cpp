@@ -89,6 +89,13 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             break;
         }
 
+        case lex::TokenKind::While: {
+            auto result = parse_while(lexer, scope);
+            FORWARD_ERROR(result);
+            expression = std::move(result).value();
+            break;
+        }
+
         case lex::TokenKind::Fn: {
             auto result = parse_function(lexer, scope);
             FORWARD_ERROR(result);

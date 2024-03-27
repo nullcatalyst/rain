@@ -30,13 +30,15 @@ util::Result<void> IfExpression::validate(Scope& scope) {
         return ERR_PTR(err::SimpleError, "if condition must result in a boolean value");
     }
 
-    // TODO: Handle optional types
-    assert(_else.has_value() && "optional types not yet implemented in if expressions");
-    if (_then->type() != _else.value()->type()) {
-        return ERR_PTR(err::SimpleError, "if branches must have the same type");
+    if (_else.has_value()) {
+        if (_then->type() != _else.value()->type()) {
+            return ERR_PTR(err::SimpleError, "if branches must (currently) have the same type");
+        }
+        _type = _then->type();
+    } else {
+        _type = nullptr;
     }
 
-    _type = _then->type();
     return {};
 }
 

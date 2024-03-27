@@ -20,6 +20,7 @@ cc_library(
         "parenthesis.cpp",
         "type.cpp",
         "unary_operator.cpp",
+        "while.cpp",
     ],
     visibility = [
         "//rain:__subpackages__",
@@ -59,6 +60,7 @@ cc_library(
         "parenthesis.hpp",
         "type.hpp",
         "unary_operator.hpp",
+        "while.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

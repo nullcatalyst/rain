@@ -56,7 +56,7 @@ namespace rain::lang::lex {
 }
 
 [[nodiscard]] TokenKind find_keyword(std::string_view word) {
-    constexpr std::array<std::tuple<std::string_view, TokenKind>, 10> KEYWORDS{
+    constexpr std::array<std::tuple<std::string_view, TokenKind>, 11> KEYWORDS{
         // clang-format off
         // <keep-sorted>
         std::make_tuple("else", TokenKind::Else),
@@ -69,6 +69,7 @@ namespace rain::lang::lex {
         std::make_tuple("self", TokenKind::Self),
         std::make_tuple("struct", TokenKind::Struct),
         std::make_tuple("true", TokenKind::True),
+        std::make_tuple("while", TokenKind::While),
         // </keep-sorted>
         // clang-format on
     };
