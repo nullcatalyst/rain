@@ -9,9 +9,13 @@
 
 namespace {
 
+// Check the iterator position compared to BOTH the start AND the end of the string_view.
 constexpr bool contains(const std::string_view s, const char* it) {
     return it >= &*s.begin() && it < &*s.end();
 }
+
+// Check the iterator position compared ONLY the end of the string_view.
+constexpr bool past_end(const std::string_view s, const char* it) { return it >= &*s.end(); }
 
 }  // namespace
 
@@ -34,23 +38,24 @@ namespace rain::lang::lex {
             }
 
             ++state.it;
+            if (past_end(source, state.it)) [[unlikely]] {
+                return State{nullptr, state.line, state.column};
+            }
             c = *state.it;
         }
 
         // Skip comments
-        if (c == '/' && state.it[1] == '/') {
+        if (c == '/' && !past_end(source, state.it + 1) && state.it[1] == '/') {
             while (c != '\n' && c != '\0') {
                 ++state.column;
                 ++state.it;
+                if (past_end(source, state.it)) [[unlikely]] {
+                    return State{nullptr, state.line, state.column};
+                }
                 c = *state.it;
             }
         }
     } while (std::isspace(c));
-
-    // Reset the index to the nullptr if we've reached the end of the string
-    if (c == '\0') [[unlikely]] {
-        state.it = nullptr;
-    }
 
     return state;
 }
@@ -85,7 +90,7 @@ namespace rain::lang::lex {
     return TokenKind::Undefined;
 }
 
-[[nodiscard]] TokenKind find_operator(State state) {
+[[nodiscard]] TokenKind find_operator(const std::string_view source, State state) {
     static constexpr std::array<TokenKind, 128> OPERATORS = []() {
         std::array<TokenKind, 128> operators{};
 
@@ -121,6 +126,10 @@ namespace rain::lang::lex {
     }();
 
     const auto op = OPERATORS[static_cast<uint8_t>(*state.it)];
+    if (past_end(source, state.it + 1)) [[unlikely]] {
+        return op;
+    }
+
     switch (op) {
         case TokenKind::Minus:
             switch (state.it[1]) {
@@ -244,8 +253,12 @@ namespace rain::lang::lex {
 
     char       c         = *state.it;
     const auto next_char = [&]() -> char {
-        ++state.it;
         ++state.column;
+        ++state.it;
+        if (past_end(source, state.it)) [[unlikely]] {
+            c = '\0';
+            return '\0';
+        }
         c = *state.it;
         return c;
     };
@@ -306,7 +319,7 @@ namespace rain::lang::lex {
     }
 
     // Operator
-    const auto operator_kind = find_operator(state);
+    const auto operator_kind = find_operator(source, state);
     if (operator_kind != TokenKind::Undefined) {
         const auto length = operator_length(operator_kind);
         state.it += length;
