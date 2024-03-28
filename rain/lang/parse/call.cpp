@@ -14,9 +14,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> callee) {
     const auto lbracket_token = lexer.next();
-    if (lbracket_token.kind != lex::TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lbracket_token.location,
-                       "expected '('; this is an internal error");
+    IF_DEBUG {
+        if (lbracket_token.kind != lex::TokenKind::LRoundBracket) {
+            return ERR_PTR(err::SyntaxError, lbracket_token.location,
+                           "expected '('; this is an internal error");
+        }
     }
 
     llvm::SmallVector<std::unique_ptr<ast::Expression>, 4> arguments;

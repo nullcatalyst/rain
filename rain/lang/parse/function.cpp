@@ -15,10 +15,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
                                                                       ast::Scope& scope) {
     const auto function_token = lexer.next();
-    if (function_token.kind != lex::TokenKind::Fn) {
-        // This function should only be called if we already know the next token starts a function.
-        return ERR_PTR(err::SyntaxError, function_token.location,
-                       "expected keyword 'fn'; this is an internal error");
+    IF_DEBUG {
+        if (function_token.kind != lex::TokenKind::Fn) {
+            return ERR_PTR(err::SyntaxError, function_token.location,
+                           "expected keyword 'fn'; this is an internal error");
+        }
     }
 
     const absl::Nullable<ast::ModuleScope*> module_scope = scope.module();
@@ -119,7 +120,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         });
     FORWARD_ERROR(result);
 
-    lex::Location rparen_location = lexer.next().location;  // Consume the ')'
+    // lex::Location rparen_location = lexer.next().location;  // Consume the ')'
+    lexer.next();  // Consume the ')'
 
     util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
     next_token                                 = lexer.peek();
@@ -132,8 +134,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         return_type = std::move(return_type_result).value();
     }
 
-    if (const auto lbracket_token = lexer.next();
-        lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
+    const auto lbracket_token = lexer.next();
+    if (lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
         // This function should only be called if we already know the next token starts a block.
         return ERR_PTR(err::SyntaxError, lbracket_token.location,
                        "expected '{' before function body");
@@ -150,6 +152,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     FORWARD_ERROR(body_result);
 
     lex::Location rbracket_location = lexer.next().location;  // Consume the '}'
+    body->set_location(lbracket_token.location.merge(rbracket_location));
 
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(

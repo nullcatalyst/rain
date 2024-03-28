@@ -12,9 +12,11 @@ namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast::Scope& scope) {
     const auto if_token = lexer.next();
-    if (if_token.kind != lex::TokenKind::If) {
-        return ERR_PTR(err::SyntaxError, if_token.location,
-                       "expected 'if'; this is an internal error");
+    IF_DEBUG {
+        if (if_token.kind != lex::TokenKind::If) {
+            return ERR_PTR(err::SyntaxError, if_token.location,
+                           "expected 'if'; this is an internal error");
+        }
     }
 
     auto condition = parse_any_expression(lexer, scope);

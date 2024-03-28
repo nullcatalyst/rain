@@ -9,10 +9,12 @@
 namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, ast::Scope& scope) {
-    if (const auto struct_token = lexer.next(); struct_token.kind != lex::TokenKind::Struct) {
-        // This function should only be called if we already know the next token starts a struct.
-        return ERR_PTR(err::SyntaxError, struct_token.location,
-                       "expected keyword 'struct'; this is an internal error");
+    const auto struct_token = lexer.next();
+    IF_DEBUG {
+        if (struct_token.kind != lex::TokenKind::Struct) {
+            return ERR_PTR(err::SyntaxError, struct_token.location,
+                           "expected keyword 'struct'; this is an internal error");
+        }
     }
 
     std::optional<std::string_view> struct_name;

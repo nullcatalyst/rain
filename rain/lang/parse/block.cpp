@@ -12,10 +12,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(lex::Lexer& lexer,
                                                                 ast::Scope& scope) {
     const auto lbracket_token = lexer.next();
-    if (lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
-        // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lbracket_token.location,
-                       "expected '{'; this is an internal error");
+    IF_DEBUG {
+        if (lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
+            return ERR_PTR(err::SyntaxError, lbracket_token.location,
+                           "expected '{'; this is an internal error");
+        }
     }
 
     auto block_expression = std::make_unique<ast::BlockExpression>(scope);

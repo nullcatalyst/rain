@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "rain/lang/lex/lexer.hpp"
+#include "rain/util/assert.hpp"
 #include "rain/util/result.hpp"
 
 // Expressions

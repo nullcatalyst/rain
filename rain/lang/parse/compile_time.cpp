@@ -11,10 +11,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::CompileTimeExpression>> parse_compile_time(lex::Lexer& lexer,
                                                                              ast::Scope& scope) {
     const auto hash_token = lexer.next();
-    if (hash_token.kind != lex::TokenKind::Hash) {
-        // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, hash_token.location,
-                       "expected '#'; this is an internal error");
+    IF_DEBUG {
+        if (hash_token.kind != lex::TokenKind::Hash) {
+            return ERR_PTR(err::SyntaxError, hash_token.location,
+                           "expected '#'; this is an internal error");
+        }
     }
 
     auto expression = parse_any_expression(lexer, scope);

@@ -12,9 +12,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::WhileExpression>> parse_while(lex::Lexer& lexer,
                                                                 ast::Scope& scope) {
     const auto while_token = lexer.next();
-    if (while_token.kind != lex::TokenKind::While) {
-        return ERR_PTR(err::SyntaxError, while_token.location,
-                       "expected 'while'; this is an internal error");
+    IF_DEBUG {
+        if (while_token.kind != lex::TokenKind::While) {
+            return ERR_PTR(err::SyntaxError, while_token.location,
+                           "expected 'while'; this is an internal error");
+        }
     }
 
     auto condition = parse_any_expression(lexer, scope);

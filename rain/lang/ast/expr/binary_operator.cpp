@@ -6,6 +6,7 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/err/binary_operator.hpp"
 #include "rain/lang/err/syntax.hpp"
+#include "rain/util/assert.hpp"
 
 namespace rain::lang::ast {
 
@@ -65,9 +66,11 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
     }
 
     const auto method_name = get_operator_method_name(_op);
-    if (!method_name.has_value()) {
-        return ERR_PTR(err::SyntaxError, _op_location,
-                       "invalid binary operator; this is an internal error");
+    IF_DEBUG {
+        if (!method_name.has_value()) {
+            return ERR_PTR(err::SyntaxError, _op_location,
+                           "invalid binary operator; this is an internal error");
+        }
     }
 
     {

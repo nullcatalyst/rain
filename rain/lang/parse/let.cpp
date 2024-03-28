@@ -12,9 +12,11 @@ namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope) {
     const auto let_token = lexer.next();
-    if (let_token.kind != lex::TokenKind::Let) {
-        return ERR_PTR(err::SyntaxError, let_token.location,
-                       "expected 'let'; this is an internal error");
+    IF_DEBUG {
+        if (let_token.kind != lex::TokenKind::Let) {
+            return ERR_PTR(err::SyntaxError, let_token.location,
+                           "expected 'let'; this is an internal error");
+        }
     }
 
     const auto name_token = lexer.next();

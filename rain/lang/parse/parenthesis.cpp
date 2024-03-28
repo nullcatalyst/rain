@@ -11,10 +11,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex::Lexer& lexer,
                                                                             ast::Scope& scope) {
     const auto lparen_token = lexer.next();
-    if (lparen_token.kind != lex::TokenKind::LRoundBracket) {
-        // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lparen_token.location,
-                       "expected '('; this is an internal error");
+    IF_DEBUG {
+        if (lparen_token.kind != lex::TokenKind::LRoundBracket) {
+            return ERR_PTR(err::SyntaxError, lparen_token.location,
+                           "expected '('; this is an internal error");
+        }
     }
 
     auto expression = parse_any_expression(lexer, scope);

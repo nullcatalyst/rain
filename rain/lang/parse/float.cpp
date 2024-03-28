@@ -6,6 +6,7 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
+#include "rain/util/assert.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
@@ -13,10 +14,11 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(lex::Lexer& lexer,
                                                                 ast::Scope& scope) {
     const auto float_token = lexer.next();
-    if (float_token.kind != lex::TokenKind::Float) {
-        // This function should only be called if we already know the next token is an integer.
-        return ERR_PTR(err::SyntaxError, float_token.location,
-                       "expected float literal; this is an internal error");
+    IF_DEBUG {
+        if (float_token.kind != lex::TokenKind::Float) {
+            return ERR_PTR(err::SyntaxError, float_token.location,
+                           "expected float literal; this is an internal error");
+        }
     }
 
     double value = 0.0;
