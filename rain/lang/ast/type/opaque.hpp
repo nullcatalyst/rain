@@ -17,15 +17,10 @@ class OpaqueType : public Type {
     OpaqueType(std::string_view name) : _name(name) {}
     ~OpaqueType() override = default;
 
-#if !defined(NDEBUG)
-    [[nodiscard]] std::string debug_name() const noexcept override {
-        return "<opaque:" + std::string(_name) + ">";
-    }
-#endif  // !defined(NDEBUG)
-
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Builtin;
     }
+    [[nodiscard]] std::string name() const noexcept override { return std::string(_name); }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
 };

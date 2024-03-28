@@ -13,11 +13,6 @@
 
 namespace rain::lang::ast {
 
-struct FunctionArgument {
-    std::string_view          name;
-    util::MaybeOwnedPtr<Type> type;
-};
-
 class FunctionExpression : public Expression {
   public:
     using ArgumentList = llvm::SmallVector<absl::Nonnull<Variable*>, 4>;
@@ -51,19 +46,38 @@ class FunctionExpression : public Expression {
     /** The type of the function. */
     absl::Nullable<FunctionType*> _type = nullptr;
 
+    lex::Location _function_location;
+    lex::Location _name_location;
+
   public:
     FunctionExpression(std::optional<std::string_view> name, ArgumentList arguments,
                        util::MaybeOwnedPtr<Type>        return_type,
-                       std::unique_ptr<BlockExpression> block)
+                       std::unique_ptr<BlockExpression> block, lex::Location function_location,
+                       lex::Location name_location)
         : _name(std::move(name)),
           _arguments(std::move(arguments)),
           _return_type(std::move(return_type)),
-          _block(std::move(block)) {}
+          _block(std::move(block)),
+          _function_location(function_location),
+          _name_location(name_location) {}
 
+    // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::Function;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+        return _function_location.merge(_block->location());
+    }
+
+    [[nodiscard]] bool compile_time_capable() const noexcept override {
+        // TODO: Should this always return true?
+        // Sure, we can always compile the function, but the function could access global mutable
+        // variables. We should probably check for that.
+        return true;
+    }
+
+    // FunctionExpression
     [[nodiscard]] constexpr bool   is_named() const noexcept { return _name.has_value(); }
     [[nodiscard]] std::string_view name_or_empty() const noexcept {
         return _name.value_or(std::string_view());
@@ -79,16 +93,8 @@ class FunctionExpression : public Expression {
     [[nodiscard]] constexpr bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
 
-    [[nodiscard]] absl::Nonnull<BlockExpression*> block() const noexcept { return _block.get(); }
-
+    [[nodiscard]] absl::Nonnull<BlockExpression*>   block() const noexcept { return _block.get(); }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
-
-    [[nodiscard]] bool compile_time_capable() const noexcept override {
-        // TODO: Should this always return true?
-        // Sure, we can always compile the function, but the function could access global mutable
-        // variables. We should probably check for that.
-        return true;
-    }
 
     util::Result<void> validate(Scope& scope) override;
 

@@ -13,14 +13,15 @@ util::Result<std::unique_ptr<ast::CompileTimeExpression>> parse_compile_time(lex
     const auto hash_token = lexer.next();
     if (hash_token.kind != lex::TokenKind::Hash) {
         // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lexer, hash_token.location,
+        return ERR_PTR(err::SyntaxError, hash_token.location,
                        "expected '#'; this is an internal error");
     }
 
     auto expression = parse_any_expression(lexer, scope);
     FORWARD_ERROR(expression);
 
-    return std::make_unique<ast::CompileTimeExpression>(std::move(expression).value());
+    return std::make_unique<ast::CompileTimeExpression>(std::move(expression).value(),
+                                                        hash_token.location);
 }
 
 }  // namespace rain::lang::parse

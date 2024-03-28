@@ -24,13 +24,13 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
     switch (token.kind) {
         case lex::TokenKind::False: {
             lexer.next();  // Consume the `false` token
-            expression = std::make_unique<ast::BooleanExpression>(false);
+            expression = std::make_unique<ast::BooleanExpression>(false, token.location);
             break;
         }
 
         case lex::TokenKind::True: {
             lexer.next();  // Consume the `true` token
-            expression = std::make_unique<ast::BooleanExpression>(true);
+            expression = std::make_unique<ast::BooleanExpression>(true, token.location);
             break;
         }
 
@@ -57,7 +57,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
 
         case lex::TokenKind::Self: {
             lexer.next();  // Consume the `self` token
-            expression = std::make_unique<ast::IdentifierExpression>(token.text());
+            expression = std::make_unique<ast::IdentifierExpression>(token.text(), token.location);
             break;
         }
 
@@ -111,7 +111,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
         }
 
             // case lex::TokenKind::EndOfFile:
-            //     return ERR_PTR(err::SyntaxError, lexer, token.location, "unexpected end of
+            //     return ERR_PTR(err::SyntaxError, token.location, "unexpected end of
             //     file");
 
         default: {

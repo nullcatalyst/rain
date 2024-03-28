@@ -15,8 +15,8 @@ util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& 
                                                                     ast::Scope& scope) {
     serial::UnaryOperatorKind op = serial::UnaryOperatorKind::Unknown;
 
-    const auto token = lexer.peek();
-    switch (token.kind) {
+    const auto op_token = lexer.peek();
+    switch (op_token.kind) {
         case lex::TokenKind::Minus:
             op = serial::UnaryOperatorKind::Negative;
             break;
@@ -31,15 +31,16 @@ util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& 
     }
 
     if (op == serial::UnaryOperatorKind::Unknown) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location,
-                       absl::StrCat("unexpected token \"", token.text(), "\""));
+        return ERR_PTR(err::SyntaxError, op_token.location,
+                       absl::StrCat("unexpected token \"", op_token.text(), "\""));
     }
 
     lexer.next();  // Consume the operator
 
     auto rhs = parse_atom(lexer, scope);
     FORWARD_ERROR(rhs);
-    return std::make_unique<ast::UnaryOperatorExpression>(std::move(rhs).value(), op);
+    return std::make_unique<ast::UnaryOperatorExpression>(std::move(rhs).value(), op,
+                                                          op_token.location);
 }
 
 }  // namespace rain::lang::parse

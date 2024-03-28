@@ -117,7 +117,8 @@ util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
         }
 
         lhs_expression = std::make_unique<ast::BinaryOperatorExpression>(
-            std::move(lhs_expression), std::move(rhs_expression).value(), binop);
+            std::move(lhs_expression), std::move(rhs_expression).value(), binop,
+            binop_token.location);
     }
 
     util::unreachable();

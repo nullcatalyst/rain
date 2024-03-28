@@ -14,7 +14,7 @@ util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(lex::Lexer& lexe
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
         // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location,
+        return ERR_PTR(err::SyntaxError, lbracket_token.location,
                        "expected '{'; this is an internal error");
     }
 
@@ -28,6 +28,10 @@ util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(lex::Lexer& lexe
             return {};
         });
     FORWARD_ERROR(result);
+
+    const auto rbracket_token = lexer.next();  // Consume the '}'
+
+    block_expression->set_location(lbracket_token.location.merge(rbracket_token.location));
     return block_expression;
 }
 

@@ -14,7 +14,7 @@ util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(lex::Lexer& 
     const auto integer_token = lexer.next();
     if (integer_token.kind != lex::TokenKind::Integer) {
         // This function should only be called if we already know the next token is an integer.
-        return ERR_PTR(err::SyntaxError, lexer, integer_token.location,
+        return ERR_PTR(err::SyntaxError, integer_token.location,
                        "expected integer literal; this is an internal error");
     }
 
@@ -24,20 +24,20 @@ util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(lex::Lexer& 
     for (const char c : integer_token.location.text()) {
         if (value > MAX) {
             // Multiplying by 10 will overflow
-            return ERR_PTR(err::SyntaxError, lexer, integer_token.location,
+            return ERR_PTR(err::SyntaxError, integer_token.location,
                            "integer literal is too large");
         }
         value *= 10;
 
         if (value > std::numeric_limits<uint64_t>::max() - (c - '0')) {
             // Adding the next digit will overflow
-            return ERR_PTR(err::SyntaxError, lexer, integer_token.location,
+            return ERR_PTR(err::SyntaxError, integer_token.location,
                            "integer literal is too large");
         }
         value += c - '0';
     }
 
-    return std::make_unique<ast::IntegerExpression>(value);
+    return std::make_unique<ast::IntegerExpression>(value, integer_token.location);
 }
 
 }  // namespace rain::lang::parse

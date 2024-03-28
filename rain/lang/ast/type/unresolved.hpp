@@ -21,11 +21,9 @@ class UnresolvedType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Unresolved;
     }
-    [[nodiscard]] constexpr std::string_view name() const noexcept { return _name; }
-
-#if !defined(NDEBUG)
-    [[nodiscard]] std::string debug_name() const noexcept override { return std::string(_name); }
-#endif  // !defined(NDEBUG)
+    [[nodiscard]] constexpr std::string name() const noexcept override {
+        return std::string(_name);
+    }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
 };

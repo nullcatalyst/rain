@@ -14,17 +14,17 @@ util::Result<std::unique_ptr<ast::MemberExpression>> parse_member(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> owner) {
     const auto period_token = lexer.next();
     if (period_token.kind != lex::TokenKind::Period) {
-        return ERR_PTR(err::SyntaxError, lexer, period_token.location,
+        return ERR_PTR(err::SyntaxError, period_token.location,
                        "expected '.'; this is an internal error");
     }
 
     const auto member_token = lexer.next();
     if (member_token.kind != lex::TokenKind::Identifier) {
-        return ERR_PTR(err::SyntaxError, lexer, member_token.location,
-                       "expected identifier after '.'");
+        return ERR_PTR(err::SyntaxError, member_token.location, "expected identifier after '.'");
     }
 
-    return std::make_unique<ast::MemberExpression>(std::move(owner), member_token.text());
+    return std::make_unique<ast::MemberExpression>(std::move(owner), member_token.text(),
+                                                   member_token.location);
 }
 
 }  // namespace rain::lang::parse

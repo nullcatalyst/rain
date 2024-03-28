@@ -14,18 +14,25 @@ namespace rain::lang::ast {
 class TypeExpression : public Expression {
     absl::Nonnull<Type*> _declare_type;
 
+    lex::Location _location;
+
   public:
     TypeExpression(absl::Nonnull<Type*> declare_type) : _declare_type(declare_type) {}
+    TypeExpression(absl::Nonnull<Type*> declare_type, lex::Location location)
+        : _declare_type(declare_type), _location(location) {}
 
+    // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::Type;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return nullptr; }
-    [[nodiscard]] constexpr absl::Nonnull<Type*>  declare_type() const noexcept {
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    // TypeExpression
+    [[nodiscard]] constexpr absl::Nonnull<Type*> declare_type() const noexcept {
         return _declare_type;
     }
-
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
 
     util::Result<void> validate(Scope& scope) override { return {}; }
 };

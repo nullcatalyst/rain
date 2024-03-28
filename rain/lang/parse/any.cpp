@@ -27,7 +27,7 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
             return std::make_unique<ast::UnresolvedType>(token.text());
 
         default:
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
+            return ERR_PTR(err::SyntaxError, token.location,
                            absl::StrCat("unexpected token \"", token.text(), "\""));
     }
 

@@ -27,17 +27,14 @@ class StructType : public Type {
     StructType(std::optional<std::string_view> name, std::vector<StructField> fields)
         : _name(std::move(name)), _fields(std::move(fields)) {}
 
-#if !defined(NDEBUG)
-    [[nodiscard]] std::string debug_name() const noexcept override {
-        if (_name.has_value()) {
-            return "<struct:" + std::string(_name.value()) + ">";
-        }
-        return "<unnnamed struct>";
-    }
-#endif  // !defined(NDEBUG)
-
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Struct;
+    }
+    [[nodiscard]] std::string name() const noexcept override {
+        if (_name.has_value()) {
+            return absl::StrCat(_name.value());
+        }
+        return "<unnamed_struct>";
     }
     [[nodiscard]] constexpr bool   is_named() const noexcept { return _name.has_value(); }
     [[nodiscard]] std::string_view name_or_empty() const noexcept {

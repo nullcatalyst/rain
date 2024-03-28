@@ -4,7 +4,8 @@
 #include <string_view>
 
 #include "absl/strings/str_cat.h"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
+#include "rain/lang/err/unary_operator.hpp"
 
 namespace rain::lang::ast {
 
@@ -25,25 +26,27 @@ std::optional<std::string_view> get_operator_method_name(serial::UnaryOperatorKi
 
 util::Result<void> UnaryOperatorExpression::validate(Scope& scope) {
     {
-        auto result = _rhs->validate(scope);
+        auto result = _expression->validate(scope);
         FORWARD_ERROR(result);
     }
 
     const auto method_name = get_operator_method_name(_op);
     if (!method_name.has_value()) {
-        return ERR_PTR(err::SimpleError, "invalid unary operator");
+        return ERR_PTR(err::SyntaxError, _op_location,
+                       "invalid unary operator; this is an internal error");
     }
 
     {
         // First check if there is a method that takes self exactly.
-        const Scope::TypeList argument_types{_rhs->type()};
+        const Scope::TypeList argument_types{_expression->type()};
 
-        _method = scope.find_function(_rhs->type(), argument_types, method_name.value());
+        _method = scope.find_function(_expression->type(), argument_types, method_name.value());
         if (_method == nullptr) {
             return ERR_PTR(
-                err::SimpleError,
+                err::UnaryOperatorError, _expression->location(), _op_location,
                 absl::StrCat("no matching unary operator method found, looking for method named \"",
-                             method_name.value(), "\""));
+                             method_name.value(), "\" on type \"", _expression->type()->name(),
+                             "\""));
         }
     }
 

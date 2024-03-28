@@ -3,14 +3,14 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/ast/var/variable.hpp"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
 util::Result<void> IdentifierExpression::validate(Scope& scope) {
     _variable = scope.find_variable(_name);
     if (_variable == nullptr) {
-        return ERR_PTR(err::SimpleError,
+        return ERR_PTR(err::SyntaxError, _location,
                        absl::StrCat("no variable named '", _name, "' found in scope"));
     }
 

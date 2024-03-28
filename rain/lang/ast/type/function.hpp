@@ -18,29 +18,10 @@ class FunctionType : public Type {
 
     ~FunctionType() override = default;
 
-#if !defined(NDEBUG)
-    [[nodiscard]] std::string debug_name() const noexcept override {
-        std::string argument_type_names;
-        for (size_t i = 0; i < _argument_types.size(); ++i) {
-            if (i > 0) {
-                argument_type_names =
-                    absl::StrCat(", ", argument_type_names, _argument_types[i]->debug_name());
-            } else {
-                argument_type_names = _argument_types[i]->debug_name();
-            }
-        }
-
-        if (_return_type != nullptr) {
-            return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->debug_name());
-        } else {
-            return absl::StrCat("fn(", argument_type_names, ")");
-        }
-    }
-#endif  // !defined(NDEBUG)
-
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Function;
     }
+    [[nodiscard]] std::string                                  name() const noexcept override;
     [[nodiscard]] constexpr const llvm::SmallVector<Type*, 4>& argument_types() const noexcept {
         return _argument_types;
     }

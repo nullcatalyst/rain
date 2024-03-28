@@ -3,7 +3,7 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/ast/var/variable.hpp"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
@@ -27,7 +27,8 @@ util::Result<void> WhileExpression::validate(Scope& scope) {
     }
 
     if (_condition->type() != scope.builtin()->bool_type()) {
-        return ERR_PTR(err::SimpleError, "while condition must result in a boolean value");
+        return ERR_PTR(err::SyntaxError, _condition->location(),
+                       "while condition must result in a boolean value");
     }
 
     // TODO: Handle optional types

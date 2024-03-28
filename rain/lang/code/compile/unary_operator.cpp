@@ -6,7 +6,7 @@ llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& 
     auto* method = unary_operator.method();
 
     llvm::SmallVector<llvm::Value*, 4U> llvm_values{
-        compile_any_expression(ctx, unary_operator.rhs()),
+        compile_any_expression(ctx, unary_operator.expression()),
     };
 
     return method->build_call(ctx.llvm_builder(), llvm_values);

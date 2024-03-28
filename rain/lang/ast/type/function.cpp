@@ -4,6 +4,24 @@
 
 namespace rain::lang::ast {
 
+std::string FunctionType::name() const noexcept {
+    std::string argument_type_names;
+    for (size_t i = 0; i < _argument_types.size(); ++i) {
+        if (i > 0) {
+            absl::StrAppend(&argument_type_names, ", ", argument_type_names,
+                            _argument_types[i]->name());
+        } else {
+            argument_type_names = _argument_types[i]->name();
+        }
+    }
+
+    if (_return_type != nullptr) {
+        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->name());
+    } else {
+        return absl::StrCat("fn(", argument_type_names, ")");
+    }
+}
+
 util::Result<absl::Nonnull<Type*>> FunctionType::resolve(Scope& scope) {
     Scope::TypeList resolved_argument_types;
     resolved_argument_types.reserve(_argument_types.size());

@@ -5,6 +5,7 @@ cc_library(
         "binary_operator.hpp",
         "simple.hpp",
         "syntax.hpp",
+        "unary_operator.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

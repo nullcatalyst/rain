@@ -17,13 +17,13 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     const auto function_token = lexer.next();
     if (function_token.kind != lex::TokenKind::Fn) {
         // This function should only be called if we already know the next token starts a function.
-        return ERR_PTR(err::SyntaxError, lexer, function_token.location,
+        return ERR_PTR(err::SyntaxError, function_token.location,
                        "expected keyword 'fn'; this is an internal error");
     }
 
     const absl::Nullable<ast::ModuleScope*> module_scope = scope.module();
     if (module_scope == nullptr) {
-        return ERR_PTR(err::SyntaxError, lexer, function_token.location,
+        return ERR_PTR(err::SyntaxError, function_token.location,
                        "function definition is not allowed in this context");
     }
 
@@ -45,17 +45,19 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     }
 
     std::optional<std::string_view> fn_name;
+    lex::Location                   fn_name_location;
     auto                            next_token = lexer.next();
     if (next_token.kind == lex::TokenKind::Identifier) {
-        fn_name    = next_token.text();
-        next_token = lexer.next();
+        fn_name          = next_token.text();
+        fn_name_location = next_token.location;
+        next_token       = lexer.next();
     } else if (callee_type != nullptr) {
-        return ERR_PTR(err::SyntaxError, lexer, next_token.location,
+        return ERR_PTR(err::SyntaxError, next_token.location,
                        "a function name is required when defining a function with a callee type");
     }
 
     if (next_token.kind != lex::TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, next_token.location,
+        return ERR_PTR(err::SyntaxError, next_token.location,
                        "expected '(' before function arguments");
     }
 
@@ -72,7 +74,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             auto end_or_sep_token = lexer.peek();
             if (end_or_sep_token.kind != lex::TokenKind::Comma &&
                 end_or_sep_token.kind != lex::TokenKind::RRoundBracket) {
-                return ERR_PTR(err::SyntaxError, lexer, end_or_sep_token.location,
+                return ERR_PTR(err::SyntaxError, end_or_sep_token.location,
                                "expected ',' or ')' after function argument");
             }
 
@@ -93,12 +95,12 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         [&](lex::Lexer& lexer) -> util::Result<void> {
             const auto argument_name = lexer.next();
             if (argument_name.kind != lex::TokenKind::Identifier) {
-                return ERR_PTR(err::SyntaxError, lexer, argument_name.location,
+                return ERR_PTR(err::SyntaxError, argument_name.location,
                                "expected identifier for function argument name");
             }
 
             if (const auto colon_token = lexer.next(); colon_token.kind != lex::TokenKind::Colon) {
-                return ERR_PTR(err::SyntaxError, lexer, colon_token.location,
+                return ERR_PTR(err::SyntaxError, colon_token.location,
                                "expected ':' between argument name and argument type");
             }
 
@@ -112,10 +114,12 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
+            return ERR_PTR(err::SyntaxError, token.location,
                            "expected ',' or ')' after function argument");
         });
     FORWARD_ERROR(result);
+
+    lex::Location rparen_location = lexer.next().location;  // Consume the ')'
 
     util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
     next_token                                 = lexer.peek();
@@ -131,7 +135,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     if (const auto lbracket_token = lexer.next();
         lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
         // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location,
+        return ERR_PTR(err::SyntaxError, lbracket_token.location,
                        "expected '{' before function body");
     }
 
@@ -145,13 +149,16 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         });
     FORWARD_ERROR(body_result);
 
+    lex::Location rbracket_location = lexer.next().location;  // Consume the '}'
+
     if (callee_type != nullptr) {
-        return std::make_unique<ast::MethodExpression>(std::move(callee_type), fn_name.value(),
-                                                       std::move(arguments), std::move(return_type),
-                                                       std::move(body), has_self_argument);
+        return std::make_unique<ast::MethodExpression>(
+            std::move(callee_type), fn_name.value(), std::move(arguments), std::move(return_type),
+            std::move(body), has_self_argument, function_token.location, fn_name_location);
     }
     return std::make_unique<ast::FunctionExpression>(std::move(fn_name), std::move(arguments),
-                                                     std::move(return_type), std::move(body));
+                                                     std::move(return_type), std::move(body),
+                                                     function_token.location, fn_name_location);
 }
 
 }  // namespace rain::lang::parse

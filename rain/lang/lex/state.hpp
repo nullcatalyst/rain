@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 namespace rain::lang::lex {
 
 struct State {
@@ -12,6 +14,9 @@ struct State {
 
     // Index of the current token, with 0 being the first token.
     int index = 0;
+
+    std::string_view source;
+    std::string_view file_name;
 };
 
 }  // namespace rain::lang::lex

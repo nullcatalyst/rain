@@ -13,17 +13,24 @@ class IntegerExpression : public Expression {
 
     absl::Nullable<Type*> _type = nullptr;
 
+    lex::Location _location;
+
   public:
-    IntegerExpression(uint64_t value) : _value(value) {}
+    IntegerExpression(uint64_t value, lex::Location location)
+        : _value(value), _location(location) {}
     ~IntegerExpression() override = default;
 
+    // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::Integer;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr uint64_t              value() const noexcept { return _value; }
-
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    // IntegerExpression
+    [[nodiscard]] constexpr uint64_t value() const noexcept { return _value; }
+
     util::Result<void> validate(Scope& scope) override;
 };
 

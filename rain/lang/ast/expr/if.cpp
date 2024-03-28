@@ -3,7 +3,7 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/ast/var/variable.hpp"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
@@ -27,12 +27,21 @@ util::Result<void> IfExpression::validate(Scope& scope) {
     }
 
     if (_condition->type() != scope.builtin()->bool_type()) {
-        return ERR_PTR(err::SimpleError, "if condition must result in a boolean value");
+        return ERR_PTR(err::SyntaxError, _condition->location(),
+                       "if condition must result in a boolean value");
     }
 
     if (_else.has_value()) {
         if (_then->type() != _else.value()->type()) {
-            return ERR_PTR(err::SimpleError, "if branches must (currently) have the same type");
+            lex::Location location;
+            if (_else.value()->expressions().empty()) {
+                location = _else.value()->location();
+            } else {
+                location = _else.value()->expressions().back()->location();
+            }
+
+            return ERR_PTR(err::SyntaxError, location,
+                           "if branches must (currently) have the same type");
         }
         _type = _then->type();
     } else {

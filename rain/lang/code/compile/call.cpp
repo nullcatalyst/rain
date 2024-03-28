@@ -21,7 +21,7 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
     switch (call.callee()->kind()) {
         case serial::ExpressionKind::Member: {
             ast::MemberExpression& member     = static_cast<ast::MemberExpression&>(*call.callee());
-            llvm::Value*           self_value = compile_any_expression(ctx, *member.lhs());
+            llvm::Value*           self_value = compile_any_expression(ctx, member.lhs());
             ast::FunctionVariable* function   = call.function();
             llvm::FunctionType*    llvm_function_type =
                 reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(function->function_type()));

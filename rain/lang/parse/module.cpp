@@ -35,11 +35,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
 
             auto result = parse_top_level_expression(lexer, scope);
             FORWARD_ERROR(result);
-            return std::make_unique<ast::ExportExpression>(std::move(result).value());
+            return std::make_unique<ast::ExportExpression>(std::move(result).value(),
+                                                           token.location);
         }
 
         default:
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
+            return ERR_PTR(err::SyntaxError, token.location,
                            absl::StrCat("unexpected token \"", token.text(), "\""));
     }
 

@@ -13,7 +13,7 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex:
     const auto lparen_token = lexer.next();
     if (lparen_token.kind != lex::TokenKind::LRoundBracket) {
         // This function should only be called if we already know the next token starts a block.
-        return ERR_PTR(err::SyntaxError, lexer, lparen_token.location,
+        return ERR_PTR(err::SyntaxError, lparen_token.location,
                        "expected '('; this is an internal error");
     }
 
@@ -22,11 +22,12 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex:
 
     const auto rparen_token = lexer.next();
     if (rparen_token.kind != lex::TokenKind::RRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, lparen_token.location,
+        return ERR_PTR(err::SyntaxError, lparen_token.location,
                        "expected ')' to end expression in parenthesis");
     }
 
-    return std::make_unique<ast::ParenthesisExpression>(std::move(expression).value());
+    return std::make_unique<ast::ParenthesisExpression>(
+        std::move(expression).value(), lparen_token.location.merge(rparen_token.location));
 }
 
 }  // namespace rain::lang::parse

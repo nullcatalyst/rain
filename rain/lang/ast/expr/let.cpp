@@ -4,7 +4,7 @@
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/ast/var/variable.hpp"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
@@ -15,7 +15,8 @@ util::Result<void> LetExpression::validate(Scope& scope) {
     }
 
     if (type() == nullptr) {
-        return ERR_PTR(err::SimpleError, "let variable declaration initial value must have a type");
+        return ERR_PTR(err::SyntaxError, _value->location(),
+                       "let variable declaration initial value must have a type");
     }
 
     _variable = scope.add_variable(_name, std::make_unique<BlockVariable>(_name, type(), true));

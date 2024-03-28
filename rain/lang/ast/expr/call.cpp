@@ -3,7 +3,7 @@
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/var/function.hpp"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/syntax.hpp"
 #include "rain/util/log.hpp"
 
 namespace rain::lang::ast {
@@ -43,31 +43,25 @@ util::Result<void> CallExpression::validate(Scope& scope) {
     // Specially handle the callee expression, in order to support function overloading.
     switch (_callee->kind()) {
         case serial::ExpressionKind::Member: {
-            auto* member = reinterpret_cast<MemberExpression*>(_callee.get());
-            auto  result = member->lhs()->validate(scope);
+            auto& member = *reinterpret_cast<MemberExpression*>(_callee.get());
+            auto  result = member.lhs().validate(scope);
             FORWARD_ERROR(result);
 
-            auto* callee_type           = member->lhs()->type();
+            auto* callee_type           = member.lhs().type();
             auto  argument_types_result = validate_arguments(callee_type);
             FORWARD_ERROR(argument_types_result);
             auto argument_types = std::move(argument_types_result).value();
 
-            auto* function = scope.find_function(callee_type, argument_types, member->name());
+            auto* function = scope.find_function(callee_type, argument_types, member.name());
             if (function == nullptr) {
                 // Remove the self argument from the list.
                 argument_types.erase(argument_types.begin());
-                function = scope.find_function(callee_type, argument_types, member->name());
+                function = scope.find_function(callee_type, argument_types, member.name());
 
                 if (function == nullptr) {
-#if !defined(NDEBUG)
-                    return ERR_PTR(err::SimpleError,
-                                   absl::StrCat("no method named .", member->name(),
-                                                " found on type ", callee_type->debug_name()));
-#else
-                    return ERR_PTR(
-                        err::SimpleError,
-                        absl::StrCat("no method named .", member->name(), " found on type"));
-#endif  // !defined(NDEBUG)
+                    return ERR_PTR(err::SyntaxError, member.member_location(),
+                                   absl::StrCat("no method .", member.name(), " found on type ",
+                                                callee_type->name()));
                 }
             }
 
@@ -102,10 +96,10 @@ util::Result<void> CallExpression::validate(Scope& scope) {
 
             auto* callee_type = _callee->type();
             if (callee_type->kind() != serial::TypeKind::Function) {
-                return ERR_PTR(err::SimpleError, "callee is not a function");
+                return ERR_PTR(err::SyntaxError, _callee->location(), "callee is not a function");
             }
 
-            return ERR_PTR(err::SimpleError,
+            return ERR_PTR(err::SyntaxError, _callee->location(),
                            "calling a function expression is not yet implemented");
             break;
         }

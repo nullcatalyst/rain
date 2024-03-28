@@ -16,12 +16,16 @@ class MethodExpression : public FunctionExpression {
 
     [[maybe_unused]] bool _has_self_argument = false;
 
+    lex::Location _callee_type_location;
+
   public:
     MethodExpression(util::MaybeOwnedPtr<Type> callee_type, std::string_view name,
                      llvm::SmallVector<absl::Nonnull<Variable*>, 4> arguments,
                      util::MaybeOwnedPtr<Type> return_type, std::unique_ptr<BlockExpression> block,
-                     bool has_self_argument)
-        : FunctionExpression(name, std::move(arguments), std::move(return_type), std::move(block)),
+                     bool has_self_argument, lex::Location function_location,
+                     lex::Location name_location)
+        : FunctionExpression(name, std::move(arguments), std::move(return_type), std::move(block),
+                             function_location, name_location),
           _callee_type(std::move(callee_type)),
           _has_self_argument(has_self_argument) {}
 
@@ -34,6 +38,12 @@ class MethodExpression : public FunctionExpression {
 
     [[nodiscard]] absl::Nonnull<Type*> callee_type() const noexcept {
         return _callee_type.get_nonnull();
+    }
+
+    [[nodiscard]] bool has_self_argument() const noexcept { return _has_self_argument; }
+
+    [[nodiscard]] lex::Location callee_type_location() const noexcept {
+        return _callee_type_location;
     }
 
     util::Result<void> validate(Scope& scope) override;

@@ -15,7 +15,7 @@ util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(lex::Lexer& lexe
     const auto float_token = lexer.next();
     if (float_token.kind != lex::TokenKind::Float) {
         // This function should only be called if we already know the next token is an integer.
-        return ERR_PTR(err::SyntaxError, lexer, float_token.location,
+        return ERR_PTR(err::SyntaxError, float_token.location,
                        "expected float literal; this is an internal error");
     }
 
@@ -44,7 +44,7 @@ util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(lex::Lexer& lexe
         multiplier *= 0.1;
     }
 
-    return std::make_unique<ast::FloatExpression>(value);
+    return std::make_unique<ast::FloatExpression>(value, float_token.location);
 }
 
 }  // namespace rain::lang::parse

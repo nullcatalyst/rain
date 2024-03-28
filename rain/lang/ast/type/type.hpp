@@ -12,13 +12,17 @@ class Scope;
 
 class Type {
   public:
+    static std::string type_name(absl::Nullable<Type*> type) noexcept {
+        if (type == nullptr) {
+            return "<null_type>";
+        }
+        return type->name();
+    }
+
     virtual ~Type() = default;
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
-
-#if !defined(NDEBUG)
-    [[nodiscard]] virtual std::string debug_name() const noexcept { return "<unknown>"; }
-#endif  // !defined(NDEBUG)
+    [[nodiscard]] virtual std::string      name() const noexcept { return "<error_type>"; }
 
     /**
      * Resolve the type to a concrete (and common) type. Fully resolved types can be compared using

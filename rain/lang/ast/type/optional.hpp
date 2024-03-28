@@ -15,6 +15,10 @@ class OptionalType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Optional;
     }
+    [[nodiscard]] std::string name() const noexcept override {
+        return absl::StrCat("?", _type->name());
+    }
+
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
 };

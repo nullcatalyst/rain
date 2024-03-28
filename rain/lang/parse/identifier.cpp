@@ -11,13 +11,14 @@ namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope) {
-    const auto token = lexer.next();
-    if (token.kind != lex::TokenKind::Identifier) {
-        return ERR_PTR(err::SyntaxError, lexer, token.location,
+    const auto identifier_token = lexer.next();
+    if (identifier_token.kind != lex::TokenKind::Identifier) {
+        return ERR_PTR(err::SyntaxError, identifier_token.location,
                        "expected identifier; this is an internal error");
     }
 
-    return std::make_unique<ast::IdentifierExpression>(token.text());
+    return std::make_unique<ast::IdentifierExpression>(identifier_token.text(),
+                                                       identifier_token.location);
 }
 
 }  // namespace rain::lang::parse

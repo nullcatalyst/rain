@@ -15,7 +15,7 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> callee) {
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != lex::TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, lbracket_token.location,
+        return ERR_PTR(err::SyntaxError, lbracket_token.location,
                        "expected '('; this is an internal error");
     }
 
@@ -30,11 +30,14 @@ util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
             return {};
         },
         [&](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
-            return ERR_PTR(err::SyntaxError, lexer, token.location, "expected ',' or ')'");
+            return ERR_PTR(err::SyntaxError, token.location, "expected ',' or ')'");
         });
     FORWARD_ERROR(result);
 
-    return std::make_unique<ast::CallExpression>(std::move(callee), std::move(arguments));
+    lex::Location rbracket_location = lexer.next().location;  // Consume the ')'
+
+    return std::make_unique<ast::CallExpression>(std::move(callee), std::move(arguments),
+                                                 lbracket_token.location.merge(rbracket_location));
 }
 
 }  // namespace rain::lang::parse

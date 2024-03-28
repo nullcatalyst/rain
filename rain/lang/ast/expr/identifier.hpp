@@ -15,20 +15,27 @@ class IdentifierExpression : public Expression {
     absl::Nullable<Variable*> _variable = nullptr;
     absl::Nullable<Type*>     _type     = nullptr;
 
+    lex::Location _location;
+
     friend class CallExpression;
 
   public:
-    IdentifierExpression(std::string_view name) : _name(name) {}
+    IdentifierExpression(std::string_view name, lex::Location location)
+        : _name(name), _location(location) {}
     ~IdentifierExpression() override = default;
 
+    // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::Variable;
     }
-    [[nodiscard]] constexpr bool is_assignable() const noexcept override {
+    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+    [[nodiscard]] constexpr bool          is_assignable() const noexcept override {
         return _variable != nullptr && _variable->mutable_();
     }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr std::string_view      name() const noexcept { return _name; }
+
+    // IdentifierExpression
+    [[nodiscard]] constexpr std::string_view          name() const noexcept { return _name; }
     [[nodiscard]] constexpr absl::Nullable<Variable*> variable() const noexcept {
         return _variable;
     }

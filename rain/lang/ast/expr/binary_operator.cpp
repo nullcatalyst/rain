@@ -4,7 +4,8 @@
 #include <string_view>
 
 #include "absl/strings/str_cat.h"
-#include "rain/lang/err/simple.hpp"
+#include "rain/lang/err/binary_operator.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
@@ -57,7 +58,7 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
 
     if (_op == serial::BinaryOperatorKind::Assign) {
         if (!_lhs->is_assignable()) {
-            return ERR_PTR(err::SimpleError,
+            return ERR_PTR(err::SyntaxError, _lhs->location(),
                            "left-hand side of assignment must be an assignable expression");
         }
         return {};
@@ -65,7 +66,8 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
 
     const auto method_name = get_operator_method_name(_op);
     if (!method_name.has_value()) {
-        return ERR_PTR(err::SimpleError, "invalid binary operator");
+        return ERR_PTR(err::SyntaxError, _op_location,
+                       "invalid binary operator; this is an internal error");
     }
 
     {
@@ -75,10 +77,10 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
         _method = scope.find_function(_lhs->type(), argument_types, method_name.value());
         if (_method == nullptr) {
             return ERR_PTR(
-                err::SimpleError,
+                err::BinaryOperatorError, _lhs->location(), _rhs->location(), _op_location,
                 absl::StrCat(
                     "no matching binary operator method found, looking for method named \"",
-                    method_name.value(), "\""));
+                    method_name.value(), "\" on type \"", _lhs->type()->name(), "\""));
         }
     }
 

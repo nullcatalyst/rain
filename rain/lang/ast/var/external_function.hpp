@@ -19,8 +19,10 @@ class ExternalFunctionVariable : public FunctionVariable {
           _wasm_function_name(wasm_function_name) {}
     ~ExternalFunctionVariable() override = default;
 
-    [[nodiscard]] std::string_view wasm_namespace() const noexcept { return _wasm_namespace; }
-    [[nodiscard]] std::string_view wasm_function_name() const noexcept {
+    [[nodiscard]] constexpr std::string_view wasm_namespace() const noexcept {
+        return _wasm_namespace;
+    }
+    [[nodiscard]] constexpr std::string_view wasm_function_name() const noexcept {
         return _wasm_function_name;
     }
 };

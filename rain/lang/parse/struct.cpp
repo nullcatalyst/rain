@@ -11,7 +11,7 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, ast::Scope& scope) {
     if (const auto struct_token = lexer.next(); struct_token.kind != lex::TokenKind::Struct) {
         // This function should only be called if we already know the next token starts a struct.
-        return ERR_PTR(err::SyntaxError, lexer, struct_token.location,
+        return ERR_PTR(err::SyntaxError, struct_token.location,
                        "expected keyword 'struct'; this is an internal error");
     }
 
@@ -25,7 +25,7 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
         // Temporarily make struct names required, while we determine the best semantics for unnamed
         // structs.
         if (next_token.kind != lex::TokenKind::Identifier) {
-            return ERR_PTR(err::SyntaxError, lexer, next_token.location,
+            return ERR_PTR(err::SyntaxError, next_token.location,
                            "expected identifier for struct name");
         }
         struct_name = next_token.text();
@@ -33,8 +33,7 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
     }
 
     if (next_token.kind != lex::TokenKind::LCurlyBracket) {
-        return ERR_PTR(err::SyntaxError, lexer, next_token.location,
-                       "expected '{' after struct name");
+        return ERR_PTR(err::SyntaxError, next_token.location, "expected '{' after struct name");
     }
 
     std::vector<ast::StructField> fields;
@@ -43,12 +42,12 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
         [&](lex::Lexer& lexer) -> util::Result<void> {
             const auto field_name = lexer.next();
             if (field_name.kind != lex::TokenKind::Identifier) {
-                return ERR_PTR(err::SyntaxError, lexer, field_name.location,
+                return ERR_PTR(err::SyntaxError, field_name.location,
                                                         "expected identifier for struct field name");
             }
 
             if (const auto colon_token = lexer.next(); colon_token.kind != lex::TokenKind::Colon) {
-                return ERR_PTR(err::SyntaxError, lexer, colon_token.location,
+                return ERR_PTR(err::SyntaxError, colon_token.location,
                                                         "expected ':' between field name and field type");
             }
 
@@ -62,7 +61,7 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
-            return ERR_PTR(err::SyntaxError, lexer, token.location,
+            return ERR_PTR(err::SyntaxError, token.location,
                                                     "expected ',' or '}' after struct field");
         });
     FORWARD_ERROR(result);

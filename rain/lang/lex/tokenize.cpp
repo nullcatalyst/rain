@@ -21,8 +21,8 @@ constexpr bool past_end(const std::string_view s, const char* it) { return it >=
 
 namespace rain::lang::lex {
 
-[[nodiscard]] State skip_whitespace(const std::string_view source, State state) {
-    if (state.it == nullptr || !contains(source, state.it)) [[unlikely]] {
+[[nodiscard]] State skip_whitespace(State state) {
+    if (state.it == nullptr || !contains(state.source, state.it)) [[unlikely]] {
         return State{nullptr, state.line, state.column};
     }
 
@@ -38,18 +38,18 @@ namespace rain::lang::lex {
             }
 
             ++state.it;
-            if (past_end(source, state.it)) [[unlikely]] {
+            if (past_end(state.source, state.it)) [[unlikely]] {
                 return State{nullptr, state.line, state.column};
             }
             c = *state.it;
         }
 
         // Skip comments
-        if (c == '/' && !past_end(source, state.it + 1) && state.it[1] == '/') {
+        if (c == '/' && !past_end(state.source, state.it + 1) && state.it[1] == '/') {
             while (c != '\n' && c != '\0') {
                 ++state.column;
                 ++state.it;
-                if (past_end(source, state.it)) [[unlikely]] {
+                if (past_end(state.source, state.it)) [[unlikely]] {
                     return State{nullptr, state.line, state.column};
                 }
                 c = *state.it;
@@ -90,7 +90,7 @@ namespace rain::lang::lex {
     return TokenKind::Undefined;
 }
 
-[[nodiscard]] TokenKind find_operator(const std::string_view source, State state) {
+[[nodiscard]] TokenKind find_operator(State state) {
     static constexpr std::array<TokenKind, 128> OPERATORS = []() {
         std::array<TokenKind, 128> operators{};
 
@@ -126,7 +126,7 @@ namespace rain::lang::lex {
     }();
 
     const auto op = OPERATORS[static_cast<uint8_t>(*state.it)];
-    if (past_end(source, state.it + 1)) [[unlikely]] {
+    if (past_end(state.source, state.it + 1)) [[unlikely]] {
         return op;
     }
 
@@ -230,17 +230,17 @@ namespace rain::lang::lex {
     return OPERATOR_LENGTH[kind];
 }
 
-[[nodiscard]] std::tuple<Token, State> next_token(const std::string_view source, State state) {
+[[nodiscard]] std::tuple<Token, State> next_token(State state) {
     {
         // Skip whitespace and comments
-        state = skip_whitespace(source, state);
+        state = skip_whitespace(state);
 
         if (state.it == nullptr) [[unlikely]] {
             return std::make_tuple(
                 Token{
-                    .kind = TokenKind::EndOfFile,
-                    .location =
-                        Location(source, source.end(), source.end(), state.line, state.column),
+                    .kind     = TokenKind::EndOfFile,
+                    .location = Location(state.file_name, state.source, state.source.end(),
+                                         state.source.end(), state.line, state.column),
                 },
                 state);
         }
@@ -255,7 +255,7 @@ namespace rain::lang::lex {
     const auto next_char = [&]() -> char {
         ++state.column;
         ++state.it;
-        if (past_end(source, state.it)) [[unlikely]] {
+        if (past_end(state.source, state.it)) [[unlikely]] {
             c = '\0';
             return '\0';
         }
@@ -273,7 +273,8 @@ namespace rain::lang::lex {
             return std::make_tuple(
                 Token{
                     .kind     = TokenKind::Integer,
-                    .location = Location(source, start_it, state.it, start_line, start_column),
+                    .location = Location(state.file_name, state.source, start_it, state.it,
+                                         start_line, start_column),
                 },
                 state);
         }
@@ -288,7 +289,8 @@ namespace rain::lang::lex {
         return std::make_tuple(
             Token{
                 .kind     = TokenKind::Float,
-                .location = Location(source, start_it, state.it, start_line, start_column),
+                .location = Location(state.file_name, state.source, start_it, state.it, start_line,
+                                     start_column),
             },
             state);
     }
@@ -305,7 +307,8 @@ namespace rain::lang::lex {
             return std::make_tuple(
                 Token{
                     .kind     = keyword,
-                    .location = Location(source, start_it, state.it, start_line, start_column),
+                    .location = Location(state.file_name, state.source, start_it, state.it,
+                                         start_line, start_column),
                 },
                 state);
         }
@@ -313,13 +316,14 @@ namespace rain::lang::lex {
         return std::make_tuple(
             Token{
                 .kind     = TokenKind::Identifier,
-                .location = Location(source, start_it, state.it, start_line, start_column),
+                .location = Location(state.file_name, state.source, start_it, state.it, start_line,
+                                     start_column),
             },
             state);
     }
 
     // Operator
-    const auto operator_kind = find_operator(source, state);
+    const auto operator_kind = find_operator(state);
     if (operator_kind != TokenKind::Undefined) {
         const auto length = operator_length(operator_kind);
         state.it += length;
@@ -328,7 +332,8 @@ namespace rain::lang::lex {
         return std::make_tuple(
             Token{
                 .kind     = operator_kind,
-                .location = Location(source, start_it, state.it, start_line, start_column),
+                .location = Location(state.file_name, state.source, start_it, state.it, start_line,
+                                     start_column),
             },
             state);
     }
@@ -337,7 +342,8 @@ namespace rain::lang::lex {
     return std::make_tuple(
         Token{
             .kind     = TokenKind::Undefined,
-            .location = Location(source, start_it, state.it, start_line, start_column),
+            .location = Location(state.file_name, state.source, start_it, state.it, start_line,
+                                 start_column),
         },
         state);
 }
