@@ -10,6 +10,8 @@ void compile_module(Context& ctx, ast::Module& module) {
     ctx.set_llvm_type(builtin.i64_type(), llvm::Type::getInt64Ty(ctx.llvm_context()));
     ctx.set_llvm_type(builtin.f32_type(), llvm::Type::getFloatTy(ctx.llvm_context()));
     ctx.set_llvm_type(builtin.f64_type(), llvm::Type::getDoubleTy(ctx.llvm_context()));
+    ctx.set_llvm_type(builtin.f32x4_type(),
+                      llvm::FixedVectorType::get(llvm::Type::getFloatTy(ctx.llvm_context()), 4));
 
     for (auto& type : builtin.owned_types()) {
         compile_type(ctx, *type);

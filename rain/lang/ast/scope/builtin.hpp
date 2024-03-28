@@ -22,6 +22,8 @@ class BuiltinScope : public Scope {
     absl::Nonnull<Type*> _f32_type;
     absl::Nonnull<Type*> _f64_type;
 
+    absl::Nonnull<Type*> _f32x4_type;
+
     std::vector<std::unique_ptr<ExternalFunctionVariable>> _external_functions;
 
   public:
@@ -44,6 +46,7 @@ class BuiltinScope : public Scope {
     [[nodiscard]] absl::Nonnull<Type*> i64_type() const noexcept { return _i64_type; }
     [[nodiscard]] absl::Nonnull<Type*> f32_type() const noexcept { return _f32_type; }
     [[nodiscard]] absl::Nonnull<Type*> f64_type() const noexcept { return _f64_type; }
+    [[nodiscard]] absl::Nonnull<Type*> f32x4_type() const noexcept { return _f32x4_type; }
     [[nodiscard]] const std::vector<std::unique_ptr<ExternalFunctionVariable>>& external_functions()
         const noexcept {
         return _external_functions;

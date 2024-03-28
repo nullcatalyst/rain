@@ -16,6 +16,7 @@ cc_library(
         "compile/let.cpp",
         "compile/module.cpp",
         "compile/parenthesis.cpp",
+        "compile/struct_literal.cpp",
         "compile/type.cpp",
         "compile/unary_operator.cpp",
         "compile/while.cpp",

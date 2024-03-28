@@ -18,6 +18,7 @@
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/struct_literal.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/expr/unary_operator.hpp"
 #include "rain/lang/ast/expr/while.hpp"
@@ -32,6 +33,7 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression);
 llvm::Value* compile_integer(Context& ctx, ast::IntegerExpression& integer);
 llvm::Value* compile_float(Context& ctx, ast::FloatExpression& float_);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);
+llvm::Value* compile_struct_literal(Context& ctx, ast::StructLiteralExpression& struct_literal);
 llvm::Value* compile_let(Context& ctx, ast::LetExpression& let);
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator);
 llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& unary_operator);

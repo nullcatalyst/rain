@@ -27,8 +27,38 @@ class MaybeOwnedPtr {
     MaybeOwnedPtr() : _type(State::None) {}
     ~MaybeOwnedPtr() { _reset(); }
 
-    MaybeOwnedPtr(const MaybeOwnedPtr& other)            = delete;
-    MaybeOwnedPtr& operator=(const MaybeOwnedPtr& other) = delete;
+    MaybeOwnedPtr(const MaybeOwnedPtr& other) {
+        switch (other._type) {
+            case State::None:
+                _type = State::None;
+                break;
+            case State::Ptr:
+                _type = State::Ptr;
+                _ptr  = other._ptr;
+                break;
+            case State::OwnedPtr:
+                _type = State::Ptr;
+                _ptr  = other.get();
+                break;
+        }
+    }
+    MaybeOwnedPtr& operator=(const MaybeOwnedPtr& other) {
+        _reset();
+
+        switch (other._type) {
+            case State::None:
+                _type = State::None;
+                break;
+            case State::Ptr:
+                _type = State::Ptr;
+                _ptr  = other._ptr;
+                break;
+            case State::OwnedPtr:
+                _type = State::Ptr;
+                _ptr  = other.get();
+                break;
+        }
+    }
 
     MaybeOwnedPtr(MaybeOwnedPtr&& other) {
         switch (other._type) {

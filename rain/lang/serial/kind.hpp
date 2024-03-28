@@ -13,6 +13,7 @@ enum class ExpressionKind {
     Float,
     Variable,
     Tuple,
+    StructLiteral,
 
     // Operations
     Ctor,

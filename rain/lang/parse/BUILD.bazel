@@ -18,6 +18,7 @@ cc_library(
         "module.cpp",
         "parenthesis.cpp",
         "struct.cpp",
+        "struct_literal.cpp",
         "unary_operator.cpp",
         "while.cpp",
     ],

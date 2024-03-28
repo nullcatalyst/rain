@@ -11,14 +11,14 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope) {
     std::unique_ptr<ast::Expression> expression;
 
-    // {
-    //     const auto state       = lexer.save_state();
-    //     auto       ctor_result = parse_ctor(lexer);
-    //     if (ctor_result.has_value()) {
-    //         return ctor_result;
-    //     }
-    //     lexer.restore_state(state);
-    // }
+    {
+        const auto state       = lexer.save_state();
+        auto       ctor_result = parse_struct_literal(lexer, scope);
+        if (ctor_result.has_value()) {
+            return ctor_result;
+        }
+        lexer.restore_state(state);
+    }
 
     const auto token = lexer.peek();
     switch (token.kind) {

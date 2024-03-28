@@ -21,6 +21,7 @@
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/module.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/struct_literal.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/expr/while.hpp"
 
@@ -42,12 +43,14 @@ util::Result<std::unique_ptr<ast::Module>> parse_module(lex::Lexer&        lexer
 util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
                                                                     ast::Scope& scope);
 
-util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexer& lexer,
-                                                                       ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FloatExpression>>      parse_float(lex::Lexer& lexer,
-                                                                     ast::Scope& scope);
-util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
+util::Result<std::unique_ptr<ast::IntegerExpression>>       parse_integer(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FloatExpression>>         parse_float(lex::Lexer& lexer,
+                                                                        ast::Scope& scope);
+util::Result<std::unique_ptr<ast::IdentifierExpression>>    parse_identifier(lex::Lexer& lexer,
+                                                                             ast::Scope& scope);
+util::Result<std::unique_ptr<ast::StructLiteralExpression>> parse_struct_literal(lex::Lexer& lexer,
+                                                                                 ast::Scope& scope);
 util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>    parse_atom(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>    parse_unary_operator(lex::Lexer& lexer,
