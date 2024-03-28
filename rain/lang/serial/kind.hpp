@@ -33,6 +33,7 @@ enum class ExpressionKind {
     // Declarations
     Export,
     Function,
+    Method,
     Let,
     Type,
 

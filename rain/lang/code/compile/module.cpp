@@ -44,6 +44,7 @@ void compile_module(Context& ctx, ast::Module& module) {
                 break;
 
             case serial::ExpressionKind::Function:
+            case serial::ExpressionKind::Method:
                 compile_function(ctx, static_cast<ast::FunctionExpression&>(*expression));
                 break;
 

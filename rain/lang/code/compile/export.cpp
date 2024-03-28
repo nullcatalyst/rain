@@ -11,7 +11,7 @@ llvm::Value* compile_export(Context& ctx, ast::ExportExpression& export_) {
 
     llvm_function->setLinkage(llvm::Function::ExternalLinkage);
     llvm_function->addFnAttr(llvm::Attribute::get(llvm_function->getContext(), "wasm-export-name",
-                                                  function.name_or_empty()));
+                                                  llvm_function->getName()));
 
     return llvm_function;
 }

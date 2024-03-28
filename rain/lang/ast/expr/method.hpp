@@ -29,6 +29,10 @@ class MethodExpression : public FunctionExpression {
           _callee_type(std::move(callee_type)),
           _has_self_argument(has_self_argument) {}
 
+    // Expression
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
+        return serial::ExpressionKind::Method;
+    }
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         // TODO: Should this always return true?
         // Sure, we can always compile the function, but the function could access global mutable

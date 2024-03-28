@@ -6,7 +6,8 @@
 namespace rain::lang::ast {
 
 util::Result<void> ExportExpression::validate(Scope& scope) {
-    if (_expression->kind() != serial::ExpressionKind::Function) {
+    if (_expression->kind() != serial::ExpressionKind::Function &&
+        _expression->kind() != serial::ExpressionKind::Method) {
         return ERR_PTR(err::SyntaxError, _expression->location(), "only functions can be exported");
     }
 

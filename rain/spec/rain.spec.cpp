@@ -9,7 +9,7 @@
 
 TEST(Lang, struct) {
     const std::string_view code = R"(
-export fn Vec4_zero() -> f32x4 {
+export fn f32x4.zero() -> f32x4 {
     f32x4 {
         x: 0.0,
         y: 0.0,
@@ -18,7 +18,7 @@ export fn Vec4_zero() -> f32x4 {
     }
 }
 
-export fn Vec4_splat(value: f32) -> f32x4 {
+export fn f32x4.splat(value: f32) -> f32x4 {
     f32x4 {
         x: value,
         y: value,
@@ -27,7 +27,7 @@ export fn Vec4_splat(value: f32) -> f32x4 {
     }
 }
 
-export fn Vec4_new(x: f32, y: f32, z: f32, w: f32) -> f32x4 {
+export fn f32x4.new(x: f32, y: f32, z: f32, w: f32) -> f32x4 {
     f32x4 {
         x: x,
         y: y,

@@ -1,3 +1,4 @@
+#include "rain/lang/ast/expr/method.hpp"
 #include "rain/lang/code/compile/all.hpp"
 
 namespace rain::lang::code {
@@ -5,9 +6,18 @@ namespace rain::lang::code {
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function) {
     llvm::FunctionType* llvm_type =
         reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(function.type()));
-    assert(llvm_type != nullptr && "Function type not found");
-    llvm::Function* llvm_function = llvm::Function::Create(
-        llvm_type, llvm::Function::InternalLinkage, function.name_or_empty(), ctx.llvm_module());
+    assert(llvm_type != nullptr && "function type not found");
+
+    std::string name;
+    if (function.kind() == serial::ExpressionKind::Method) {
+        ast::MethodExpression& method = static_cast<ast::MethodExpression&>(function);
+        name = absl::StrCat(method.callee_type()->name(), ".", function.name_or_empty());
+    } else {
+        name = std::string(function.name_or_empty());
+    }
+
+    llvm::Function* llvm_function =
+        llvm::Function::Create(llvm_type, llvm::Function::InternalLinkage, name, ctx.llvm_module());
     if (const auto* function_variable = function.variable(); function_variable != nullptr) {
         ctx.set_llvm_value(function_variable, llvm_function);
     }
