@@ -2,6 +2,7 @@ cc_library(
     name = "type",
     srcs = [
         "function.cpp",
+        "meta.cpp",
         "opaque.cpp",
         "struct.cpp",
         "type.cpp",
@@ -27,6 +28,7 @@ cc_library(
     name = "hdrs",
     hdrs = [
         "function.hpp",
+        "meta.hpp",
         "opaque.hpp",
         "struct.hpp",
         "type.hpp",

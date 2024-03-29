@@ -21,7 +21,6 @@ class BuiltinScope : public Scope {
     absl::Nonnull<Type*> _i64_type;
     absl::Nonnull<Type*> _f32_type;
     absl::Nonnull<Type*> _f64_type;
-
     absl::Nonnull<Type*> _f32x4_type;
 
     std::vector<std::unique_ptr<ExternalFunctionVariable>> _external_functions;

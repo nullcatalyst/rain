@@ -49,8 +49,11 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
         case serial::TypeKind::Struct:
             return compile_struct_type(ctx, static_cast<ast::StructType&>(type));
 
+        case serial::TypeKind::Meta:
+            return nullptr;
+
         default:
-            util::console_error("unimplemented: compile type", type.kind());
+            util::console_error("unimplemented: compile type ", type.kind());
             std::abort();
     }
 }

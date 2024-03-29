@@ -15,9 +15,10 @@ class Variable {
   public:
     virtual ~Variable() = default;
 
-    [[nodiscard]] virtual std::string_view     name() const noexcept     = 0;
-    [[nodiscard]] virtual absl::Nonnull<Type*> type() const noexcept     = 0;
-    [[nodiscard]] virtual bool                 mutable_() const noexcept = 0;
+    [[nodiscard]] virtual serial::VariableKind kind() const noexcept = 0;
+    [[nodiscard]] virtual std::string_view     name() const noexcept = 0;
+    [[nodiscard]] virtual absl::Nonnull<Type*> type() const noexcept = 0;
+    [[nodiscard]] virtual bool                 mutable_() const noexcept { return false; }
 
     [[nodiscard]] virtual util::Result<void> validate(Scope& scope) noexcept = 0;
 };

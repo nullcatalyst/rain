@@ -19,10 +19,6 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
 
     std::optional<std::string_view> struct_name;
     auto                            next_token = lexer.next();
-    // if (next_token.kind == lex::TokenKind::Identifier) {
-    //     struct_name = next_token.text();
-    //     next_token  = lexer.next();
-    // }
     {
         // Temporarily make struct names required, while we determine the best semantics for unnamed
         // structs.
@@ -67,6 +63,8 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
                                                     "expected ',' or '}' after struct field");
         });
     FORWARD_ERROR(result);
+
+    lexer.next();  // Consume the '}'
 
     return std::make_unique<ast::StructType>(std::move(struct_name), std::move(fields));
 }

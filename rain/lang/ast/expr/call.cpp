@@ -2,6 +2,7 @@
 
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/member.hpp"
+#include "rain/lang/ast/type/meta.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/util/log.hpp"
@@ -47,16 +48,28 @@ util::Result<void> CallExpression::validate(Scope& scope) {
             auto  result = member.lhs().validate(scope);
             FORWARD_ERROR(result);
 
-            auto* callee_type           = member.lhs().type();
-            auto  argument_types_result = validate_arguments(callee_type);
+            auto* callee_type = member.lhs().type();
+            bool  try_self    = true;
+
+            // If the variable is a meta variable (a type), then we can try to search for a method
+            // on that type that doesn't take self as a parameter.
+            if (callee_type->kind() == serial::TypeKind::Meta) {
+                auto* meta_type = reinterpret_cast<MetaType*>(callee_type);
+                callee_type     = &meta_type->type();
+                try_self        = false;
+            }
+
+            auto argument_types_result = validate_arguments(try_self ? callee_type : nullptr);
             FORWARD_ERROR(argument_types_result);
             auto argument_types = std::move(argument_types_result).value();
 
             auto* function = scope.find_function(callee_type, argument_types, member.name());
             if (function == nullptr) {
-                // Remove the self argument from the list.
-                argument_types.erase(argument_types.begin());
-                function = scope.find_function(callee_type, argument_types, member.name());
+                if (try_self) {
+                    // Remove the self argument from the list.
+                    argument_types.erase(argument_types.begin());
+                    function = scope.find_function(callee_type, argument_types, member.name());
+                }
 
                 if (function == nullptr) {
                     return ERR_PTR(err::SyntaxError, member.member_location(),

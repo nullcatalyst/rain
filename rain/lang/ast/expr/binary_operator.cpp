@@ -88,7 +88,7 @@ util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
     }
 
     {
-        // TODO: Check if the method can be called with a reference.
+        // TODO: Check if the method can be called with a reference?
     }
 
     _type = _method->function_type()->return_type();

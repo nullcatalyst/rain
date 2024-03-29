@@ -6,12 +6,14 @@
 namespace rain::lang::ast {
 
 util::Result<void> ExportExpression::validate(Scope& scope) {
-    if (_expression->kind() != serial::ExpressionKind::Function &&
-        _expression->kind() != serial::ExpressionKind::Method) {
-        return ERR_PTR(err::SyntaxError, _expression->location(), "only functions can be exported");
+    if (_expression->kind() == serial::ExpressionKind::Method) {
+        return ERR_PTR(err::SyntaxError, _expression->location(),
+                       "methods cannot (currently) be exported");
     }
 
-    // TODO: Only allow exporting functions that do not have a callee.
+    if (_expression->kind() != serial::ExpressionKind::Function) {
+        return ERR_PTR(err::SyntaxError, _expression->location(), "only functions can be exported");
+    }
 
     return _expression->validate(scope);
 }

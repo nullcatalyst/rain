@@ -111,6 +111,7 @@ enum class TypeKind {
     Struct,
     Interface,
 
+    Meta,
     Unresolved,
 
     Count,

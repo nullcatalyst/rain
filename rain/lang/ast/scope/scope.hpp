@@ -20,6 +20,7 @@ inline H AbslHashValue(H h, const llvm::SmallVector<T*, 4>& vec) {
 namespace rain::lang::ast {
 
 class Type;
+class MetaType;
 class FunctionType;
 
 class Variable;
@@ -38,9 +39,10 @@ class Scope {
     using FunctionVariableKey = std::tuple<absl::Nullable<Type*> /*callee*/, TypeList /*arguments*/,
                                            std::string_view /*name*/>;
 
-    absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>        _named_types;
-    absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>> _function_types;
-    absl::flat_hash_set<std::unique_ptr<Type>>                         _owned_types;
+    absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>         _named_types;
+    absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>>  _function_types;
+    absl::flat_hash_map<absl::Nonnull<Type*>, absl::Nonnull<MetaType*>> _meta_types;
+    absl::flat_hash_set<std::unique_ptr<Type>>                          _owned_types;
 
     absl::flat_hash_map<FunctionVariableKey, absl::Nonnull<FunctionVariable*>> _function_variables;
     absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>            _named_variables;
@@ -79,19 +81,22 @@ class Scope {
     [[nodiscard]] virtual absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
 
-    virtual absl::Nonnull<Type*> add_type(const std::string_view name,
-                                          std::unique_ptr<Type>  type) noexcept;
+    virtual absl::Nonnull<Type*> add_type(const std::string_view name, std::unique_ptr<Type> type);
 
-    virtual absl::Nonnull<FunctionVariable*> add_function(
-        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
-        const std::string_view name, std::unique_ptr<FunctionVariable> method) noexcept;
+    virtual absl::Nonnull<FunctionVariable*> add_function(absl::Nullable<Type*>  callee_type,
+                                                          const TypeList&        argument_types,
+                                                          const std::string_view name,
+                                                          std::unique_ptr<FunctionVariable> method);
 
     virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
-                                                  std::unique_ptr<Variable> variable) noexcept;
+                                                  std::unique_ptr<Variable> variable);
 
   protected:
     [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
+        const TypeList& argument_types, absl::Nullable<Type*> return_type);
+
+    absl::Nonnull<Type*> _add_owned_named_type(const std::string_view name,
+                                               std::unique_ptr<Type>  type);
 };
 
 }  // namespace rain::lang::ast

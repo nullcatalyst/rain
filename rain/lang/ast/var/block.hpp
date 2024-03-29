@@ -22,6 +22,9 @@ class BlockVariable : public Variable {
     }
     ~BlockVariable() override = default;
 
+    [[nodiscard]] serial::VariableKind kind() const noexcept override {
+        return serial::VariableKind::Local;
+    }
     [[nodiscard]] std::string_view     name() const noexcept override { return _name; }
     [[nodiscard]] absl::Nonnull<Type*> type() const noexcept override {
         return _type.get_nonnull();
