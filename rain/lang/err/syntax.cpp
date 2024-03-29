@@ -6,15 +6,21 @@
 namespace rain::lang::err {
 
 std::string SyntaxError::message() const noexcept {
-    const auto source_line = _location.whole_line().text();
-
+    const auto  source_line = _location.whole_line().text();
+    int         capacity    = source_line.size();
     std::string under_line;
-    under_line.reserve(source_line.size());
+    under_line.reserve(capacity);
 
-    for (int i = 0; i < _location.column - 1; ++i) {
+    // Column indexing starts at 1, whereas capacity is indexed from 0.
+    // Offset by 1 to make them match.
+    capacity += 1;
+
+    int column = 1;
+    for (int end = std::min(capacity, _location.column); column < end; ++column) {
         under_line += ' ';
     }
-    for (int i = 0, end = std::min(source_line.size(), _location.text().size()); i < end; ++i) {
+    for (int end = std::min(capacity, _location.column + static_cast<int>(_location.text().size()));
+         column < end; ++column) {
         under_line += '~';
     }
 
