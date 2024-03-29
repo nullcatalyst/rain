@@ -38,7 +38,7 @@
             "name": "Specification Test",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bazel-bin/rain/lang/spec/spec",
+            "program": "${workspaceFolder}/bazel-bin/rain/spec/spec",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
