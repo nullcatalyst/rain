@@ -1,5 +1,10 @@
 cc_library(
     name = "err",
+    srcs = [
+        "binary_operator.cpp",
+        "syntax.cpp",
+        "unary_operator.cpp",
+    ],
     hdrs = [
         "all.hpp",
         "binary_operator.hpp",

@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "absl/strings/str_cat.h"
+#include "rain/util/assert.hpp"
 #include "rain/util/colors.hpp"
 #include "rain/util/log.hpp"
 
@@ -44,18 +45,26 @@ struct Location {
     [[nodiscard]] std::string_view text() const noexcept { return std::string_view{begin, end}; }
 
     [[nodiscard]] Location merge(const Location& other) const noexcept {
-#if !defined(NDEBUG)
-        if (file_name.data() != other.file_name.data() &&
-            file_name.size() != other.file_name.size() && source.data() != other.source.data() &&
-            source.size() != other.source.size()) {
-            util::console_error(ANSI_RED, "cannot merge locations from different sources",
-                                ANSI_RESET);
-            std::abort();
+        IF_DEBUG {
+            if (file_name.data() != other.file_name.data() &&
+                file_name.size() != other.file_name.size() &&
+                source.data() != other.source.data() && source.size() != other.source.size()) {
+                util::console_error(ANSI_RED, "cannot merge locations from different sources",
+                                    ANSI_RESET);
+                std::abort();
+            }
         }
-#endif  // !defined(NDEBUG)
 
-        return Location(file_name, source, std::min(begin, other.begin), std::max(end, other.end),
-                        std::min(line, other.line), std::min(column, other.column));
+        if (line == other.line) {
+            return Location(file_name, source, std::min(begin, other.begin),
+                            std::max(end, other.end), line, std::min(column, other.column));
+        }
+
+        if (line < other.line) {
+            return Location(file_name, source, begin, other.end, line, column);
+        } else {
+            return Location(file_name, source, other.begin, end, other.line, other.column);
+        }
     }
 
     [[nodiscard]] Location whole_line() const noexcept {
