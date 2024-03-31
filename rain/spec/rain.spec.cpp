@@ -36,8 +36,13 @@ fn f32x4.new(x: f32, y: f32, z: f32, w: f32) -> f32x4 {
     }
 }
 
-export fn test_f32x4() -> f32x4 {
-    f32x4.zero() + f32x4.splat(4.0) + f32x4.new(1.0, 2.0, 3.0, 4.0)
+export fn test_f32x4() -> f32 {
+    f32x4 {
+        x: 1.0,
+        y: 2.0,
+        z: 3.0,
+        w: 4.0,
+    }.z
 }
 
 
@@ -76,21 +81,24 @@ export fn compile_time_fib() -> i32 {
     #fib(8)
 }
 
-// fn f32.sqrt(self) -> f32 {
-//     __builtin_sqrt(self)
-// }
+fn f32.sqrt(self) -> f32 {
+    extern("js", "math", "sqrt") fn js_math_sqrt(value: f32) -> f32
+    js_math_sqrt(self)
+}
 
-// fn f32.cos(self) -> f32 {
-//     __builtin_cos(self)
-// }
+fn f32.cos(self) -> f32 {
+    extern("js", "math", "cos") fn js_math_cos(value: f32) -> f32
+    js_math_cos(self)
+}
 
-// fn f32.sin(self) -> f32 {
-//     __builtin_sin(self)
-// }
+fn f32.sin(self) -> f32 {
+    extern("js", "math", "sin") fn js_math_sin(value: f32) -> f32
+    js_math_sin(self)
+}
 
-// export fn root_2() -> f32 {
-//     #2.0.sqrt()
-// }
+export fn root_2() -> f32 {
+    #2.0.sqrt()
+}
 )";
 
     rain::lang::code::initialize_llvm();

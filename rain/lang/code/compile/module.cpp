@@ -5,13 +5,14 @@ namespace rain::lang::code {
 void compile_module(Context& ctx, ast::Module& module) {
     ast::BuiltinScope& builtin = *module.scope().builtin();
 
+    auto* llvm_f32_type = llvm::Type::getFloatTy(ctx.llvm_context());
+
     ctx.set_llvm_type(builtin.bool_type(), llvm::Type::getInt1Ty(ctx.llvm_context()));
     ctx.set_llvm_type(builtin.i32_type(), llvm::Type::getInt32Ty(ctx.llvm_context()));
     ctx.set_llvm_type(builtin.i64_type(), llvm::Type::getInt64Ty(ctx.llvm_context()));
-    ctx.set_llvm_type(builtin.f32_type(), llvm::Type::getFloatTy(ctx.llvm_context()));
+    ctx.set_llvm_type(builtin.f32_type(), llvm_f32_type);
     ctx.set_llvm_type(builtin.f64_type(), llvm::Type::getDoubleTy(ctx.llvm_context()));
-    ctx.set_llvm_type(builtin.f32x4_type(),
-                      llvm::FixedVectorType::get(llvm::Type::getFloatTy(ctx.llvm_context()), 4));
+    ctx.set_llvm_type(builtin.f32x4_type(), llvm::FixedVectorType::get(llvm_f32_type, 4));
 
     for (auto& type : builtin.owned_types()) {
         compile_type(ctx, *type);

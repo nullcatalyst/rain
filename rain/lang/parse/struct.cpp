@@ -64,9 +64,10 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, a
         });
     FORWARD_ERROR(result);
 
-    lexer.next();  // Consume the '}'
+    const auto rbracket_token = lexer.next();  // Consume the '}'
 
-    return std::make_unique<ast::StructType>(std::move(struct_name), std::move(fields));
+    return std::make_unique<ast::StructType>(std::move(struct_name), std::move(fields),
+                                             struct_token.location.merge(rbracket_token.location));
 }
 
 }  // namespace rain::lang::parse

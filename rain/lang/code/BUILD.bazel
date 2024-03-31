@@ -16,6 +16,7 @@ cc_library(
         "compile/if.cpp",
         "compile/integer.cpp",
         "compile/let.cpp",
+        "compile/member.cpp",
         "compile/module.cpp",
         "compile/parenthesis.cpp",
         "compile/struct_literal.cpp",

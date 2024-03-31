@@ -8,8 +8,14 @@ llvm::Value* compile_extern(Context& ctx, ast::ExternExpression& extern_) {
     llvm::Function* llvm_function = compile_function_declaration(ctx, extern_.declaration());
 
     llvm_function->setLinkage(llvm::Function::ExternalLinkage);
-    llvm_function->addFnAttr(llvm::Attribute::get(llvm_function->getContext(), "wasm-export-name",
-                                                  llvm_function->getName()));
+
+    const auto& keys = extern_.keys();
+    if (keys[0] == "js") {
+        llvm_function->addFnAttr(
+            llvm::Attribute::get(ctx.llvm_context(), "wasm-import-module", keys[1]));
+        llvm_function->addFnAttr(
+            llvm::Attribute::get(ctx.llvm_context(), "wasm-import-name", keys[2]));
+    }
 
     return llvm_function;
 }

@@ -2,34 +2,41 @@
 
 namespace rain::lang::code {
 
-llvm::Value* compile_struct_literal(Context& ctx, ast::StructLiteralExpression& struct_literal) {
-    ast::StructType* struct_type      = struct_literal.struct_type();
-    llvm::Type*      llvm_struct_type = ctx.llvm_type(struct_type);
+llvm::Value* compile_member(Context& ctx, ast::MemberExpression& member) {
+    auto* llvm_owner = compile_any_expression(ctx, member.lhs());
 
-    std::vector<llvm::Value*> field_values;
-    field_values.resize(struct_type.fields().size(), nullptr);
+    auto& struct_type  = static_cast<ast::StructType&>(*member.lhs().type());
+    auto  member_index = struct_type.find_member(member.name()).value();
 
-    // Compile the field values in the order that they are defined.
-    // The values will be assigned to the struct in field order, but compiling them in the order
-    // that they were written in the source code allows calling functions that have order-dependent
-    // side-effects inline in the struct literal.
-    for (const auto& field : struct_literal.fields()) {
-        assert(field.index >= 0 && field.index < field_values.size());
+    auto& llvm_ir = ctx.llvm_builder();
 
-        llvm::Value* field_value  = compile_any_expression(ctx, *field.expression);
-        field_values[field.index] = field_value;
+    auto* llvm_owner_type = ctx.llvm_type(&struct_type);
+    assert(llvm_owner_type != nullptr && "owner type is null");
+
+    // The owner is a vector (think SIMD types like f32x4), so LLVM requires us to "extract the
+    // element" instead of "extracting the value". So handle that here.
+    if (llvm_owner->getType()->isVectorTy()) {
+        return llvm_ir.CreateExtractElement(llvm_owner, member_index);
     }
 
-    for (int i = 0, end = struct_type.fields().size(); i < end.size(); ++i) {
-        if (field_values[i] != nullptr) {
-            // The field value is already defined.
-            return;
-        }
+    if (member.kind() == serial::ExpressionKind::Variable) {
+        auto& identifier = static_cast<const ast::IdentifierExpression&>(member.lhs());
 
-        field_values[i] = llvm::Constant::getNullValue(ctx.llvm_type(struct_type.fields()[i].type));
+        auto* variable = identifier.variable();
+        assert(variable != nullptr && "variable is null");
+
+        // if (variable->mutable_()) {
+        auto* llvm_member_type =
+            ctx.llvm_type(struct_type.fields()[member_index].type.get_nonnull());
+        assert(llvm_member_type != nullptr && "member type is null");
+
+        return llvm_ir.CreateLoad(
+            llvm_member_type,
+            llvm_ir.CreateStructGEP(llvm_owner_type, ctx.llvm_value(variable), member_index));
+        // }
     }
 
-    return llvm::ConstantStruct::get(llvm_struct_type, field_values);
+    return llvm_ir.CreateExtractValue(llvm_owner, static_cast<unsigned int>(member_index));
 }
 
 }  // namespace rain::lang::code
