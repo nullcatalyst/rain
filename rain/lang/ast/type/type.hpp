@@ -3,6 +3,7 @@
 #include <string>
 
 #include "absl/base/nullability.h"
+#include "rain/lang/lex/location.hpp"
 #include "rain/lang/serial/kind.hpp"
 #include "rain/util/result.hpp"
 
@@ -23,6 +24,7 @@ class Type {
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
     [[nodiscard]] virtual std::string      name() const noexcept { return "<error_type>"; }
+    [[nodiscard]] virtual lex::Location    location() const noexcept = 0;
 
     /**
      * Resolve the type to a concrete (and common) type. Fully resolved types can be compared using

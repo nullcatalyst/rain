@@ -9,8 +9,10 @@
 #include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/export.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/extern.hpp"
 #include "rain/lang/ast/expr/float.hpp"
 #include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/function_declaration.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
 #include "rain/lang/ast/expr/integer.hpp"
@@ -42,10 +44,13 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call);
 llvm::Value* compile_compile_time(Context& ctx, ast::CompileTimeExpression& compile_time);
 llvm::Value* compile_parenthesis(Context& ctx, ast::ParenthesisExpression& parenthesis);
 llvm::Value* compile_block(Context& ctx, ast::BlockExpression& block);
+llvm::Function* compile_function_declaration(
+    Context& ctx, ast::FunctionDeclarationExpression& function_declaration);
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function);
 llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
 llvm::Value*    compile_while(Context& ctx, ast::WhileExpression& while_);
 llvm::Value*    compile_export(Context& ctx, ast::ExportExpression& export_);
+llvm::Value*    compile_extern(Context& ctx, ast::ExternExpression& extern_);
 
 // Types
 llvm::Type* compile_type(Context& ctx, ast::Type& type);

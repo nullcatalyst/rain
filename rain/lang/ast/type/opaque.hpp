@@ -17,10 +17,15 @@ class OpaqueType : public Type {
     OpaqueType(std::string_view name) : _name(name) {}
     ~OpaqueType() override = default;
 
+    // Type
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Builtin;
     }
     [[nodiscard]] std::string name() const noexcept override { return std::string(_name); }
+    [[nodiscard]] constexpr lex::Location location() const noexcept override {
+        // Opaque types do not have a location. They are implicitly defined.
+        return lex::Location();
+    }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
 };

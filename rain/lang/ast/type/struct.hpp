@@ -23,10 +23,14 @@ class StructType : public Type {
     /** The set of fields contained in the struct. */
     std::vector<StructField> _fields;
 
-  public:
-    StructType(std::optional<std::string_view> name, std::vector<StructField> fields)
-        : _name(std::move(name)), _fields(std::move(fields)) {}
+    lex::Location _location;
 
+  public:
+    StructType(std::optional<std::string_view> name, std::vector<StructField> fields,
+               lex::Location location)
+        : _name(std::move(name)), _fields(std::move(fields)), _location(location) {}
+
+    // Type
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Struct;
     }
@@ -36,6 +40,9 @@ class StructType : public Type {
         }
         return "<unnamed_struct>";
     }
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+
+    // StructType
     [[nodiscard]] constexpr bool   is_named() const noexcept { return _name.has_value(); }
     [[nodiscard]] std::string_view name_or_empty() const noexcept {
         return _name.value_or(std::string_view());

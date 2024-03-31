@@ -68,13 +68,6 @@ void add_external_functions_to_module(lang::ast::Module& module) {
 
     auto fn_f64__f64 = builtin->get_function_type({f64}, f64);
     assert(fn_f64__f64 != nullptr && "fn (f64) -> f64 function type not found");
-
-    builtin->declare_external_function(std::make_unique<lang::ast::ExternalFunctionVariable>(
-        "__builtin_sqrt", fn_f64__f64, "math", "sqrt"));
-    builtin->declare_external_function(std::make_unique<lang::ast::ExternalFunctionVariable>(
-        "__builtin_cos", fn_f64__f64, "math", "cos"));
-    builtin->declare_external_function(std::make_unique<lang::ast::ExternalFunctionVariable>(
-        "__builtin_sin", fn_f64__f64, "math", "sin"));
 }
 
 }  // namespace rain

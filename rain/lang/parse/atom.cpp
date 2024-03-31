@@ -8,6 +8,67 @@
 
 namespace rain::lang::parse {
 
+namespace {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_standalone_atom(lex::Lexer& lexer,
+                                                                     ast::Scope& scope) {
+    const auto token = lexer.peek();
+    switch (token.kind) {
+        case lex::TokenKind::False: {
+            lexer.next();  // Consume the `false` token
+            return std::make_unique<ast::BooleanExpression>(false, token.location);
+        }
+
+        case lex::TokenKind::True: {
+            lexer.next();  // Consume the `true` token
+            return std::make_unique<ast::BooleanExpression>(true, token.location);
+        }
+
+        case lex::TokenKind::Integer:
+            return parse_integer(lexer, scope);
+
+        case lex::TokenKind::Float:
+            return parse_float(lexer, scope);
+
+        case lex::TokenKind::Identifier:
+            return parse_identifier(lexer, scope);
+
+        case lex::TokenKind::Self: {
+            lexer.next();  // Consume the `self` token
+            return std::make_unique<ast::IdentifierExpression>(token.text(), token.location);
+        }
+
+        case lex::TokenKind::Let:
+            return parse_let(lexer, scope);
+
+        case lex::TokenKind::LRoundBracket:
+            return parse_parenthesis(lexer, scope);
+
+        case lex::TokenKind::LCurlyBracket:
+            return parse_block(lexer, scope);
+
+        case lex::TokenKind::If:
+            return parse_if(lexer, scope);
+
+        case lex::TokenKind::While:
+            return parse_while(lexer, scope);
+
+        case lex::TokenKind::Fn:
+            return parse_function(lexer, scope);
+
+        case lex::TokenKind::Hash:
+            return parse_compile_time(lexer, scope);
+
+        case lex::TokenKind::Extern:
+            return parse_extern(lexer, scope);
+
+        default:
+            return parse_unary_operator(lexer, scope);
+    }
+}
+
+}  // namespace
+
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope) {
     std::unique_ptr<ast::Expression> expression;
 
@@ -15,110 +76,13 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
         const auto state       = lexer.save_state();
         auto       ctor_result = parse_struct_literal(lexer, scope);
         if (ctor_result.has_value()) {
-            return ctor_result;
-        }
-        lexer.restore_state(state);
-    }
+            expression = std::move(ctor_result).value();
+        } else {
+            lexer.restore_state(state);
 
-    const auto token = lexer.peek();
-    switch (token.kind) {
-        case lex::TokenKind::False: {
-            lexer.next();  // Consume the `false` token
-            expression = std::make_unique<ast::BooleanExpression>(false, token.location);
-            break;
-        }
-
-        case lex::TokenKind::True: {
-            lexer.next();  // Consume the `true` token
-            expression = std::make_unique<ast::BooleanExpression>(true, token.location);
-            break;
-        }
-
-        case lex::TokenKind::Integer: {
-            auto result = parse_integer(lexer, scope);
+            auto result = parse_standalone_atom(lexer, scope);
             FORWARD_ERROR(result);
             expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::Float: {
-            auto result = parse_float(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::Identifier: {
-            auto result = parse_identifier(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::Self: {
-            lexer.next();  // Consume the `self` token
-            expression = std::make_unique<ast::IdentifierExpression>(token.text(), token.location);
-            break;
-        }
-
-        case lex::TokenKind::Let: {
-            auto result = parse_let(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::LRoundBracket: {
-            auto result = parse_parenthesis(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::LCurlyBracket: {
-            auto result = parse_block(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::If: {
-            auto result = parse_if(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::While: {
-            auto result = parse_while(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::Fn: {
-            auto result = parse_function(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-        case lex::TokenKind::Hash: {
-            auto result = parse_compile_time(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
-        }
-
-            // case lex::TokenKind::EndOfFile:
-            //     return ERR_PTR(err::SyntaxError, token.location, "unexpected end of
-            //     file");
-
-        default: {
-            auto result = parse_unary_operator(lexer, scope);
-            FORWARD_ERROR(result);
-            expression = std::move(result).value();
-            break;
         }
     }
 

@@ -24,11 +24,11 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
 
         case lex::TokenKind::Identifier:
             lexer.next();  // Consume the identifier token
-            return std::make_unique<ast::UnresolvedType>(token.text());
+            return std::make_unique<ast::UnresolvedType>(token.text(), token.location);
 
         default:
             return ERR_PTR(err::SyntaxError, token.location,
-                           absl::StrCat("unexpected token \"", token.text(), "\""));
+                           absl::StrCat("unexpected token: ", token.text()));
     }
 
     util::unreachable();

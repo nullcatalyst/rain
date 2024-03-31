@@ -15,6 +15,7 @@ enum TokenKind : uint32_t {
     Identifier,
     Integer,
     Float,
+    String,
 
     // Keywords
     True,
@@ -28,6 +29,7 @@ enum TokenKind : uint32_t {
     Break,
     Continue,
     Export,
+    Extern,
     Struct,
     Interface,
     Self,

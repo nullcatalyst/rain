@@ -11,12 +11,12 @@ enum class ExpressionKind {
     False,
     Integer,
     Float,
+    String,
     Variable,
     Tuple,
     StructLiteral,
 
     // Operations
-    Ctor,
     Call,
     CompileTime,
     Member,
@@ -32,6 +32,8 @@ enum class ExpressionKind {
 
     // Declarations
     Export,
+    Extern,
+    FunctionDeclaration,
     Function,
     Method,
     Let,

@@ -20,14 +20,14 @@ class MethodExpression : public FunctionExpression {
 
   public:
     MethodExpression(util::MaybeOwnedPtr<Type> callee_type, std::string_view name,
-                     llvm::SmallVector<absl::Nonnull<Variable*>, 4> arguments,
-                     util::MaybeOwnedPtr<Type> return_type, std::unique_ptr<BlockExpression> block,
-                     bool has_self_argument, lex::Location function_location,
-                     lex::Location name_location)
+                     ArgumentList arguments, util::MaybeOwnedPtr<Type> return_type,
+                     std::unique_ptr<BlockExpression> block, bool has_self_argument,
+                     lex::Location declaration_location, lex::Location callee_type_location)
         : FunctionExpression(name, std::move(arguments), std::move(return_type), std::move(block),
-                             function_location, name_location),
+                             declaration_location),
           _callee_type(std::move(callee_type)),
-          _has_self_argument(has_self_argument) {}
+          _has_self_argument(has_self_argument),
+          _callee_type_location(callee_type_location) {}
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {

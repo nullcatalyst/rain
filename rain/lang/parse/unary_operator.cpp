@@ -32,7 +32,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_unary_operator(lex::Lexer& 
 
     if (op == serial::UnaryOperatorKind::Unknown) {
         return ERR_PTR(err::SyntaxError, op_token.location,
-                       absl::StrCat("unexpected token \"", op_token.text(), "\""));
+                       absl::StrCat("unexpected token: ", op_token.text()));
     }
 
     lexer.next();  // Consume the operator

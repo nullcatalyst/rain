@@ -16,13 +16,14 @@ BuiltinScope::BuiltinScope() {
     _f32_type   = _add_owned_named_type("f32", std::make_unique<OpaqueType>("f32"));
     _f64_type   = _add_owned_named_type("f64", std::make_unique<OpaqueType>("f64"));
     _f32x4_type = _add_owned_named_type(
-        "f32x4",
-        std::make_unique<StructType>("f32x4", std::vector<StructField>{
+        "f32x4", std::make_unique<StructType>("f32x4",
+                                              std::vector<StructField>{
                                                   StructField{.name = "x", .type = _f32_type},
                                                   StructField{.name = "y", .type = _f32_type},
                                                   StructField{.name = "z", .type = _f32_type},
                                                   StructField{.name = "w", .type = _f32_type},
-                                              }));
+                                              },
+                                              lex::Location()));
 
 #include "rain/lang/ast/scope/builtin_methods.inl"
 }

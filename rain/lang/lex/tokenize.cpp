@@ -61,11 +61,12 @@ namespace rain::lang::lex {
 }
 
 [[nodiscard]] TokenKind find_keyword(std::string_view word) {
-    constexpr std::array<std::tuple<std::string_view, TokenKind>, 11> KEYWORDS{
+    constexpr std::array<std::tuple<std::string_view, TokenKind>, 12> KEYWORDS{
         // clang-format off
-        // <keep-sorted>
+        // <keep_sorted>
         std::make_tuple("else", TokenKind::Else),
         std::make_tuple("export", TokenKind::Export),
+        std::make_tuple("extern", TokenKind::Extern),
         std::make_tuple("false", TokenKind::False),
         std::make_tuple("fn", TokenKind::Fn),
         std::make_tuple("if", TokenKind::If),
@@ -75,7 +76,7 @@ namespace rain::lang::lex {
         std::make_tuple("struct", TokenKind::Struct),
         std::make_tuple("true", TokenKind::True),
         std::make_tuple("while", TokenKind::While),
-        // </keep-sorted>
+        // </keep_sorted>
         // clang-format on
     };
 
@@ -289,6 +290,35 @@ namespace rain::lang::lex {
         return std::make_tuple(
             Token{
                 .kind     = TokenKind::Float,
+                .location = Location(state.file_name, state.source, start_it, state.it, start_line,
+                                     start_column),
+            },
+            state);
+    }
+
+    // String (no character escape sequences are resolved here)
+    if (c == '"') {
+        do {
+            // TODO: Don't end the string on escaped double quotes
+            next_char();
+        } while (c != '"' && c != '\0');
+
+        if (c == '"') {
+            next_char();
+
+            return std::make_tuple(
+                Token{
+                    .kind     = TokenKind::String,
+                    .location = Location(state.file_name, state.source, start_it, state.it,
+                                         start_line, start_column),
+                },
+                state);
+        }
+
+        // Error: unterminated string
+        return std::make_tuple(
+            Token{
+                .kind     = TokenKind::Undefined,
                 .location = Location(state.file_name, state.source, start_it, state.it, start_line,
                                      start_column),
             },

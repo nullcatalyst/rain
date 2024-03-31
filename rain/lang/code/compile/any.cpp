@@ -28,8 +28,8 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
             return compile_unary_operator(ctx,
                                           static_cast<ast::UnaryOperatorExpression&>(expression));
 
-            // case serial::ExpressionKind::Member:
-            //     return compile_member(ctx, static_cast<ast::MemberExpression&>(expression));
+        case serial::ExpressionKind::Member:
+            return compile_member(ctx, static_cast<ast::MemberExpression&>(expression));
 
         case serial::ExpressionKind::Call:
             return compile_call(ctx, static_cast<ast::CallExpression&>(expression));
@@ -51,6 +51,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
 
         case serial::ExpressionKind::Export:
             return compile_export(ctx, static_cast<ast::ExportExpression&>(expression));
+
+        case serial::ExpressionKind::Extern:
+            return compile_extern(ctx, static_cast<ast::ExternExpression&>(expression));
 
         default:
             util::console_error("failed to compile expression: unknown expression kind: ",

@@ -12,8 +12,10 @@
 #include "rain/lang/ast/expr/call.hpp"
 #include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/extern.hpp"
 #include "rain/lang/ast/expr/float.hpp"
 #include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/function_declaration.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
 #include "rain/lang/ast/expr/integer.hpp"
@@ -67,11 +69,15 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex:
                                                                             ast::Scope& scope);
 util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(lex::Lexer& lexer,
-                                                                         ast::Scope& scope);
-util::Result<std::unique_ptr<ast::IfExpression>>    parse_if(lex::Lexer& lexer, ast::Scope& scope);
-util::Result<std::unique_ptr<ast::WhileExpression>> parse_while(lex::Lexer& lexer,
-                                                                ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
+    lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
+                                                                      ast::Scope& scope);
+util::Result<std::unique_ptr<ast::IfExpression>>     parse_if(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::WhileExpression>>  parse_while(lex::Lexer& lexer,
+                                                                 ast::Scope& scope);
+util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& lexer,
+                                                                  ast::Scope& scope);
 
 // Types
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);

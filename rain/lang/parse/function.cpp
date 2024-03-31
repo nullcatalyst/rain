@@ -45,9 +45,9 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         }
     }
 
-    std::optional<std::string_view> fn_name;
-    lex::Location                   fn_name_location;
-    auto                            next_token = lexer.next();
+    std::string_view fn_name;
+    lex::Location    fn_name_location;
+    auto             next_token = lexer.next();
     if (next_token.kind == lex::TokenKind::Identifier) {
         fn_name          = next_token.text();
         fn_name_location = next_token.location;
@@ -66,8 +66,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     auto& body_scope = body->scope();
 
     // Check if the method takes a 'self' argument.
-    bool                                                has_self_argument = false;
-    llvm::SmallVector<absl::Nonnull<ast::Variable*>, 4> arguments;
+    bool              has_self_argument = false;
+    ast::ArgumentList arguments;
     if (callee_type != nullptr) {
         if (auto self_token = lexer.peek(); self_token.kind == lex::TokenKind::Self) {
             lexer.next();  // Consume the 'self' token
@@ -120,8 +120,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         });
     FORWARD_ERROR(result);
 
-    // lex::Location rparen_location = lexer.next().location;  // Consume the ')'
-    lexer.next();  // Consume the ')'
+    const auto rparen_location = lexer.next().location;  // Consume the ')'
 
     util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
     next_token                                 = lexer.peek();
@@ -154,14 +153,18 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     lex::Location rbracket_location = lexer.next().location;  // Consume the '}'
     body->set_location(lbracket_token.location.merge(rbracket_location));
 
+    const auto declaration_location = return_type != nullptr
+                                          ? function_token.location.merge(return_type->location())
+                                          : function_token.location.merge(rparen_location);
+
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(
-            std::move(callee_type), fn_name.value(), std::move(arguments), std::move(return_type),
-            std::move(body), has_self_argument, function_token.location, fn_name_location);
+            std::move(callee_type), fn_name, std::move(arguments), std::move(return_type),
+            std::move(body), has_self_argument, declaration_location, callee_type->location());
     }
     return std::make_unique<ast::FunctionExpression>(std::move(fn_name), std::move(arguments),
                                                      std::move(return_type), std::move(body),
-                                                     function_token.location, fn_name_location);
+                                                     declaration_location);
 }
 
 }  // namespace rain::lang::parse
