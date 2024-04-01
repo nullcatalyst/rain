@@ -64,6 +64,14 @@ class Scope {
     [[nodiscard]] virtual absl::Nonnull<ModuleScope*>  module() const noexcept  = 0;
     [[nodiscard]] virtual absl::Nonnull<BuiltinScope*> builtin() const noexcept = 0;
 
+    [[nodiscard]] constexpr absl::flat_hash_set<std::unique_ptr<Type>>& owned_types() noexcept {
+        return _owned_types;
+    }
+    [[nodiscard]] constexpr absl::flat_hash_set<std::unique_ptr<Variable>>&
+    owned_variables() noexcept {
+        return _owned_variables;
+    }
+
     [[nodiscard]] virtual absl::Nonnull<FunctionType*> get_function_type(
         const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept = 0;
 

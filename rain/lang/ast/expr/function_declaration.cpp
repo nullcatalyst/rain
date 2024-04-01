@@ -23,7 +23,7 @@ util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options&
     }
 
     if (_return_type != nullptr) {
-        auto return_type = _return_type->resolve(scope);
+        auto return_type = _return_type->resolve(options, scope);
         FORWARD_ERROR(return_type);
 
         _return_type = std::move(return_type).value();

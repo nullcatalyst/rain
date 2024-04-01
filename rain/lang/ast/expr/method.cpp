@@ -3,7 +3,7 @@
 namespace rain::lang::ast {
 
 util::Result<void> MethodExpression::validate(Options& options, Scope& scope) {
-    auto callee_type = _callee_type->resolve(scope);
+    auto callee_type = _callee_type->resolve(options, scope);
     FORWARD_ERROR(callee_type);
     // NOTE: Don't replace the `_callee_type` here YET. Wait until AFTER the arguments are
     // validated, because the self argument, if there is one, points to the original type.

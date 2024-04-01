@@ -47,6 +47,21 @@ export fn test_f32x4() -> f32 {
     }.z
 }
 
+struct Mat4 {
+    x: f32x4,
+    y: f32x4,
+    z: f32x4,
+    w: f32x4,
+}
+
+export fn Mat4_zero() -> Mat4 {
+    Mat4 {
+        x: f32x4.zero(),
+        y: f32x4.zero(),
+        z: f32x4.zero(),
+        w: f32x4.zero(),
+    }
+}
 
 // The last expression in a function is implicitly returned.
 fn four() -> i32 {

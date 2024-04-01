@@ -28,7 +28,8 @@ class MetaType : public Type {
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

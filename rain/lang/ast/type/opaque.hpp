@@ -27,7 +27,8 @@ class OpaqueType : public Type {
         return lex::Location();
     }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

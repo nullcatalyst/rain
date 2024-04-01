@@ -2,6 +2,8 @@
 
 namespace rain::lang::ast {
 
-util::Result<absl::Nonnull<Type*>> MetaType::resolve(Scope& scope) { return this; }
+util::Result<absl::Nonnull<Type*>> MetaType::resolve(Options& options, Scope& scope) {
+    return this;
+}
 
 }  // namespace rain::lang::ast

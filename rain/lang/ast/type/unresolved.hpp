@@ -31,7 +31,8 @@ class UnresolvedType : public Type {
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

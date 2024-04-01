@@ -4,6 +4,7 @@
 
 #include "absl/base/nullability.h"
 #include "rain/lang/lex/location.hpp"
+#include "rain/lang/options.hpp"
 #include "rain/lang/serial/kind.hpp"
 #include "rain/util/result.hpp"
 
@@ -33,7 +34,8 @@ class Type {
      * The instance used to call this method is no longer valid after calling this method. If the
      * instance was being stored, then it should be replaced with the returned value.
      */
-    [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) = 0;
+    [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                                     Scope&   scope) = 0;
 };
 
 }  // namespace rain::lang::ast

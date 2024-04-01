@@ -6,7 +6,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Scope& scope) {
+util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Options& options, Scope& scope) {
     auto resolved_type = scope.find_type(_name);
     if (resolved_type == nullptr) {
         // TODO: Add a location to the error

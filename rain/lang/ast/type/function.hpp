@@ -37,7 +37,8 @@ class FunctionType : public Type {
 
     [[nodiscard]] absl::Nullable<Type*> return_type() const noexcept { return _return_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Scope& scope) override;
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast
