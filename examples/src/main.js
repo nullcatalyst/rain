@@ -48,7 +48,7 @@ async function main() {
                         startColumn: column,
                         endLineNumber: line,
                         endColumn: lastNonSpace,
-                        message: `<span color="red">${message}</span>`,
+                        message: message,
                         severity: monaco.MarkerSeverity.Error,
                     },
                 ]
