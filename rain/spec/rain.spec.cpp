@@ -54,7 +54,7 @@ struct Mat4 {
     w: f32x4,
 }
 
-export fn Mat4_zero() -> Mat4 {
+export fn Mat4.zero() -> Mat4 {
     Mat4 {
         x: f32x4.zero(),
         y: f32x4.zero(),
