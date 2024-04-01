@@ -43,7 +43,8 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
 
             case EVENT_ERROR: {
                 const text = decodeText(rainc.memory, dataStart, dataEnd);
-                console.error("%cError:", CONSOLE_ERROR_STYLE, text);
+                console.error("%cError:", CONSOLE_ERROR_STYLE);
+                console.error(text);
                 onError(text);
                 break;
             }

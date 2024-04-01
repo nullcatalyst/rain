@@ -23,8 +23,7 @@ export async function loadEditor() {
             const editor = monaco.editor.create(document.getElementById('editor'), {
                 model: rain,
                 automaticLayout: true,
-                overviewRulerLanes: 0,
-                overviewRulerBorder: false,
+                wordWrap: 'on',
                 theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
                     ? 'vs-dark'
                     : 'vs',

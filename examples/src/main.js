@@ -18,11 +18,11 @@ async function main() {
             const fileName = parts[0];
             const line = Number(parts[1]);
             const column = Number(parts[2]);
-            const message = parts.slice(3).join(":");
+            const message = parts.slice(3).join(":").trim();
             return [fileName, line, column, message];
         };
 
-        if (text.startsWith("<unknown>:")) {
+        if (text.indexOf("<unknown>:") >= 0) {
             const lines = text.split("\n");
             const [_fileName, line, column, message] = parseErrorMsg(lines[0]);
 
@@ -38,6 +38,7 @@ async function main() {
                 }
             }
 
+            debugger;
             monaco.editor.setModelMarkers(
                 rain,
                 "compilation",
@@ -47,7 +48,7 @@ async function main() {
                         startColumn: column,
                         endLineNumber: line,
                         endColumn: lastNonSpace,
-                        message: message,
+                        message: `<span color="red">${message}</span>`,
                         severity: monaco.MarkerSeverity.Error,
                     },
                 ]

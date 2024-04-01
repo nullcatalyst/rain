@@ -2,6 +2,8 @@
 <html>
 
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>demo</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
@@ -19,9 +21,18 @@ fn i32.double(self) -> i32 {
     2 * self
 }
 
+// The self argument can be omitted to create a static method on the type.
+fn i32.zero() -> i32 {
+    0
+}
+
 // Example use of custom method on a primitive type.
-fn double_double() -> i32 {
+fn i32_methods() -> i32 {
+    // Instance method.
     4.double().double()
+
+    // Type method.
+    i32.zero()
 }
 
 // The `extern` keyword is used to define an external functions that will be
@@ -115,7 +126,7 @@ export fn compile_time_fib() -> i32 {
 // `constexpr` or `consteval`.
 export fn sqrt_2() -> f64 {
     #2.0.sqrt()
-}    
+}
 </script>
   <div class="editor-container">
     <div class="editor-tab-list">
