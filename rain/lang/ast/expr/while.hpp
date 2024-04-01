@@ -58,7 +58,7 @@ class WhileExpression : public Expression {
     [[nodiscard]] constexpr const BlockExpression& else_() const noexcept { return *_else.value(); }
     [[nodiscard]] constexpr BlockExpression&       else_() noexcept { return *_else.value(); }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

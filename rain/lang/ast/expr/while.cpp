@@ -12,17 +12,17 @@ bool WhileExpression::compile_time_capable() const noexcept {
            (!_else.has_value() || _else.value()->compile_time_capable());
 }
 
-util::Result<void> WhileExpression::validate(Scope& scope) {
+util::Result<void> WhileExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _condition->validate(scope);
+        auto result = _condition->validate(options, scope);
         FORWARD_ERROR(result);
     }
     {
-        auto result = _loop->validate(scope);
+        auto result = _loop->validate(options, scope);
         FORWARD_ERROR(result);
     }
     if (_else.has_value()) {
-        auto result = _else.value()->validate(scope);
+        auto result = _else.value()->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

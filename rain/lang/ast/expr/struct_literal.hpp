@@ -49,7 +49,7 @@ class StructLiteralExpression : public Expression {
     }
     [[nodiscard]] constexpr std::vector<StructLiteralField>& fields() { return _fields; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

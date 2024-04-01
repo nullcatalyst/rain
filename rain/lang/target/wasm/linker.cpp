@@ -1,4 +1,4 @@
-#include "rain/lang/code/target/wasm/linker.hpp"
+#include "rain/lang/target/wasm/linker.hpp"
 
 #include "lld/Common/CommonLinkerContext.h"
 #include "lld/Common/Memory.h"
@@ -11,7 +11,7 @@
 #include "rain/lang/err/simple.hpp"
 #include "rain/util/defer.hpp"
 
-namespace rain::lang::code::wasm {
+namespace rain::lang::wasm {
 
 using namespace lld;
 using namespace lld::wasm;
@@ -455,4 +455,4 @@ util::Result<void> Linker::add(llvm::Module&        llvm_module,
     return {};
 }
 
-}  // namespace rain::lang::code::wasm
+}  // namespace rain::lang::wasm

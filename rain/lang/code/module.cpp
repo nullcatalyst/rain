@@ -17,7 +17,6 @@
 // #include "llvm/Transforms/Vectorize/LoopVectorize.h"
 // #include "llvm/Transforms/Vectorize/SLPVectorizer.h"
 // #include "llvm/Transforms/Vectorize/VectorCombine.h"
-#include "rain/lang/code/target/wasm/target.hpp"
 
 namespace rain::lang::code {
 
@@ -52,12 +51,10 @@ std::unique_ptr<llvm::TargetMachine> clone_target_machine(
 
 }  // namespace
 
-Module::Module() : Module(wasm::target_machine()) {}
-
-Module::Module(std::unique_ptr<llvm::TargetMachine> llvm_target_machine)
+Module::Module(Options& options)
     : _llvm_ctx(std::make_unique<llvm::LLVMContext>()),
-      _llvm_target_machine(std::move(llvm_target_machine)) {
-    assert(_llvm_target_machine);
+      _llvm_target_machine(options.create_target_machine()) {
+    assert(_llvm_target_machine != nullptr && "failed to create target machine");
 
     auto llvm_module = std::make_unique<llvm::Module>("rain", *_llvm_ctx);
     llvm_module->setDataLayout(_llvm_target_machine->createDataLayout());
@@ -65,7 +62,7 @@ Module::Module(std::unique_ptr<llvm::TargetMachine> llvm_target_machine)
 
     _llvm_module = llvm_module.get();
     _llvm_engine =
-        create_interpreter(std::move(llvm_module), clone_target_machine(*_llvm_target_machine));
+        options.create_engine(std::move(llvm_module), clone_target_machine(*_llvm_target_machine));
 }
 
 void Module::optimize() {

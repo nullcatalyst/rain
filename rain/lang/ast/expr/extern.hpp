@@ -16,6 +16,8 @@ class ExternExpression : public Expression {
     llvm::SmallVector<std::string, 3>              _keys;
     std::unique_ptr<FunctionDeclarationExpression> _declaration;
 
+    bool _compile_time_capable = false;
+
     lex::Location _location;
 
   public:
@@ -33,7 +35,9 @@ class ExternExpression : public Expression {
         return _declaration->type();
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool                    compile_time_capable() const noexcept override;
+    [[nodiscard]] constexpr bool          compile_time_capable() const noexcept override {
+        return _compile_time_capable;
+    }
 
     // ExternExpression
     [[nodiscard]] constexpr const llvm::SmallVector<std::string, 3>& keys() const { return _keys; }
@@ -42,7 +46,7 @@ class ExternExpression : public Expression {
     }
     [[nodiscard]] constexpr FunctionDeclarationExpression& declaration() { return *_declaration; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

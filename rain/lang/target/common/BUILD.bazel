@@ -1,0 +1,17 @@
+cc_library(
+    name = "interpreter",
+    srcs = [
+        "interpreter.cpp",
+    ],
+    hdrs = [
+        "interpreter.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/util",
+        "@abseil-cpp//absl/strings",
+        "@llvm-project//llvm:Interpreter",
+    ],
+)

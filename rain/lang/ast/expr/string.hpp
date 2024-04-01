@@ -31,7 +31,7 @@ class StringExpression : public Expression {
     // StringExpression
     [[nodiscard]] constexpr std::string_view value() const noexcept { return _value; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

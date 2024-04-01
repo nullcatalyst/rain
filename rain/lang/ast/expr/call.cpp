@@ -20,7 +20,7 @@ bool CallExpression::compile_time_capable() const noexcept {
     }
 }
 
-util::Result<void> CallExpression::validate(Scope& scope) {
+util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
     const auto validate_arguments =
         [&](absl::Nullable<Type*> callee_type) -> util::Result<Scope::TypeList> {
         Scope::TypeList argument_types;
@@ -32,7 +32,7 @@ util::Result<void> CallExpression::validate(Scope& scope) {
         }
 
         for (auto& argument : _arguments) {
-            auto result = argument->validate(scope);
+            auto result = argument->validate(options, scope);
             FORWARD_ERROR(result);
 
             argument_types.push_back(argument->type());
@@ -45,7 +45,7 @@ util::Result<void> CallExpression::validate(Scope& scope) {
     switch (_callee->kind()) {
         case serial::ExpressionKind::Member: {
             auto& member = *reinterpret_cast<MemberExpression*>(_callee.get());
-            auto  result = member.lhs().validate(scope);
+            auto  result = member.lhs().validate(options, scope);
             FORWARD_ERROR(result);
 
             auto* callee_type = member.lhs().type();
@@ -104,7 +104,7 @@ util::Result<void> CallExpression::validate(Scope& scope) {
         }
 
         default: {
-            auto result = _callee->validate(scope);
+            auto result = _callee->validate(options, scope);
             FORWARD_ERROR(result);
 
             auto* callee_type = _callee->type();

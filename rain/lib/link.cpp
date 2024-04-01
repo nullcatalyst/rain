@@ -3,8 +3,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
-#include "rain/lang/code/target/wasm/linker.hpp"
 #include "rain/lang/err/simple.hpp"
+#include "rain/lang/target/wasm/linker.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain {
@@ -31,28 +31,22 @@ class LlvmBuffer : public Buffer {
 }  // namespace
 
 util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module) {
-#if defined(RAIN_TARGET_WASM)
-    lang::code::wasm::Linker linker;
+    // TODO: Support more targets.
+    lang::wasm::Linker linker;
     linker.add(module.llvm_module(), module.llvm_target_machine());
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());
-#else
-#error "Unsupported target"
-#endif
 }
 
 util::Result<std::unique_ptr<Buffer>> link(llvm::Module&        llvm_module,
                                            llvm::TargetMachine& llvm_target_machine) {
-#if defined(RAIN_TARGET_WASM)
-    lang::code::wasm::Linker linker;
+    // TODO: Support more targets.
+    lang::wasm::Linker linker;
     linker.add(llvm_module, llvm_target_machine);
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());
-#else
-#error "Unsupported target"
-#endif
 }
 
 util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir,

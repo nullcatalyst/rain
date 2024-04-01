@@ -9,7 +9,6 @@ cc_library(
     deps = [
         ":lib_compile",
         ":lib_decompile",
-        ":lib_extras",
         ":lib_link",
     ],
 )
@@ -30,6 +29,7 @@ cc_library(
     ],
     deps = [
         "//rain/lang",
+        "//rain/lang/target/wasm",
         "//rain/util",
     ],
 )
@@ -59,16 +59,6 @@ cc_library(
         "//rain/lang/err",
         "//rain/util",
         "@wabt",
-    ],
-)
-
-cc_library(
-    name = "lib_extras",
-    srcs = ["lib/compile_time_functions.cpp"],
-    hdrs = ["lib/compile_time_functions.hpp"],
-    deps = [
-        "//rain/lang",
-        "//rain/util",
     ],
 )
 

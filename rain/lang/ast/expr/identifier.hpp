@@ -40,7 +40,7 @@ class IdentifierExpression : public Expression {
         return _variable;
     }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

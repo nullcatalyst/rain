@@ -1,0 +1,30 @@
+cc_library(
+    name = "wasm",
+    srcs = [
+        "init.cpp",
+        "linker.cpp",
+        "options.cpp",
+        "writer.cpp",
+    ],
+    hdrs = [
+        "init.hpp",
+        "linker.hpp",
+        "options.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "//rain/lang:options",
+        "//rain/lang/code:context",
+        "//rain/lang/target/common:interpreter",
+        "//rain/util",
+        "@llvm-project//lld:Common",
+        "@llvm-project//lld:Wasm",
+        "@llvm-project//llvm:Core",
+        "@llvm-project//llvm:Linker",
+        "@llvm-project//llvm:WebAssemblyAsmParser",
+        "@llvm-project//llvm:WebAssemblyCodeGen",
+        "@llvm-project//llvm:WebAssemblyInfo",
+    ],
+)

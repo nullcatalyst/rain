@@ -31,7 +31,7 @@ class BlockVariable : public Variable {
     }
     [[nodiscard]] bool mutable_() const noexcept override { return _mutable; }
 
-    [[nodiscard]] util::Result<void> validate(Scope& scope) noexcept override;
+    [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };
 
 }  // namespace rain::lang::ast

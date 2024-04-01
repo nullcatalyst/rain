@@ -6,11 +6,11 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> MemberExpression::validate(Scope& scope) {
+util::Result<void> MemberExpression::validate(Options& options, Scope& scope) {
     assert(_lhs != nullptr && "lhs is null");
 
     {
-        auto result = _lhs->validate(scope);
+        auto result = _lhs->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

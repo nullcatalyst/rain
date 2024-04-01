@@ -36,6 +36,7 @@ cc_library(
         "//rain:__subpackages__",
     ],
     deps = [
+        "//rain/lang:options",
         "//rain/lang/err",
         "//rain/lang/serial",
         "//rain/util",

@@ -82,10 +82,10 @@ class FunctionDeclarationExpression : public Expression {
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 
   protected:
-    util::Result<void> _validate_declaration(Scope& scope);
+    util::Result<void> _validate_declaration(Options& options, Scope& scope);
 };
 
 }  // namespace rain::lang::ast

@@ -7,7 +7,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> IdentifierExpression::validate(Scope& scope) {
+util::Result<void> IdentifierExpression::validate(Options& options, Scope& scope) {
     _variable = scope.find_variable(_name);
     if (_variable == nullptr) {
         return ERR_PTR(err::SyntaxError, _location,

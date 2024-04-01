@@ -4,7 +4,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> BooleanExpression::validate(Scope& scope) {
+util::Result<void> BooleanExpression::validate(Options& options, Scope& scope) {
     _type = scope.builtin()->bool_type();
     return {};
 }

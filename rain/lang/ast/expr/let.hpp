@@ -51,7 +51,7 @@ class LetExpression : public Expression {
         return _variable_location;
     }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

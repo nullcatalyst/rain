@@ -47,13 +47,13 @@ bool BinaryOperatorExpression::compile_time_capable() const noexcept {
     return _lhs->compile_time_capable() && _rhs->compile_time_capable();
 }
 
-util::Result<void> BinaryOperatorExpression::validate(Scope& scope) {
+util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _lhs->validate(scope);
+        auto result = _lhs->validate(options, scope);
         FORWARD_ERROR(result);
     }
     {
-        auto result = _rhs->validate(scope);
+        auto result = _rhs->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

@@ -8,8 +8,8 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> ParenthesisExpression::validate(Scope& scope) {
-    return _expression->validate(scope);
+util::Result<void> ParenthesisExpression::validate(Options& options, Scope& scope) {
+    return _expression->validate(options, scope);
 }
 
 }  // namespace rain::lang::ast

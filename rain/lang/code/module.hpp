@@ -7,6 +7,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Target/TargetMachine.h"
+#include "rain/lang/options.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::code {
@@ -18,8 +19,7 @@ class Module {
     std::unique_ptr<llvm::ExecutionEngine> _llvm_engine;
 
   public:
-    Module();
-    Module(std::unique_ptr<llvm::TargetMachine> llvm_target_machine);
+    Module(Options& options);
 
     Module(const Module&)            = delete;
     Module& operator=(const Module&) = delete;

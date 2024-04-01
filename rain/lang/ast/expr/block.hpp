@@ -44,7 +44,7 @@ class BlockExpression : public Expression {
     void set_location(const lex::Location location) noexcept { _location = location; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override;
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

@@ -23,6 +23,29 @@ cc_library(
         "compile/type.cpp",
         "compile/unary_operator.cpp",
         "compile/while.cpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        ":context",
+        "//rain/lang:options",
+        "//rain/lang/ast",
+        "//rain/lang/target/wasm",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@llvm-project//llvm:CodeGen",
+        "@llvm-project//llvm:ExecutionEngine",
+        "@llvm-project//llvm:Interpreter",
+        "@llvm-project//llvm:MC",
+        "@llvm-project//llvm:common_transforms",
+    ],
+)
+
+cc_library(
+    name = "context",
+    srcs = [
         "context.cpp",
         "module.cpp",
     ],
@@ -34,14 +57,13 @@ cc_library(
         "//rain:__subpackages__",
     ],
     deps = [
+        "//rain/lang:options",
         "//rain/lang/ast",
-        "//rain/lang/code/target:wasm",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@llvm-project//llvm:CodeGen",
         "@llvm-project//llvm:ExecutionEngine",
-        "@llvm-project//llvm:Interpreter",
         "@llvm-project//llvm:MC",
         "@llvm-project//llvm:common_transforms",
     ],

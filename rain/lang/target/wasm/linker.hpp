@@ -9,7 +9,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "rain/util/result.hpp"
 
-namespace rain::lang::code::wasm {
+namespace rain::lang::wasm {
 
 /**
  * This is mostly a copy of the implementation of the lld LinkerDriver class.
@@ -38,4 +38,4 @@ class Linker {
     [[nodiscard]] util::Result<std::unique_ptr<llvm::MemoryBuffer>> link();
 };
 
-}  // namespace rain::lang::code::wasm
+}  // namespace rain::lang::wasm

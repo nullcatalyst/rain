@@ -4,10 +4,28 @@ cc_library(
         "//rain:__subpackages__",
     ],
     deps = [
+        ":options",
         "//rain/lang/ast",
         "//rain/lang/code",
         "//rain/lang/lex",
         "//rain/lang/parse",
         "//rain/lang/serial",
+    ],
+)
+
+cc_library(
+    name = "options",
+    srcs = [
+        "options.cpp",
+    ],
+    hdrs = [
+        "options.hpp",
+    ],
+    visibility = [
+        "//rain:__subpackages__",
+    ],
+    deps = [
+        "@llvm-project//llvm:CodeGen",
+        "@llvm-project//llvm:ExecutionEngine",
     ],
 )

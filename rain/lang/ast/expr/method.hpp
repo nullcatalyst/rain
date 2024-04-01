@@ -50,7 +50,7 @@ class MethodExpression : public FunctionExpression {
         return _callee_type_location;
     }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

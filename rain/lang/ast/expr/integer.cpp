@@ -4,7 +4,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> IntegerExpression::validate(Scope& scope) {
+util::Result<void> IntegerExpression::validate(Options& options, Scope& scope) {
     _type = scope.builtin()->i32_type();
     return {};
 }

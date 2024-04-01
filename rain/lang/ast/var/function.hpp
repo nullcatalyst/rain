@@ -35,7 +35,7 @@ class FunctionVariable : public Variable {
         return nullptr;
     }
 
-    [[nodiscard]] util::Result<void> validate(Scope& scope) noexcept override;
+    [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };
 
 }  // namespace rain::lang::ast

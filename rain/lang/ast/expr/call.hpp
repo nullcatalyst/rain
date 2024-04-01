@@ -46,7 +46,7 @@ class CallExpression : public Expression {
         return _arguments_location;
     }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

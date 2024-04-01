@@ -2,7 +2,8 @@
 
 namespace rain::lang::ast {
 
-[[nodiscard]] util::Result<void> FunctionVariable::validate(Scope& scope) noexcept {
+[[nodiscard]] util::Result<void> FunctionVariable::validate(Options& options,
+                                                            Scope&   scope) noexcept {
     auto resolved_type = _function_type->resolve(scope);
     FORWARD_ERROR(resolved_type);
 

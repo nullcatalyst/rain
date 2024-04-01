@@ -8,6 +8,7 @@
 
 <body>
   <script id="source-code" type="x-application/rain">// The last expression in a function is implicitly returned.
+// (Proper return statements are planned).
 fn four() -> i32 {
     4
 }
@@ -23,15 +24,33 @@ fn double_double() -> i32 {
     4.double().double()
 }
 
-// These 3 `__builtin_*` functions are currently automatically defined by the
-// compiler -- at least until a way to define imports is added. They are
-// WebAssembly imports from JavaScript.
-//
-// If you export a function that uses any of these, you can see the import in
-// the generated `*.wat` code.
-fn f64.sqrt(self) -> f64 { __builtin_sqrt(self) }
-fn f64.cos(self) -> f64 { __builtin_cos(self) }
-fn f64.sin(self) -> f64 { __builtin_sin(self) }
+// The `extern` keyword is used to define an external functions that will be
+// imported from JavaScript to make them usable in WebAssembly.
+fn f32.sqrt(self) -> f32 {
+    // They are scoped, so declaring them inside a wrapper function like this,
+    // means that the raw import cannot be used outside of this function's
+    // scope.
+    //
+    // The first argument is "js", as ideally, this could be "c" or "c++" in the
+    // future to have the correct name mangling when compiling native binaries.
+    // The second and third arguments are the module and function names (see the
+    // compiled WASM text output and check the imports).
+    extern("js", "math", "sqrt") fn js_math_sqrt(value: f32) -> f32
+
+    js_math_sqrt(self)
+}
+
+fn f32.cos(self) -> f32 {
+    extern("js", "math", "cos") fn js_math_cos(value: f32) -> f32
+
+    js_math_cos(self)
+}
+
+fn f32.sin(self) -> f32 {
+    extern("js", "math", "sin") fn js_math_sin(value: f32) -> f32
+
+    js_math_sin(self)
+}
 
 // Only exported functions are exported from WASM so they can be called from
 // JavaScript. This is useful to optimize away unused code.
@@ -39,16 +58,28 @@ export fn fib_recursion(n: i32) -> i32 {
     if n < 2 {
         1
     } else {
-      fib_recursion(n - 1) + fib_recursion(n - 2)
+        fib_recursion(n - 1) + fib_recursion(n - 2)
     }
 }
 
 export fn fib_iteration(n: i32) -> i32 {
+    // I haven't decided how constant vs mutable variables should be declared,
+    // should they be like
+    // - Rust:          let mut var_name = ...;
+    //                  let constant_name = ...;
+    // - JavaScript:    let var_name = ...;
+    //                  const constant_name = ...;
+    // - Swift:         var var_name = ...;
+    //                  let constant_name = ...;
+    //
+    // So, for now, `let <var_name> = <expression>` declares a mutable variable
+    // to make them usable.
     let a = 0
     let b = 1
 
     // Function arguments are immutable by default. But a variable can be
-    // redeclared with the same name, similar to how this can be done in Rust.
+    // redeclared with the same name, shadowing the previous declaration,
+    // similar to how this can be done in Rust.
     let n = n
 
     while n > 0 {
@@ -57,9 +88,12 @@ export fn fib_iteration(n: i32) -> i32 {
         b = tmp + b
         n = n - 1
     }
+
     a
 }
 
+// THIS is probably my FAVOURITE feature!!!
+//
 // Putting a `#` before any expression causes the expression to be evaluated at
 // compile-time.
 //
@@ -81,7 +115,7 @@ export fn compile_time_fib() -> i32 {
 // `constexpr` or `consteval`.
 export fn sqrt_2() -> f64 {
     #2.0.sqrt()
-}
+}    
 </script>
   <div class="editor-container">
     <div class="editor-tab-list">

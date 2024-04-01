@@ -8,9 +8,9 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> LetExpression::validate(Scope& scope) {
+util::Result<void> LetExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _value->validate(scope);
+        auto result = _value->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

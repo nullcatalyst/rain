@@ -9,9 +9,9 @@ bool BlockExpression::compile_time_capable() const noexcept {
                        [](const auto& expression) { return expression->compile_time_capable(); });
 }
 
-util::Result<void> BlockExpression::validate(Scope& scope) {
+util::Result<void> BlockExpression::validate(Options& options, Scope& scope) {
     for (auto& expr : _expressions) {
-        auto result = expr->validate(_scope);
+        auto result = expr->validate(options, _scope);
         FORWARD_ERROR(result);
     }
 

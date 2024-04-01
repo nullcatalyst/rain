@@ -6,6 +6,7 @@
 #include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/scope/module.hpp"
 #include "rain/lang/ast/type/function.hpp"
+#include "rain/lang/options.hpp"
 
 namespace rain::lang::ast {
 
@@ -30,7 +31,7 @@ class Module {
         _expressions.push_back(std::move(expression));
     }
 
-    util::Result<void> validate();
+    util::Result<void> validate(Options& options);
 };
 
 }  // namespace rain::lang::ast

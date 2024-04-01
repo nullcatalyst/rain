@@ -12,17 +12,17 @@ bool IfExpression::compile_time_capable() const noexcept {
            (!_else.has_value() || _else.value()->compile_time_capable());
 }
 
-util::Result<void> IfExpression::validate(Scope& scope) {
+util::Result<void> IfExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _condition->validate(scope);
+        auto result = _condition->validate(options, scope);
         FORWARD_ERROR(result);
     }
     {
-        auto result = _then->validate(scope);
+        auto result = _then->validate(options, scope);
         FORWARD_ERROR(result);
     }
     if (_else.has_value()) {
-        auto result = _else.value()->validate(scope);
+        auto result = _else.value()->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

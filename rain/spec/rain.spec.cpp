@@ -2,9 +2,11 @@
 #include <string_view>
 
 #include "gtest/gtest.h"
-//
-#include "rain/lang/code/target/default.hpp"
-#include "rain/lib/compile_time_functions.hpp"
+
+// This must be included after gtest.h because the util::Result class checks if gtest was included
+// in order to add additional functionality.
+#include "rain/lang/target/wasm/init.hpp"
+#include "rain/lang/target/wasm/options.hpp"
 #include "rain/rain.hpp"
 
 TEST(Lang, struct) {
@@ -101,10 +103,9 @@ export fn root_2() -> f32 {
 }
 )";
 
-    rain::lang::code::initialize_llvm();
-    rain::load_external_functions_into_llvm_interpreter();
+    rain::lang::wasm::initialize_llvm();
 
-    auto module_result = rain::compile(code, rain::add_external_functions_to_module);
+    auto module_result = rain::compile(code);
     ASSERT_TRUE(check_success(module_result));
     auto mod = std::move(module_result).value();
 

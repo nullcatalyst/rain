@@ -5,7 +5,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> ExportExpression::validate(Scope& scope) {
+util::Result<void> ExportExpression::validate(Options& options, Scope& scope) {
     if (_expression->kind() == serial::ExpressionKind::Method) {
         return ERR_PTR(err::SyntaxError, _expression->location(),
                        "methods cannot (currently) be exported");
@@ -15,7 +15,7 @@ util::Result<void> ExportExpression::validate(Scope& scope) {
         return ERR_PTR(err::SyntaxError, _expression->location(), "only functions can be exported");
     }
 
-    return _expression->validate(scope);
+    return _expression->validate(options, scope);
 }
 
 }  // namespace rain::lang::ast

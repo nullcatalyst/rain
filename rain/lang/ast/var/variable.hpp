@@ -5,6 +5,7 @@
 
 #include "absl/base/nullability.h"
 #include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/options.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::ast {
@@ -20,7 +21,7 @@ class Variable {
     [[nodiscard]] virtual absl::Nonnull<Type*> type() const noexcept = 0;
     [[nodiscard]] virtual bool                 mutable_() const noexcept { return false; }
 
-    [[nodiscard]] virtual util::Result<void> validate(Scope& scope) noexcept = 0;
+    [[nodiscard]] virtual util::Result<void> validate(Options& options, Scope& scope) noexcept = 0;
 };
 
 }  // namespace rain::lang::ast

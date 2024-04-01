@@ -34,7 +34,7 @@ class TypeExpression : public Expression {
         return _declare_type;
     }
 
-    util::Result<void> validate(Scope& scope) override { return {}; }
+    util::Result<void> validate(Options& options, Scope& scope) override { return {}; }
 };
 
 }  // namespace rain::lang::ast

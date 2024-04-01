@@ -5,8 +5,8 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> CompileTimeExpression::validate(Scope& scope) {
-    return _expression->validate(scope);
+util::Result<void> CompileTimeExpression::validate(Options& options, Scope& scope) {
+    return _expression->validate(options, scope);
 }
 
 }  // namespace rain::lang::ast

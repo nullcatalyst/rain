@@ -6,6 +6,7 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/lex/location.hpp"
+#include "rain/lang/options.hpp"
 #include "rain/lang/serial/kind.hpp"
 #include "rain/util/result.hpp"
 
@@ -23,7 +24,7 @@ class Expression {
     [[nodiscard]] virtual bool compile_time_capable() const noexcept { return false; }
     [[nodiscard]] virtual bool is_assignable() const noexcept { return false; }
 
-    [[nodiscard]] virtual util::Result<void> validate(Scope& scope) = 0;
+    [[nodiscard]] virtual util::Result<void> validate(Options& options, Scope& scope) = 0;
 };
 
 }  // namespace rain::lang::ast

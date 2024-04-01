@@ -1935,7 +1935,7 @@ void Writer::createHeader() {
 
 } // namespace wasm::lld
 
-namespace rain::lang::code::wasm {
+namespace rain::lang::wasm {
 
 std::unique_ptr<llvm::MemoryBuffer> writeResult() {
     std::unique_ptr<llvm::MemoryBuffer> out_buffer;
@@ -1943,5 +1943,5 @@ std::unique_ptr<llvm::MemoryBuffer> writeResult() {
     return out_buffer;
 }
 
-} // namespace rain::lang::code::wasm
+} // namespace rain::lang::wasm
 // </change>

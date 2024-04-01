@@ -37,7 +37,7 @@ class CompileTimeExpression : public Expression {
         }
         return _expression->compile_time_capable();
     }
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

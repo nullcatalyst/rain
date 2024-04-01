@@ -25,9 +25,9 @@ std::optional<std::string_view> get_operator_method_name(serial::UnaryOperatorKi
 
 }  // namespace
 
-util::Result<void> UnaryOperatorExpression::validate(Scope& scope) {
+util::Result<void> UnaryOperatorExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _expression->validate(scope);
+        auto result = _expression->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

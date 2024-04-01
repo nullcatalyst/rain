@@ -57,7 +57,7 @@ class FunctionExpression : public FunctionDeclarationExpression {
     [[nodiscard]] absl::Nonnull<BlockExpression*>   block() const noexcept { return _block.get(); }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

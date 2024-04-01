@@ -3,9 +3,9 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> FunctionDeclarationExpression::validate(Scope& scope) {
+util::Result<void> FunctionDeclarationExpression::validate(Options& options, Scope& scope) {
     {
-        auto result = _validate_declaration(scope);
+        auto result = _validate_declaration(options, scope);
         FORWARD_ERROR(result);
     }
 
@@ -15,9 +15,10 @@ util::Result<void> FunctionDeclarationExpression::validate(Scope& scope) {
     return {};
 }
 
-util::Result<void> FunctionDeclarationExpression::_validate_declaration(Scope& scope) {
+util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options& options,
+                                                                        Scope&   scope) {
     for (auto& argument : _arguments) {
-        auto result = argument->validate(scope);
+        auto result = argument->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

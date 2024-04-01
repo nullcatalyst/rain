@@ -4,7 +4,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> FloatExpression::validate(Scope& scope) {
+util::Result<void> FloatExpression::validate(Options& options, Scope& scope) {
     _type = scope.builtin()->f32_type();
     return {};
 }

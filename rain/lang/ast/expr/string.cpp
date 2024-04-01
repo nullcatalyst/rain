@@ -5,7 +5,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> StringExpression::validate(Scope& scope) {
+util::Result<void> StringExpression::validate(Options& options, Scope& scope) {
     return ERR_PTR(err::SyntaxError, _location, "string expressions are not yet supported");
 }
 

@@ -9,7 +9,7 @@ export function registerRainLanguage(monaco) {
                 root: [
                     // Keywords
                     [/\b(await|break|continue|else|for|if|loop|return|while)\b/, 'keyword'],
-                    [/\b(export|fn|import|interface|let|struct|var|self)\b/, 'keyword'],
+                    [/\b(export|extern|fn|import|interface|let|struct|var|self)\b/, 'keyword'],
                     // Comments
                     [/\/\/.*$/, 'comment'],
                     // Strings

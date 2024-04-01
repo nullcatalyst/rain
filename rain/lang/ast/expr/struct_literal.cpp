@@ -8,7 +8,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> StructLiteralExpression::validate(Scope& scope) {
+util::Result<void> StructLiteralExpression::validate(Options& options, Scope& scope) {
     auto type = _type->resolve(scope);
     FORWARD_ERROR(type);
     _type = std::move(type).value();
@@ -36,7 +36,7 @@ util::Result<void> StructLiteralExpression::validate(Scope& scope) {
                                         "\" has no field named \"", field.name, "\""));
         }
 
-        auto result = field.value->validate(scope);
+        auto result = field.value->validate(options, scope);
         FORWARD_ERROR(result);
     }
 

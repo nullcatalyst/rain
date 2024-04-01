@@ -28,7 +28,7 @@ class BooleanExpression : public Expression {
     [[nodiscard]] constexpr bool value() const noexcept { return _value; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

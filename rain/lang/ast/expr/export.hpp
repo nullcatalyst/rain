@@ -29,7 +29,7 @@ class ExportExpression : public Expression {
     [[nodiscard]] constexpr const ast::Expression& expression() const { return *_expression; }
     [[nodiscard]] constexpr ast::Expression&       expression() { return *_expression; }
 
-    util::Result<void> validate(Scope& scope) override;
+    util::Result<void> validate(Options& options, Scope& scope) override;
 };
 
 }  // namespace rain::lang::ast

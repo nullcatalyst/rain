@@ -1,0 +1,35 @@
+# cc_library(
+#     name = "arm",
+#     srcs = ["arm.cpp"],
+#     hdrs = [
+#         "arm.hpp",
+#     ],
+#     defines = ["RAIN_TARGET_ARM=1"],
+#     visibility = ["//rain:__subpackages__"],
+#     deps = [
+#         "//rain/util",
+#         # "@llvm-project//lld:Common",
+#         # "@llvm-project//llvm:Linker",
+#         "@llvm-project//llvm:AArch64AsmParser",
+#         "@llvm-project//llvm:AArch64CodeGen",
+#         "@llvm-project//llvm:AArch64Info",
+#     ],
+# )
+
+# cc_library(
+#     name = "x86",
+#     srcs = ["x86.cpp"],
+#     hdrs = [
+#         "x86.hpp",
+#     ],
+#     defines = ["RAIN_TARGET_X86=1"],
+#     visibility = ["//rain:__subpackages__"],
+#     deps = [
+#         "//rain/util",
+#         # "@llvm-project//lld:Common",
+#         # "@llvm-project//llvm:Linker",
+#         "@llvm-project//llvm:X86AsmParser",
+#         "@llvm-project//llvm:X86CodeGen",
+#         "@llvm-project//llvm:X86Info",
+#     ],
+# )
