@@ -14,6 +14,9 @@ namespace rain::lang::ast {
 struct StructField {
     std::string_view          name;
     util::MaybeOwnedPtr<Type> type;
+
+    StructField(std::string_view name, util::MaybeOwnedPtr<Type> type)
+        : name(name), type(std::move(type)) {}
 };
 
 class StructType : public Type {

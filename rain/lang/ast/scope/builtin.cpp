@@ -16,14 +16,19 @@ BuiltinScope::BuiltinScope() {
     _f32_type   = _add_owned_named_type("f32", std::make_unique<OpaqueType>("f32"));
     _f64_type   = _add_owned_named_type("f64", std::make_unique<OpaqueType>("f64"));
     _f32x4_type = _add_owned_named_type(
-        "f32x4", std::make_unique<StructType>("f32x4",
-                                              std::vector<StructField>{
-                                                  StructField{.name = "x", .type = _f32_type},
-                                                  StructField{.name = "y", .type = _f32_type},
-                                                  StructField{.name = "z", .type = _f32_type},
-                                                  StructField{.name = "w", .type = _f32_type},
-                                              },
-                                              lex::Location()));
+        "f32x4", std::make_unique<StructType>(
+                     "f32x4",
+                     [_f32_type = this->_f32_type]() -> std::vector<StructField> {
+                         // std::initializer_list of move-only types is not allowed (for some unknown reason).
+                         std::vector<StructField> fields;
+                         fields.reserve(4);
+                         fields.emplace_back("x", _f32_type);
+                         fields.emplace_back("y", _f32_type);
+                         fields.emplace_back("z", _f32_type);
+                         fields.emplace_back("w", _f32_type);
+                         return fields;
+                     }(),
+                     lex::Location()));
 
 #include "rain/lang/ast/scope/builtin_methods.inl"
 }

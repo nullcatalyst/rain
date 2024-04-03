@@ -27,38 +27,16 @@ class MaybeOwnedPtr {
     MaybeOwnedPtr() : _type(State::None) {}
     ~MaybeOwnedPtr() { _reset(); }
 
-    MaybeOwnedPtr(const MaybeOwnedPtr& other) {
-        switch (other._type) {
-            case State::None:
-                _type = State::None;
-                break;
-            case State::Ptr:
-                _type = State::Ptr;
-                _ptr  = other._ptr;
-                break;
-            case State::OwnedPtr:
-                _type = State::Ptr;
-                _ptr  = other.get();
-                break;
-        }
-    }
-    MaybeOwnedPtr& operator=(const MaybeOwnedPtr& other) {
-        _reset();
-
-        switch (other._type) {
-            case State::None:
-                _type = State::None;
-                break;
-            case State::Ptr:
-                _type = State::Ptr;
-                _ptr  = other._ptr;
-                break;
-            case State::OwnedPtr:
-                _type = State::Ptr;
-                _ptr  = other.get();
-                break;
-        }
-    }
+    // Copying is not allowed.
+    //
+    // This is because we don't know if the pointer is owned or not, and we don't want to make a
+    // copy of the owned pointer, then accidentally free the original (owned version) when there
+    // still exists an unowned copy referring to the same object.
+    //
+    // So unfortunately, this means that you as the developer have to stop and think about if you
+    // want to make a copy, instead of accidentally doing it.
+    MaybeOwnedPtr(const MaybeOwnedPtr& other)            = delete;
+    MaybeOwnedPtr& operator=(const MaybeOwnedPtr& other) = delete;
 
     MaybeOwnedPtr(MaybeOwnedPtr&& other) {
         switch (other._type) {
@@ -177,6 +155,8 @@ class MaybeOwnedPtr {
                 return _owned_ptr.get();
         }
     }
+
+    [[nodiscard]] constexpr bool is_owned() const { return _type == State::OwnedPtr; }
 
   private:
     void _reset() {
