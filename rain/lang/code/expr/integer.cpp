@@ -1,4 +1,7 @@
-#include "rain/lang/code/expr/all.hpp"
+#include "rain/lang/ast/expr/integer.hpp"
+
+#include "llvm/IR/Constants.h"
+#include "rain/lang/code/context.hpp"
 
 namespace rain::lang::code {
 
