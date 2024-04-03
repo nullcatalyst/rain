@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rain/lang/code/context.hpp"
+#include "rain/lang/code/expr/any.hpp"
 
 // Expressions
 #include "rain/lang/ast/expr/array_literal.hpp"
@@ -31,8 +32,6 @@ namespace rain::lang::code {
 void compile_module(Context& ctx, ast::Module& module);
 
 // Expressions
-llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression);
-
 llvm::Value* compile_integer(Context& ctx, ast::IntegerExpression& integer);
 llvm::Value* compile_float(Context& ctx, ast::FloatExpression& float_);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);
@@ -53,8 +52,5 @@ llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
 llvm::Value*    compile_while(Context& ctx, ast::WhileExpression& while_);
 llvm::Value*    compile_export(Context& ctx, ast::ExportExpression& export_);
 llvm::Value*    compile_extern(Context& ctx, ast::ExternExpression& extern_);
-
-// Types
-llvm::Type* compile_type(Context& ctx, ast::Type& type);
 
 }  // namespace rain::lang::code

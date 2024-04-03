@@ -1,4 +1,5 @@
-#include "rain/lang/code/compile/all.hpp"
+#include "rain/lang/code/expr/all.hpp"
+#include "rain/lang/code/type/all.hpp"
 
 namespace rain::lang::code {
 

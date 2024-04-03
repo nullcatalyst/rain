@@ -1,5 +1,5 @@
 #include "rain/lang/ast/expr/method.hpp"
-#include "rain/lang/code/compile/all.hpp"
+#include "rain/lang/code/expr/all.hpp"
 
 namespace rain::lang::code {
 

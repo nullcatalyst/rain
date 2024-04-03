@@ -1,5 +1,5 @@
 #include "llvm/ExecutionEngine/GenericValue.h"
-#include "rain/lang/code/compile/all.hpp"
+#include "rain/lang/code/expr/all.hpp"
 #include "rain/util/defer.hpp"
 
 namespace rain::lang::code {

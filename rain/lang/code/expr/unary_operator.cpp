@@ -1,4 +1,7 @@
-#include "rain/lang/code/compile/all.hpp"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/IR/Value.h"
+#include "rain/lang/code/context.hpp"
+#include "rain/lang/code/expr/all.hpp"
 
 namespace rain::lang::code {
 

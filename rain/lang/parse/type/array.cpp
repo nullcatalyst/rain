@@ -31,11 +31,13 @@ util::Result<std::unique_ptr<ast::ArrayType>> parse_array_type(lex::Lexer& lexer
         return ERR_PTR(err::SyntaxError, rsquare_token.location, "expected ']' after array length");
     }
 
-    auto element_type = parse_any_type(lexer, scope);
-    FORWARD_ERROR(element_type);
+    auto element_type_result = parse_any_type(lexer, scope);
+    FORWARD_ERROR(element_type_result);
+    auto element_type = std::move(element_type_result).value();
 
-    return std::make_unique<ast::ArrayType>(std::move(element_type).value(),
-                                            std::move(length).value());
+    auto location = lsquare_token.location.merge(element_type->location());
+    return std::make_unique<ast::ArrayType>(std::move(element_type), std::move(length).value(),
+                                            location);
 }
 
 }  // namespace rain::lang::parse
