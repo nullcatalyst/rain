@@ -95,7 +95,7 @@ class OptionalType : public Type {
     ~OptionalType() override = default;
 
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
-        return serial::TypeKind::Array;
+        return serial::TypeKind::Optional;
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             name() const noexcept override;

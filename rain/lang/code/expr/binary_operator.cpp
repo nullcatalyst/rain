@@ -1,4 +1,7 @@
-#include "rain/lang/code/expr/all.hpp"
+#include "rain/lang/ast/expr/binary_operator.hpp"
+
+#include "rain/lang/ast/expr/identifier.hpp"
+#include "rain/lang/code/expr/any.hpp"
 
 namespace rain::lang::code {
 
@@ -27,7 +30,7 @@ llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression
         compile_any_expression(ctx, binary_operator.lhs()),
         compile_any_expression(ctx, binary_operator.rhs()),
     };
-    return method->build_call(ctx.llvm_builder(), llvm_values);
+    return method->build_call(ctx, llvm_values);
 }
 
 }  // namespace rain::lang::code

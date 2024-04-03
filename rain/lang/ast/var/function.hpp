@@ -9,6 +9,12 @@
 #include "rain/lang/ast/var/variable.hpp"
 #include "rain/util/maybe_owned_ptr.hpp"
 
+namespace rain::lang::code {
+
+class Context;
+
+}  // namespace rain::lang::code
+
 namespace rain::lang::ast {
 
 class FunctionVariable : public Variable {
@@ -30,10 +36,7 @@ class FunctionVariable : public Variable {
     }
 
     [[nodiscard]] virtual llvm::Value* build_call(
-        llvm::IRBuilder<>&                        builder,
-        const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept {
-        return nullptr;
-    }
+        code::Context& ctx, const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept;
 
     [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };

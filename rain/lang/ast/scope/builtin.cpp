@@ -6,6 +6,7 @@
 #include "rain/lang/ast/type/struct.hpp"
 #include "rain/lang/ast/var/builtin_function.hpp"
 #include "rain/lang/ast/var/function.hpp"
+#include "rain/lang/code/context.hpp"
 
 namespace rain::lang::ast {
 
@@ -19,7 +20,8 @@ BuiltinScope::BuiltinScope() {
         "f32x4", std::make_unique<StructType>(
                      "f32x4",
                      [_f32_type = this->_f32_type]() -> std::vector<StructField> {
-                         // std::initializer_list of move-only types is not allowed (for some unknown reason).
+                         // std::initializer_list of move-only types is not allowed (for some
+                         // unknown reason).
                          std::vector<StructField> fields;
                          fields.reserve(4);
                          fields.emplace_back("x", _f32_type);

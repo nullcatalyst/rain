@@ -12,7 +12,7 @@ llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& 
         compile_any_expression(ctx, unary_operator.expression()),
     };
 
-    return method->build_call(ctx.llvm_builder(), llvm_values);
+    return method->build_call(ctx, llvm_values);
 }
 
 }  // namespace rain::lang::code

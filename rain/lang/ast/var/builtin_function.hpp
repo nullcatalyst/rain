@@ -10,7 +10,7 @@ namespace rain::lang::ast {
 template <typename BuildFn>
 class BuiltinFunctionVariable : public FunctionVariable {
     // This is a lambda function that has the following signature:
-    // llvm::Value* (*)(llvm::IRBuilder&, const llvm::SmallVector<llvm::Value*, 4>&)
+    // llvm::Value* (*)(code::Context&, const llvm::SmallVector<llvm::Value*, 4>&)
     BuildFn _build_fn;
 
   public:
@@ -19,9 +19,9 @@ class BuiltinFunctionVariable : public FunctionVariable {
     ~BuiltinFunctionVariable() override = default;
 
     [[nodiscard]] llvm::Value* build_call(
-        llvm::IRBuilder<>&                        builder,
+        code::Context&                            ctx,
         const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept override {
-        return _build_fn(builder, arguments);
+        return _build_fn(ctx, arguments);
     }
 };
 
