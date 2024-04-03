@@ -14,6 +14,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Variable:
             return compile_identifier(ctx, static_cast<ast::IdentifierExpression&>(expression));
 
+        case serial::ExpressionKind::Null:
+            return nullptr;
+
         case serial::ExpressionKind::StructLiteral:
             return compile_struct_literal(ctx,
                                           static_cast<ast::StructLiteralExpression&>(expression));

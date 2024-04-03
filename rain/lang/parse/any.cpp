@@ -25,6 +25,9 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
         case lex::TokenKind::LSquareBracket:
             return parse_array_type(lexer, scope);
 
+        case lex::TokenKind::Question:
+            return parse_optional_type(lexer, scope);
+
         case lex::TokenKind::Identifier:
             lexer.next();  // Consume the identifier token
             return std::make_unique<ast::UnresolvedType>(token.text(), token.location);

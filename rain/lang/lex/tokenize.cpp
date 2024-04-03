@@ -61,7 +61,7 @@ namespace rain::lang::lex {
 }
 
 [[nodiscard]] TokenKind find_keyword(std::string_view word) {
-    constexpr std::array<std::tuple<std::string_view, TokenKind>, 12> KEYWORDS{
+    constexpr std::array<std::tuple<std::string_view, TokenKind>, 13> KEYWORDS{
         // clang-format off
         // <keep_sorted>
         std::make_tuple("else", TokenKind::Else),
@@ -71,6 +71,7 @@ namespace rain::lang::lex {
         std::make_tuple("fn", TokenKind::Fn),
         std::make_tuple("if", TokenKind::If),
         std::make_tuple("let", TokenKind::Let),
+        std::make_tuple("null", TokenKind::Null),
         std::make_tuple("return", TokenKind::Return),
         std::make_tuple("self", TokenKind::Self),
         std::make_tuple("struct", TokenKind::Struct),
@@ -100,6 +101,7 @@ namespace rain::lang::lex {
         operators[','] = TokenKind::Comma;
         operators[':'] = TokenKind::Colon;
         operators[';'] = TokenKind::Semicolon;
+        operators['?'] = TokenKind::Question;
 
         operators['@'] = TokenKind::At;
         operators['!'] = TokenKind::Exclaim;
@@ -194,6 +196,7 @@ namespace rain::lang::lex {
         lengths[TokenKind::Comma]     = 1;
         lengths[TokenKind::Colon]     = 1;
         lengths[TokenKind::Semicolon] = 1;
+        lengths[TokenKind::Question]  = 1;
 
         lengths[TokenKind::At]        = 1;
         lengths[TokenKind::Exclaim]   = 1;

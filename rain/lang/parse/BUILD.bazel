@@ -21,6 +21,7 @@ cc_library(
         "parenthesis.cpp",
         "struct_literal.cpp",
         "type/array.cpp",
+        "type/optional.cpp",
         "type/struct.cpp",
         "unary_operator.cpp",
         "util/int_value.hpp",

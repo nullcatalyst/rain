@@ -64,6 +64,10 @@ absl::Nonnull<Type*> Scope::_unwrap_type(absl::Nonnull<Type*> type) {
                 type = &static_cast<ArrayType&>(*type).type();
                 break;
 
+            case serial::TypeKind::Optional:
+                type = &static_cast<OptionalType&>(*type).type();
+                break;
+
             default:
                 return type;
         }

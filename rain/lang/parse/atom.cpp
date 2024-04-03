@@ -1,5 +1,6 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/null.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
@@ -36,6 +37,11 @@ util::Result<std::unique_ptr<ast::Expression>> parse_standalone_atom(lex::Lexer&
         case lex::TokenKind::Self: {
             lexer.next();  // Consume the `self` token
             return std::make_unique<ast::IdentifierExpression>(token.text(), token.location);
+        }
+
+        case lex::TokenKind::Null: {
+            lexer.next();  // Consume the `null` token
+            return std::make_unique<ast::NullExpression>(token.location);
         }
 
         case lex::TokenKind::Let:

@@ -84,6 +84,8 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
 
 util::Result<std::unique_ptr<ast::ArrayType>>  parse_array_type(lex::Lexer& lexer,
                                                                 ast::Scope& scope);
+util::Result<std::unique_ptr<ast::OptionalType>>  parse_optional_type(lex::Lexer& lexer,
+                                                                   ast::Scope& scope);
 util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lexer,
                                                                  ast::Scope& scope);
 

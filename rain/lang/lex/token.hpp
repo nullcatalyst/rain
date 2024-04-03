@@ -33,6 +33,7 @@ enum TokenKind : uint32_t {
     Struct,
     Interface,
     Self,
+    Null,
     Fn,
     Let,
 
@@ -43,6 +44,7 @@ enum TokenKind : uint32_t {
     Colon,
     Semicolon,
     RArrow,
+    Question,
 
     At,
     Exclaim,

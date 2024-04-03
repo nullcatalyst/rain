@@ -36,6 +36,9 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
         case serial::TypeKind::Array:
             return compile_array_type(ctx, static_cast<ast::ArrayType&>(type));
 
+        case serial::TypeKind::Optional:
+            return compile_optional_type(ctx, static_cast<ast::OptionalType&>(type));
+
         case serial::TypeKind::Meta:
             return nullptr;
 
