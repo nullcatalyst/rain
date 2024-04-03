@@ -35,7 +35,7 @@ void console_error(Args&&... args) {
 }
 
 template <typename... Args>
-void panic(Args&&... args) {
+[[noreturn]] void panic(Args&&... args) {
     const auto msg = absl::StrCat(std::forward<Args>(args)...);
     _console_error_impl(msg.data(), msg.data() + msg.size());
     std::abort();

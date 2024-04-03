@@ -3,8 +3,8 @@ cc_library(
     hdrs = [
         "assert.hpp",
         "colors.hpp",
+        "console.hpp",
         "defer.hpp",
-        "log.hpp",
         "maybe_owned_ptr.hpp",
         "result.hpp",
         "string.hpp",
