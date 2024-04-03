@@ -26,6 +26,7 @@ def cc_binary(name, deps = [], **kwargs):
         deps = deps + [
             "@wasm_toolchain//c",
             "@wasm_toolchain//c++",
+            "@wasm_toolchain//c/dlmalloc",
         ],
         **kwargs
     )

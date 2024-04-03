@@ -1,9 +1,5 @@
 cc_library(
     name = "util",
-    srcs = [
-        "snprintf.c",
-        "sprintf.c",
-    ],
     hdrs = [
         "assert.hpp",
         "colors.hpp",
