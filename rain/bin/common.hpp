@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 #include "rain/util/wasm.hpp"
 
 namespace rain {

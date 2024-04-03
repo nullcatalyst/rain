@@ -5,7 +5,7 @@
 #include "absl/strings/str_cat.h"
 #include "rain/util/assert.hpp"
 #include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 
 namespace rain::lang::lex {
 
@@ -57,9 +57,7 @@ struct Location {
             if (file_name.data() != other.file_name.data() &&
                 file_name.size() != other.file_name.size() &&
                 source.data() != other.source.data() && source.size() != other.source.size()) {
-                util::console_error(ANSI_RED, "cannot merge locations from different sources",
-                                    ANSI_RESET);
-                std::abort();
+                util::panic(ANSI_RED, "cannot merge locations from different sources", ANSI_RESET);
             }
         }
 

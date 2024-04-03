@@ -16,8 +16,7 @@ llvm::Type* get_or_compile_type(Context& ctx, ast::Type& type) {
         return llvm_type;
     }
 
-    util::console_error("failed to compile type: ", type.name());
-    std::abort();
+    util::panic("failed to compile type: ", type.name());
 }
 
 void compile_supplemental_types(Context& ctx, ast::Type& type, llvm::Type* llvm_type) {
@@ -90,8 +89,7 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
             return nullptr;
 
         default:
-            util::console_error("unimplemented: compile type ", type.kind());
-            std::abort();
+            util::panic("unimplemented: compile type ", type.kind());
     }
 }
 

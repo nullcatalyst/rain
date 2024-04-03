@@ -40,18 +40,16 @@ absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
         }
         if (return_type != nullptr) {
             if (!_owned_types.contains(_unwrap_type(return_type))) {
-                util::console_error("builtin scope does not own return type");
-                std::abort();
+                util::panic("builtin scope does not own return type");
             }
         }
     }
 
     auto type = Scope::_get_function_type(argument_types, return_type);
     if (type == nullptr) {
-        util::console_error(
+        util::panic(
             "failed to find function type: cannot create a function type with types not found in "
             "scope at any level (this should never happen)");
-        std::abort();
     }
     return type;
 }

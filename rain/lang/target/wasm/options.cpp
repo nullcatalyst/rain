@@ -12,19 +12,18 @@
 #include "rain/lang/code/context.hpp"
 #include "rain/lang/target/common/interpreter.hpp"
 #include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 
 namespace rain::lang::wasm {
 
 namespace {
 
-#define ASSERT_ARGUMENT_COUNT(name, expected_argument_count, got_argument_count)            \
-    if (llvm_arguments.size() != expected_argument_count) {                                 \
-        rain::util::console_error(ANSI_RED, "bad builtin function call: \"", name,          \
-                                  "\": ", ANSI_RESET, "expected ", expected_argument_count, \
-                                  " argument", (expected_argument_count == 1 ? "" : "s"),   \
-                                  ", got ", got_argument_count);                            \
-        std::abort();                                                                       \
+#define ASSERT_ARGUMENT_COUNT(name, expected_argument_count, got_argument_count)               \
+    if (llvm_arguments.size() != expected_argument_count) {                                    \
+        rain::util::panic(ANSI_RED, "bad builtin function call: \"", name, "\": ", ANSI_RESET, \
+                          "expected ", expected_argument_count, " argument",                   \
+                          (expected_argument_count == 1 ? "" : "s"), ", got ",                 \
+                          got_argument_count);                                                 \
     }
 
 llvm::GenericValue lle_X_atan2(llvm::FunctionType*                llvm_function_type,
@@ -131,8 +130,7 @@ std::unique_ptr<llvm::TargetMachine> Options::create_target_machine() {
     std::string         target_triple = llvm::Triple::normalize("wasm32-unknown-unknown");
     const llvm::Target* target        = llvm::TargetRegistry::lookupTarget(target_triple, error);
     if (target == nullptr) {
-        util::console_error(ANSI_RED, "failed to lookup target: ", ANSI_RESET, error);
-        std::abort();
+        util::panic(ANSI_RED, "failed to lookup target: ", ANSI_RESET, error);
     }
 
     std::string cpu;

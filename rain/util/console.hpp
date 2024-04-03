@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+
 #include "absl/strings/str_cat.h"
 
 #if defined(__wasm__)
@@ -32,9 +34,16 @@ void console_error(Args&&... args) {
     _console_error_impl(msg.data(), msg.data() + msg.size());
 }
 
+template <typename... Args>
+void panic(Args&&... args) {
+    const auto msg = absl::StrCat(std::forward<Args>(args)...);
+    _console_error_impl(msg.data(), msg.data() + msg.size());
+    std::abort();
+}
+
 }  // namespace rain::util
 
-#else
+#else  // defined(__wasm__)
 
 #include <iostream>
 
@@ -50,6 +59,12 @@ void console_error(Args&&... args) {
     std::cerr << absl::StrCat(std::forward<Args>(args)...) << '\n';
 }
 
+template <typename... Args>
+[[noreturn]] void panic(Args&&... args) {
+    std::cerr << absl::StrCat(std::forward<Args>(args)...) << '\n';
+    std::abort();
+}
+
 }  // namespace rain::util
 
-#endif
+#endif  // !defined(__wasm__)

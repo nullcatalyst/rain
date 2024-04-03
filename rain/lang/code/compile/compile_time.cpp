@@ -30,8 +30,7 @@ llvm::Constant* create_constant_from_generic_value(llvm::Type*               llv
         }
 
         default:
-            util::console_error("unsupported generic value type in constant expression");
-            std::abort();
+            util::panic("unsupported generic value type in constant expression");
     }
 }
 

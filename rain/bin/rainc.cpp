@@ -1,6 +1,7 @@
 #include "rain/bin/common.hpp"
 #include "rain/lang/target/wasm/options.hpp"
 #include "rain/rain.hpp"
+#include "rain/util/console.hpp"
 
 WASM_EXPORT("init")
 void initialize() {
@@ -89,10 +90,9 @@ int main(const int argc, const char* const argv[]) {
 
     initialize();
 
-#define ABORT_ON_ERROR(result, msg)                                 \
-    if (!result.has_value()) {                                      \
-        std::cout << msg << result.error()->message() << std::endl; \
-        std::abort();                                               \
+#define ABORT_ON_ERROR(result, msg)                        \
+    if (!result.has_value()) {                             \
+        rain::util::panic(msg, result.error()->message()); \
     }
 
     auto compile_result = rain::compile(source);

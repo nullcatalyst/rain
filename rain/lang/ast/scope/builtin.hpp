@@ -9,7 +9,7 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/ast/var/external_function.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 
 namespace rain::lang::ast {
 
@@ -31,10 +31,9 @@ class BuiltinScope : public Scope {
 
     [[nodiscard]] absl::Nullable<Scope*>      parent() const noexcept override { return nullptr; }
     [[nodiscard]] absl::Nonnull<ModuleScope*> module() const noexcept override {
-        util::console_error(
+        util::panic(
             "the builtin scope is not part of any module, and is instead shared between many "
             "modules");
-        std::abort();
     }
     [[nodiscard]] absl::Nonnull<BuiltinScope*> builtin() const noexcept override {
         return const_cast<BuiltinScope*>(this);
@@ -56,24 +55,18 @@ class BuiltinScope : public Scope {
 
     absl::Nonnull<Type*> add_type(const std::string_view name,
                                   std::unique_ptr<Type>  type) noexcept override {
-        util::console_error(
-            "the builtin scope is immutable and cannot have custom types added to it");
-        std::abort();
+        util::panic("the builtin scope is immutable and cannot have custom types added to it");
     }
 
     absl::Nonnull<FunctionVariable*> add_function(
         absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
         const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override {
-        util::console_error(
-            "the builtin scope is immutable and cannot have custom functions added to it");
-        std::abort();
+        util::panic("the builtin scope is immutable and cannot have custom functions added to it");
     }
 
     absl::Nonnull<Variable*> add_variable(const std::string_view    name,
                                           std::unique_ptr<Variable> variable) noexcept override {
-        util::console_error(
-            "the builtin scope is immutable and cannot have custom variables added to it");
-        std::abort();
+        util::panic("the builtin scope is immutable and cannot have custom variables added to it");
     }
 
     void declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable);

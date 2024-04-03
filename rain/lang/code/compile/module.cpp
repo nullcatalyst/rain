@@ -54,10 +54,8 @@ void compile_module(Context& ctx, ast::Module& module) {
                 break;
 
             default:
-                util::console_error(
-                    "failed to compile top-level expression: unknown expression kind: ",
-                    static_cast<int>(expression->kind()));
-                std::abort();
+                util::panic("failed to compile top-level expression: unknown expression kind: ",
+                            static_cast<int>(expression->kind()));
         }
     }
 }

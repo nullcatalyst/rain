@@ -1,4 +1,5 @@
 #include "rain/lang/code/compile/all.hpp"
+#include "rain/util/console.hpp"
 
 namespace rain::lang::code {
 
@@ -60,9 +61,8 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
             return compile_extern(ctx, static_cast<ast::ExternExpression&>(expression));
 
         default:
-            util::console_error("failed to compile expression: unknown expression kind: ",
-                                static_cast<int>(expression.kind()));
-            std::abort();
+            util::panic("failed to compile expression: unknown expression kind: ",
+                        static_cast<int>(expression.kind()));
     }
 
     return nullptr;

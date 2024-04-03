@@ -5,7 +5,7 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "rain/util/assert.hpp"
 #include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 
 namespace llvm {
 
@@ -31,8 +31,7 @@ std::unique_ptr<llvm::ExecutionEngine> create_interpreter(
     IF_DEBUG {
         // This should never happen, but just in case.
         if (engine == nullptr) {
-            util::console_error(ANSI_RED, "failed to create interpreter: ", ANSI_RESET, error);
-            std::abort();
+            util::panic(ANSI_RED, "failed to create interpreter: ", ANSI_RESET, error);
         }
     }
     return std::unique_ptr<llvm::ExecutionEngine>(engine);

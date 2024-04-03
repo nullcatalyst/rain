@@ -5,7 +5,7 @@
 #include "rain/lang/ast/type/meta.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/err/syntax.hpp"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 
 namespace rain::lang::ast {
 

@@ -37,10 +37,9 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
                 const auto arguments = get_arguments(self_value);
                 return ir.CreateCall(llvm_function_type, llvm_function, arguments);
             } else {
-                util::console_error(
+                util::panic(
                     "failed to compile function call: internal error: unknown number of expected "
                     "arguments");
-                std::abort();
             }
         }
 

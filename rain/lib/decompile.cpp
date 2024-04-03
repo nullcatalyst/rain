@@ -6,7 +6,6 @@
 
 #include "rain/lang/err/simple.hpp"
 #include "rain/util/colors.hpp"
-#include "rain/util/log.hpp"
 #include "rain/util/result.hpp"
 #include "wabt/apply-names.h"
 #include "wabt/binary-reader-ir.h"

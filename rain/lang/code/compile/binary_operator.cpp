@@ -6,9 +6,7 @@ llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression
     if (binary_operator.op() == serial::BinaryOperatorKind::Assign) {
         switch (binary_operator.lhs().kind()) {
             case serial::ExpressionKind::Member: {
-                util::console_error(
-                    "failed to compile binary operator: member assignment not implemented");
-                std::abort();
+                util::panic("failed to compile binary operator: member assignment not implemented");
             }
 
             case serial::ExpressionKind::Variable: {
@@ -20,9 +18,7 @@ llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression
             }
 
             default:
-                util::console_error(
-                    "failed to compile binary operator: unknown left hand side kind: ");
-                std::abort();
+                util::panic("failed to compile binary operator: unknown left hand side kind: ");
         }
     }
 

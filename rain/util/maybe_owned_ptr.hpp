@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "absl/base/nullability.h"
-#include "rain/util/log.hpp"
+#include "rain/util/console.hpp"
 #include "rain/util/unreachable.hpp"
 
 namespace rain::util {
@@ -170,8 +170,7 @@ class MaybeOwnedPtr {
     absl::Nullable<T*> get_nonnull() const {
         switch (_type) {
             case State::None:
-                util::console_error("trying to get a nonnull value from a null ptr");
-                std::abort();
+                util::panic("trying to get a nonnull value from a null ptr");
             case State::Ptr:
                 return _ptr;
             case State::OwnedPtr:
