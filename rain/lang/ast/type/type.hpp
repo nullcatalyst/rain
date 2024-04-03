@@ -1,18 +1,26 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "absl/base/nullability.h"
+#include "absl/container/flat_hash_map.h"
 #include "rain/lang/lex/location.hpp"
 #include "rain/lang/options.hpp"
 #include "rain/lang/serial/kind.hpp"
+#include "rain/util/maybe_owned_ptr.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::ast {
 
 class Scope;
 
+class ArrayType;
+
 class Type {
+  protected:
+    absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>> _array_types;
+
   public:
     static std::string type_name(absl::Nullable<Type*> type) noexcept {
         if (type == nullptr) {
@@ -25,7 +33,14 @@ class Type {
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
     [[nodiscard]] virtual std::string      name() const noexcept { return "<error_type>"; }
-    [[nodiscard]] virtual lex::Location    location() const noexcept = 0;
+    [[nodiscard]] virtual lex::Location    location() const noexcept { return lex::Location(); }
+
+    [[nodiscard]] ArrayType& get_array_type(size_t length);
+
+    [[nodiscard]] constexpr const absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>>&
+    array_types() const noexcept {
+        return _array_types;
+    }
 
     /**
      * Resolve the type to a concrete (and common) type. Fully resolved types can be compared using
@@ -36,6 +51,28 @@ class Type {
      */
     [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                                      Scope&   scope) = 0;
+};
+
+class ArrayType : public Type {
+    util::MaybeOwnedPtr<Type> _type;
+    size_t                    _length;
+
+  public:
+    ArrayType(util::MaybeOwnedPtr<Type> type, size_t length)
+        : _type(std::move(type)), _length(length) {}
+    ~ArrayType() override = default;
+
+    [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
+        return serial::TypeKind::Array;
+    }
+    [[nodiscard]] std::string name() const noexcept override;
+
+    [[nodiscard]] constexpr size_t      length() const noexcept { return _length; }
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
+
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

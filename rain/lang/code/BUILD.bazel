@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "compile/all.hpp",
         "compile/any.cpp",
+        "compile/array_literal.cpp",
         "compile/binary_operator.cpp",
         "compile/block.cpp",
         "compile/call.cpp",

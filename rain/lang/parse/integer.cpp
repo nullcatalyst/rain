@@ -5,6 +5,7 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
+#include "rain/lang/parse/util/int_value.hpp"
 #include "rain/util/assert.hpp"
 #include "rain/util/result.hpp"
 
@@ -20,26 +21,11 @@ util::Result<std::unique_ptr<ast::IntegerExpression>> parse_integer(lex::Lexer& 
         }
     }
 
-    constexpr uint64_t MAX   = std::numeric_limits<uint64_t>::max() / 10;
-    uint64_t           value = 0;
+    auto value = int_value<int64_t>(integer_token);
+    FORWARD_ERROR(value);
 
-    for (const char c : integer_token.location.text()) {
-        if (value > MAX) {
-            // Multiplying by 10 will overflow
-            return ERR_PTR(err::SyntaxError, integer_token.location,
-                           "integer literal is too large");
-        }
-        value *= 10;
-
-        if (value > std::numeric_limits<uint64_t>::max() - (c - '0')) {
-            // Adding the next digit will overflow
-            return ERR_PTR(err::SyntaxError, integer_token.location,
-                           "integer literal is too large");
-        }
-        value += c - '0';
-    }
-
-    return std::make_unique<ast::IntegerExpression>(value, integer_token.location);
+    return std::make_unique<ast::IntegerExpression>(std::move(value).value(),
+                                                    integer_token.location);
 }
 
 }  // namespace rain::lang::parse

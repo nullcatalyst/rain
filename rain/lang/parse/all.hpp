@@ -45,14 +45,14 @@ util::Result<std::unique_ptr<ast::Module>> parse_module(lex::Lexer&        lexer
 util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
                                                                     ast::Scope& scope);
 
-util::Result<std::unique_ptr<ast::IntegerExpression>>       parse_integer(lex::Lexer& lexer,
+util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexer& lexer,
+                                                                       ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FloatExpression>>      parse_float(lex::Lexer& lexer,
+                                                                     ast::Scope& scope);
+util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FloatExpression>>         parse_float(lex::Lexer& lexer,
-                                                                        ast::Scope& scope);
-util::Result<std::unique_ptr<ast::IdentifierExpression>>    parse_identifier(lex::Lexer& lexer,
-                                                                             ast::Scope& scope);
-util::Result<std::unique_ptr<ast::StructLiteralExpression>> parse_struct_literal(lex::Lexer& lexer,
-                                                                                 ast::Scope& scope);
+util::Result<std::unique_ptr<ast::Expression>>           parse_struct_literal(lex::Lexer& lexer,
+                                                                              ast::Scope& scope);
 util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>    parse_atom(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>    parse_unary_operator(lex::Lexer& lexer,
@@ -82,6 +82,9 @@ util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& le
 // Types
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
-util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::ArrayType>>  parse_array_type(lex::Lexer& lexer,
+                                                                ast::Scope& scope);
+util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lexer,
+                                                                 ast::Scope& scope);
 
 }  // namespace rain::lang::parse

@@ -20,7 +20,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
         }
 
         case lex::TokenKind::Struct: {
-            auto result = parse_struct(lexer, scope);
+            auto result = parse_struct_type(lexer, scope);
             FORWARD_ERROR(result);
             auto  type     = std::move(result).value();
             auto* type_ptr = type.get();

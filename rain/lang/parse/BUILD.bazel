@@ -19,9 +19,11 @@ cc_library(
         "member.cpp",
         "module.cpp",
         "parenthesis.cpp",
-        "struct.cpp",
         "struct_literal.cpp",
+        "type/array.cpp",
+        "type/struct.cpp",
         "unary_operator.cpp",
+        "util/int_value.hpp",
         "while.cpp",
     ],
     hdrs = [

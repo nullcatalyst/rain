@@ -45,6 +45,14 @@ struct Location {
     [[nodiscard]] std::string_view text() const noexcept { return std::string_view{begin, end}; }
 
     [[nodiscard]] Location merge(const Location& other) const noexcept {
+        if (source.empty()) {
+            return other;
+        }
+
+        if (other.source.empty()) {
+            return *this;
+        }
+
         IF_DEBUG {
             if (file_name.data() != other.file_name.data() &&
                 file_name.size() != other.file_name.size() &&

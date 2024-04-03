@@ -105,6 +105,11 @@ class Scope {
 
     absl::Nonnull<Type*> _add_owned_named_type(const std::string_view name,
                                                std::unique_ptr<Type>  type);
+
+    absl::Nonnull<Type*>       _unwrap_type(absl::Nonnull<Type*> type);
+    absl::Nonnull<const Type*> _unwrap_type(absl::Nonnull<const Type*> type) {
+        return absl::Nonnull<const Type*>(_unwrap_type(absl::Nonnull<Type*>(type)));
+    }
 };
 
 }  // namespace rain::lang::ast

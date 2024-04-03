@@ -63,6 +63,14 @@ export fn Mat4.zero() -> Mat4 {
     }
 }
 
+fn f32x4.dot(self, other: f32x4) -> f32 {
+    self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+}
+
+export fn test_f32x4_dot(a: f32x4, b: f32x4) -> f32 {
+    a.dot(b)
+}
+
 // The last expression in a function is implicitly returned.
 fn four() -> i32 {
     4
@@ -115,6 +123,10 @@ fn f32.sin(self) -> f32 {
 
 export fn root_2() -> f32 {
     #2.0.sqrt()
+}
+
+export fn array() -> [4]i32 {
+   [4]i32{1, 2, compile_time_fib(), 4}
 }
 )";
 

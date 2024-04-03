@@ -8,7 +8,8 @@
 
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::StructType>> parse_struct(lex::Lexer& lexer, ast::Scope& scope) {
+util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lexer,
+                                                                 ast::Scope& scope) {
     const auto struct_token = lexer.next();
     IF_DEBUG {
         if (struct_token.kind != lex::TokenKind::Struct) {

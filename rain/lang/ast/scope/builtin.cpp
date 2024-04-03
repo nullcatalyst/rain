@@ -34,12 +34,12 @@ absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
         // All of the argument types must be non-null.
         // The return type MAY BE null (in the case of a void function).
         // All of the involved types (arguments and return type) must be owned by this scope.
-        for ([[maybe_unused]] const auto* argument_type : argument_types) {
+        for ([[maybe_unused]] auto* argument_type : argument_types) {
             assert(argument_type != nullptr);
-            assert(_owned_types.contains(argument_type));
+            assert(_owned_types.contains(_unwrap_type(argument_type)));
         }
         if (return_type != nullptr) {
-            if (!_owned_types.contains(return_type)) {
+            if (!_owned_types.contains(_unwrap_type(return_type))) {
                 util::console_error("builtin scope does not own return type");
                 std::abort();
             }

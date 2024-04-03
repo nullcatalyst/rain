@@ -20,6 +20,12 @@ llvm::Type* get_or_compile_type(Context& ctx, ast::Type& type) {
     std::abort();
 }
 
+void compile_supplemental_types(Context& ctx, ast::Type& type, llvm::Type* llvm_type) {
+    for (auto& [length, array_type] : type.array_types()) {
+        ctx.set_llvm_type(array_type.get(), llvm::ArrayType::get(llvm_type, length));
+    }
+}
+
 llvm::Type* compile_function_type(Context& ctx, ast::FunctionType& function_type) {
     llvm::SmallVector<llvm::Type*, 4> llvm_argument_types;
     llvm_argument_types.reserve(function_type.argument_types().size());
@@ -34,6 +40,7 @@ llvm::Type* compile_function_type(Context& ctx, ast::FunctionType& function_type
     llvm::Type* llvm_type = llvm::FunctionType::get(llvm_return_type, llvm_argument_types, false);
     ctx.set_llvm_type(&function_type, llvm_type);
 
+    // compile_supplemental_types(ctx, function_type, llvm_type);
     return llvm_type;
 }
 
@@ -51,6 +58,14 @@ llvm::Type* compile_struct_type(Context& ctx, ast::StructType& struct_type) {
             : llvm::StructType::get(ctx.llvm_context(), llvm_field_types, /*packed*/ false);
     ctx.set_llvm_type(&struct_type, llvm_type);
 
+    // compile_supplemental_types(ctx, struct_type, llvm_type);
+    return llvm_type;
+}
+
+llvm::Type* compile_array_type(Context& ctx, ast::ArrayType& array_type) {
+    llvm::Type* llvm_type =
+        llvm::ArrayType::get(get_or_compile_type(ctx, array_type.type()), array_type.length());
+    ctx.set_llvm_type(&array_type, llvm_type);
     return llvm_type;
 }
 
@@ -67,6 +82,9 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
 
         case serial::TypeKind::Struct:
             return compile_struct_type(ctx, static_cast<ast::StructType&>(type));
+
+        case serial::TypeKind::Array:
+            return compile_array_type(ctx, static_cast<ast::ArrayType&>(type));
 
         case serial::TypeKind::Meta:
             return nullptr;

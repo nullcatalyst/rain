@@ -22,18 +22,6 @@ namespace rain::lang::code {
 
 namespace {
 
-std::unique_ptr<llvm::ExecutionEngine> create_interpreter(
-    std::unique_ptr<llvm::Module>        llvm_module,
-    std::unique_ptr<llvm::TargetMachine> llvm_target_machine) {
-    llvm::EngineBuilder builder{std::move(llvm_module)};
-    std::string         error;
-    builder.setErrorStr(&error);
-    builder.setEngineKind(llvm::EngineKind::Interpreter);
-    std::unique_ptr<llvm::ExecutionEngine> engine{builder.create(llvm_target_machine.release())};
-    assert(engine != nullptr && "failed to create interpreter engine");
-    return engine;
-}
-
 std::unique_ptr<llvm::TargetMachine> clone_target_machine(
     const llvm::TargetMachine& llvm_target_machine) {
     llvm_target_machine.getTargetTriple();

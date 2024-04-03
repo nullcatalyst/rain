@@ -20,7 +20,10 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
     const auto token = lexer.peek();
     switch (token.kind) {
         case lex::TokenKind::Struct:
-            return parse_struct(lexer, scope);
+            return parse_struct_type(lexer, scope);
+
+        case lex::TokenKind::LSquareBracket:
+            return parse_array_type(lexer, scope);
 
         case lex::TokenKind::Identifier:
             lexer.next();  // Consume the identifier token

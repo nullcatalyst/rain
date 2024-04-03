@@ -1,6 +1,7 @@
 cc_library(
     name = "expr",
     srcs = [
+        "array_literal.cpp",
         "binary_operator.cpp",
         "block.cpp",
         "boolean.cpp",
@@ -44,6 +45,7 @@ cc_library(
 cc_library(
     name = "hdrs",
     hdrs = [
+        "array_literal.hpp",
         "binary_operator.hpp",
         "block.hpp",
         "boolean.hpp",

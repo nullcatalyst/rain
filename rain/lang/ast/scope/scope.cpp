@@ -14,8 +14,8 @@ absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument
                                                         Type*           return_type) {
     const bool owns_types =
         std::any_of(argument_types.begin(), argument_types.end(),
-                    [this](const auto* type) { return _owned_types.contains(type); }) ||
-        (return_type != nullptr && _owned_types.contains(return_type));
+                    [this](auto* type) { return _owned_types.contains(_unwrap_type(type)); }) ||
+        (return_type != nullptr && _owned_types.contains(_unwrap_type(return_type)));
     if (!owns_types) {
         // If the types are not owned by this scope, then we cannot return a function type, because
         // then when the function type is destroyed, it will create an orphaned function type that
@@ -55,6 +55,19 @@ absl::Nonnull<Type*> Scope::_add_owned_named_type(const std::string_view name,
     }
 
     return type_ptr;
+}
+
+absl::Nonnull<Type*> Scope::_unwrap_type(absl::Nonnull<Type*> type) {
+    for (;;) {
+        switch (type->kind()) {
+            case serial::TypeKind::Array:
+                type = &static_cast<ArrayType&>(*type).type();
+                break;
+
+            default:
+                return type;
+        }
+    }
 }
 
 absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexcept {
