@@ -1,8 +1,9 @@
 #pragma once
 
+#include <span>
 #include <string_view>
 
-#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Value.h"
 #include "rain/lang/ast/type/function.hpp"
@@ -36,7 +37,7 @@ class FunctionVariable : public Variable {
     }
 
     [[nodiscard]] virtual llvm::Value* build_call(
-        code::Context& ctx, const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept;
+        code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept;
 
     [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };

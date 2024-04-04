@@ -1,5 +1,6 @@
 #include "rain/lang/ast/scope/builtin.hpp"
 
+#include <array>
 #include <vector>
 
 #include "rain/lang/ast/type/opaque.hpp"
@@ -32,7 +33,7 @@ BuiltinScope::BuiltinScope() {
                      }(),
                      lex::Location()));
 
-#include "rain/lang/ast/scope/builtin_methods.inl"
+#include "rain/lang/ast/scope/builtin/all.inl"
 }
 
 absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(

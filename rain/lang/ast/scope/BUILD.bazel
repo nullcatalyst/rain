@@ -5,10 +5,9 @@ cc_library(
         "builtin.cpp",
         "module.cpp",
         "scope.cpp",
-    ],
-    textual_hdrs = [
-        "builtin_methods.inl",
-    ],
+    ] + glob([
+        "builtin/*.inl",
+    ]),
     visibility = [
         "//rain:__subpackages__",
     ],

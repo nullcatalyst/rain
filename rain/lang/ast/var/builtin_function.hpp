@@ -19,8 +19,7 @@ class BuiltinFunctionVariable : public FunctionVariable {
     ~BuiltinFunctionVariable() override = default;
 
     [[nodiscard]] llvm::Value* build_call(
-        code::Context&                            ctx,
-        const llvm::SmallVector<llvm::Value*, 4>& arguments) const noexcept override {
+        code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept override {
         return _build_fn(ctx, arguments);
     }
 };
