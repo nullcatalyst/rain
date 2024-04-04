@@ -16,7 +16,7 @@ util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& sco
     // Check if the type is a struct.
     if (_type->kind() != serial::TypeKind::Array) {
         return ERR_PTR(err::SimpleError,
-                       absl::StrCat("type \"", _type->name(), "\" is not an array type"));
+                       absl::StrCat("type \"", _type->display_name(), "\" is not an array type"));
     }
 
     ArrayType& array_type = static_cast<ArrayType&>(*_type.get());
@@ -30,10 +30,10 @@ util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& sco
 
         // Check if the element type matches the array type.
         if (element->type() != &array_type.type()) {
-            return ERR_PTR(
-                err::SimpleError,
-                absl::StrCat("element type \"", element->type()->name(), "\" at index ", i,
-                             " does not match array type \"", array_type.type().name(), "\""));
+            return ERR_PTR(err::SimpleError,
+                           absl::StrCat("element type \"", element->type()->display_name(),
+                                        "\" at index ", i, " does not match array type \"",
+                                        array_type.type().display_name(), "\""));
         }
     }
 

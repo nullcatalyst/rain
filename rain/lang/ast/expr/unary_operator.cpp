@@ -48,8 +48,8 @@ util::Result<void> UnaryOperatorExpression::validate(Options& options, Scope& sc
             return ERR_PTR(
                 err::UnaryOperatorError, _expression->location(), _op_location,
                 absl::StrCat("no matching unary operator method found, looking for method named \"",
-                             method_name.value(), "\" on type \"", _expression->type()->name(),
-                             "\""));
+                             method_name.value(), "\" on type \"",
+                             _expression->type()->display_name(), "\""));
         }
     }
 

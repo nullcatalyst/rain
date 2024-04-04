@@ -23,7 +23,7 @@ util::Result<void> MemberExpression::validate(Options& options, Scope& scope) {
         return ERR_PTR(
             err::SyntaxError, _lhs->location(),
             absl::StrCat("accessing member of value that is not a struct, the value has type ",
-                         lhs_type->name()));
+                         lhs_type->display_name()));
     }
 
     const auto struct_type = reinterpret_cast<ast::StructType*>(lhs_type);

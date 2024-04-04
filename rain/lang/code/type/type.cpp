@@ -18,7 +18,7 @@ llvm::Type* get_or_compile_type(Context& ctx, ast::Type& type) {
         return llvm_type;
     }
 
-    util::panic("failed to compile type: ", type.name());
+    util::panic("failed to compile type: ", type.display_name());
 }
 
 llvm::Type* compile_type(Context& ctx, ast::Type& type) {

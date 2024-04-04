@@ -24,7 +24,7 @@ class FunctionType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Function;
     }
-    [[nodiscard]] std::string             name() const noexcept override;
+    [[nodiscard]] std::string             display_name() const noexcept override;
     [[nodiscard]] constexpr lex::Location location() const noexcept override {
         // Function types do not have a location. They are implicitly defined.
         return lex::Location();

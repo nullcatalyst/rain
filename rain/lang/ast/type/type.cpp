@@ -22,8 +22,8 @@ ArrayType& Type::get_array_type(size_t length) {
     return ref;
 }
 
-std::string ArrayType::name() const noexcept {
-    return absl::StrCat("[", _length, "]", _type->name());
+std::string ArrayType::display_name() const noexcept {
+    return absl::StrCat("[", _length, "]", _type->display_name());
 }
 
 util::Result<absl::Nonnull<Type*>> ArrayType::resolve(Options& options, Scope& scope) {
@@ -40,7 +40,9 @@ util::Result<absl::Nonnull<Type*>> ArrayType::resolve(Options& options, Scope& s
     return &type->get_array_type(_length);
 }
 
-std::string OptionalType::name() const noexcept { return absl::StrCat("?", _type->name()); }
+std::string OptionalType::display_name() const noexcept {
+    return absl::StrCat("?", _type->display_name());
+}
 
 util::Result<absl::Nonnull<Type*>> OptionalType::resolve(Options& options, Scope& scope) {
     auto result = _type->resolve(options, scope);

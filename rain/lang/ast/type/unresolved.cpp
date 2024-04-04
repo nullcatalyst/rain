@@ -10,8 +10,7 @@ util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Options& options, Sco
     auto resolved_type = scope.find_type(_name);
     if (resolved_type == nullptr) {
         // TODO: Add a location to the error
-        return ERR_PTR(err::SimpleError,
-                       absl::StrCat("no type named \"", _name, "\" found in scope"));
+        return ERR_PTR(err::SimpleError, absl::StrCat("no type \"", _name, "\" found in scope"));
     }
 
     return resolved_type;

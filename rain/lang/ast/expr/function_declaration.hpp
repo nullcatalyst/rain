@@ -83,6 +83,7 @@ class FunctionDeclarationExpression : public Expression {
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
+    util::Result<void> add_to_scope(Options& options, Scope& scope);
 
   protected:
     util::Result<void> _validate_declaration(Options& options, Scope& scope);

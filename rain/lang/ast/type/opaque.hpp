@@ -21,7 +21,7 @@ class OpaqueType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Builtin;
     }
-    [[nodiscard]] std::string name() const noexcept override { return std::string(_name); }
+    [[nodiscard]] std::string display_name() const noexcept override { return std::string(_name); }
     [[nodiscard]] constexpr lex::Location location() const noexcept override {
         // Opaque types do not have a location. They are implicitly defined.
         return lex::Location();

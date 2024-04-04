@@ -12,7 +12,7 @@ llvm::Function* compile_function_declaration(
     std::string name;
     if (function_declaration.kind() == serial::ExpressionKind::Method) {
         ast::MethodExpression& method = static_cast<ast::MethodExpression&>(function_declaration);
-        name = absl::StrCat(method.callee_type()->name(), ".", function_declaration.name());
+        name = absl::StrCat(method.callee_type()->display_name(), ".", function_declaration.name());
     } else {
         name = std::string(function_declaration.name());
     }

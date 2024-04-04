@@ -74,7 +74,7 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
                 if (function == nullptr) {
                     return ERR_PTR(err::SyntaxError, member.member_location(),
                                    absl::StrCat("no method .", member.name(), " found on type ",
-                                                callee_type->name()));
+                                                callee_type->display_name()));
                 }
             }
 

@@ -83,7 +83,7 @@ util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& s
                 err::BinaryOperatorError, _lhs->location(), _rhs->location(), _op_location,
                 absl::StrCat(
                     "no matching binary operator method found, looking for method named \"",
-                    method_name.value(), "\" on type \"", _lhs->type()->name(), "\""));
+                    method_name.value(), "\" on type \"", _lhs->type()->display_name(), "\""));
         }
     }
 

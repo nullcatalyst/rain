@@ -29,7 +29,10 @@ util::Result<void> ExternExpression::validate(Options& options, Scope& scope) {
 
     _compile_time_capable = options.extern_is_compile_time_runnable(_keys);
 
-    return _declaration->validate(options, scope);
+    auto result = _declaration->validate(options, scope);
+    FORWARD_ERROR(result);
+
+    return {};
 }
 
 }  // namespace rain::lang::ast

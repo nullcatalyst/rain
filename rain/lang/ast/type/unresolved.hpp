@@ -26,7 +26,7 @@ class UnresolvedType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Unresolved;
     }
-    [[nodiscard]] constexpr std::string name() const noexcept override {
+    [[nodiscard]] constexpr std::string display_name() const noexcept override {
         return std::string(_name);
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }

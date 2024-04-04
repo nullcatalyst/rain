@@ -16,7 +16,7 @@ util::Result<void> StructLiteralExpression::validate(Options& options, Scope& sc
     // Check if the type is a struct.
     if (_type->kind() != serial::TypeKind::Struct) {
         return ERR_PTR(err::SimpleError,
-                       absl::StrCat("type \"", _type->name(), "\" is not a struct type"));
+                       absl::StrCat("type \"", _type->display_name(), "\" is not a struct type"));
     }
 
     StructType* struct_type = static_cast<StructType*>(_type.get());
@@ -32,7 +32,7 @@ util::Result<void> StructLiteralExpression::validate(Options& options, Scope& sc
         }
         if (field.index == -1) {
             return ERR_PTR(err::SimpleError,
-                           absl::StrCat("struct type \"", struct_type->name(),
+                           absl::StrCat("struct type \"", struct_type->display_name(),
                                         "\" has no field named \"", field.name, "\""));
         }
 

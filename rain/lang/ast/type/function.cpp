@@ -4,19 +4,19 @@
 
 namespace rain::lang::ast {
 
-std::string FunctionType::name() const noexcept {
+std::string FunctionType::display_name() const noexcept {
     std::string argument_type_names;
     for (size_t i = 0; i < _argument_types.size(); ++i) {
         if (i > 0) {
             absl::StrAppend(&argument_type_names, ", ", argument_type_names,
-                            _argument_types[i]->name());
+                            _argument_types[i]->display_name());
         } else {
-            argument_type_names = _argument_types[i]->name();
+            argument_type_names = _argument_types[i]->display_name();
         }
     }
 
     if (_return_type != nullptr) {
-        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->name());
+        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->display_name());
     } else {
         return absl::StrCat("fn(", argument_type_names, ")");
     }

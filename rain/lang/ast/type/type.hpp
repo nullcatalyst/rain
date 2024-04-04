@@ -28,13 +28,13 @@ class Type {
         if (type == nullptr) {
             return "<null_type>";
         }
-        return type->name();
+        return type->display_name();
     }
 
     virtual ~Type() = default;
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
-    [[nodiscard]] virtual std::string      name() const noexcept { return "<error_type>"; }
+    [[nodiscard]] virtual std::string      display_name() const noexcept { return "<error_type>"; }
     [[nodiscard]] virtual lex::Location    location() const noexcept { return lex::Location(); }
 
     [[nodiscard]] OptionalType& get_optional_type();
@@ -73,7 +73,7 @@ class ArrayType : public Type {
         return serial::TypeKind::Array;
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] std::string             name() const noexcept override;
+    [[nodiscard]] std::string             display_name() const noexcept override;
 
     [[nodiscard]] constexpr size_t      length() const noexcept { return _length; }
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
@@ -98,7 +98,7 @@ class OptionalType : public Type {
         return serial::TypeKind::Optional;
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] std::string             name() const noexcept override;
+    [[nodiscard]] std::string             display_name() const noexcept override;
 
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }

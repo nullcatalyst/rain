@@ -16,8 +16,8 @@ class MetaType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Meta;
     }
-    [[nodiscard]] std::string name() const noexcept override {
-        return absl::StrCat("<meta:", _type->name(), ">");
+    [[nodiscard]] std::string display_name() const noexcept override {
+        return absl::StrCat("<meta:", _type->display_name(), ">");
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override {
         // Meta types do not have a location. They are implicitly defined.

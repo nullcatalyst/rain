@@ -37,9 +37,9 @@ class StructType : public Type {
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Struct;
     }
-    [[nodiscard]] std::string name() const noexcept override {
+    [[nodiscard]] std::string display_name() const noexcept override {
         if (_name.has_value()) {
-            return absl::StrCat(_name.value());
+            return std::string(_name.value());
         }
         return "<unnamed_struct>";
     }
