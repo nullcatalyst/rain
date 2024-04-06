@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "absl/base/nullability.h"
+#include "absl/container/flat_hash_set.h"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/lex/location.hpp"
 #include "rain/util/result.hpp"

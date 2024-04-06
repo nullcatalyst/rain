@@ -29,8 +29,8 @@ class ParenthesisExpression : public Expression {
     }
 
     // ParenthesisExpression
-    [[nodiscard]] constexpr const ast::Expression& expression() const { return *_expression; }
-    [[nodiscard]] constexpr ast::Expression&       expression() { return *_expression; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&       expression() { return *_expression; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

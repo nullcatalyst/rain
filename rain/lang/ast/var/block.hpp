@@ -15,12 +15,9 @@ class BlockVariable : public Variable {
     util::MaybeOwnedPtr<Type> _type;
     bool                      _mutable = false;
 
-    lex::Location _location;
-
   public:
-    BlockVariable(std::string_view name, util::MaybeOwnedPtr<Type> type, bool mutable_,
-                  lex::Location location)
-        : _name(name), _type(std::move(type)), _mutable(mutable_), _location(location) {
+    BlockVariable(std::string_view name, util::MaybeOwnedPtr<Type> type, bool mutable_)
+        : _name(name), _type(std::move(type)), _mutable(mutable_) {
         assert(_type != nullptr);
     }
     ~BlockVariable() override = default;
@@ -33,7 +30,7 @@ class BlockVariable : public Variable {
         return _type.get_nonnull();
     }
     [[nodiscard]] bool          mutable_() const noexcept override { return _mutable; }
-    [[nodiscard]] lex::Location location() const noexcept { return _location; }
+    [[nodiscard]] lex::Location location() const noexcept { return lex::Location(); }
 
     [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };

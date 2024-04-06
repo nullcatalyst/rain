@@ -1,4 +1,4 @@
-#include "rain/lang/ast/expr/module.hpp"
+#include "rain/lang/ast/module.hpp"
 
 namespace rain::lang::ast {
 

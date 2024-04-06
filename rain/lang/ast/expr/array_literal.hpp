@@ -22,7 +22,7 @@ class ArrayLiteralExpression : public Expression {
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::ArrayLiteral;
     }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override {
+    [[nodiscard]] /*constexpr*/ absl::Nullable<Type*> type() const noexcept override {
         return _type.get();
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }

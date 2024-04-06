@@ -9,6 +9,8 @@
 #include "rain/lang/target/wasm/options.hpp"
 #include "rain/rain.hpp"
 
+#define DO_OPTIMIZE true
+
 #define RUN_TEST()                                   \
     do {                                             \
         rain::lang::wasm::initialize_llvm();         \
@@ -17,7 +19,7 @@
         ASSERT_TRUE(check_success(module_result));   \
         auto mod = std::move(module_result).value(); \
                                                      \
-        if (true) {                                  \
+        if (DO_OPTIMIZE) {                           \
             mod.optimize();                          \
         }                                            \
                                                      \
@@ -30,7 +32,7 @@
 
 TEST(Lang, array) {
     const std::string_view code = R"(
-export fn literal() -> [4]i32 {
+export fn int_array() -> [4]i32 {
     [4]i32{ 1, 2, 3, 4 }
 }
 )";
@@ -45,7 +47,7 @@ struct Vec2 {
     y: f32,
 }
 
-export fn literal() -> [2]Vec2 {
+export fn array_of_structs() -> [2]Vec2 {
     [2]Vec2{
         Vec2{ x: 1.0, y: 2.0 },
         Vec2{ x: 3.0, y: 4.0 },

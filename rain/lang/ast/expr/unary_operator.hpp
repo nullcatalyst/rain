@@ -26,14 +26,14 @@ class UnaryOperatorExpression : public Expression {
         return serial::ExpressionKind::UnaryOperator;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _op_location.merge(_expression->location());
     }
 
     // UnaryOperatorExpression
-    [[nodiscard]] constexpr const ast::Expression&    expression() const { return *_expression; }
-    [[nodiscard]] constexpr ast::Expression&          expression() { return *_expression; }
-    [[nodiscard]] constexpr serial::UnaryOperatorKind op() const { return _op; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&       expression() { return *_expression; }
+    [[nodiscard]] constexpr serial::UnaryOperatorKind  op() const { return _op; }
     [[nodiscard]] constexpr absl::Nullable<FunctionVariable*> method() const noexcept {
         return _method;
     }

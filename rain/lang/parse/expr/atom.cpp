@@ -1,6 +1,20 @@
 #include "absl/strings/str_cat.h"
+#include "rain/lang/ast/expr/block.hpp"
+#include "rain/lang/ast/expr/boolean.hpp"
+#include "rain/lang/ast/expr/call.hpp"
+#include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/expr/extern.hpp"
+#include "rain/lang/ast/expr/float.hpp"
+#include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/identifier.hpp"
+#include "rain/lang/ast/expr/if.hpp"
+#include "rain/lang/ast/expr/while.hpp"
+#include "rain/lang/ast/expr/integer.hpp"
+#include "rain/lang/ast/expr/let.hpp"
+#include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/null.hpp"
+#include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
@@ -32,10 +46,8 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex:
                                                                             ast::Scope& scope);
 util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
-    lex::Lexer& lexer, ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
-                                                                      ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(lex::Lexer& lexer,
+                                                                         ast::Scope& scope);
 util::Result<std::unique_ptr<ast::IfExpression>>     parse_if(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::WhileExpression>>  parse_while(lex::Lexer& lexer,
                                                                  ast::Scope& scope);

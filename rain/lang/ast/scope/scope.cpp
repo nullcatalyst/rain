@@ -111,6 +111,7 @@ absl::Nonnull<FunctionVariable*> Scope::add_function(absl::Nullable<Type*>  call
                                                      std::unique_ptr<FunctionVariable> function) {
     assert(function != nullptr);
 
+    std::cout << "Scope::add_function(" << name << ")" << argument_types.size() << std::endl;
     auto* function_ptr = function.get();
     _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name),
                                          function_ptr);
@@ -128,11 +129,11 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
     return variable_ptr;
 }
 
-util::Result<void> Scope::validate(code::Options& options) {
-    for (auto& type : _owned_types) {
-        auto result = type->validate(options, *this);
-        FORWARD_ERROR(result);
-    }
+util::Result<void> Scope::validate(Options& options) {
+    // for (auto& type : _owned_types) {
+    //     auto result = type->validate(options, *this);
+    //     FORWARD_ERROR(result);
+    // }
 
     return {};
 }

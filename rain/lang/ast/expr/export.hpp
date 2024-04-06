@@ -26,8 +26,8 @@ class ExportExpression : public Expression {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
 
     // ExportExpression
-    [[nodiscard]] constexpr const ast::Expression& expression() const { return *_expression; }
-    [[nodiscard]] constexpr ast::Expression&       expression() { return *_expression; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&       expression() { return *_expression; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

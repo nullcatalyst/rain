@@ -2,15 +2,17 @@
 
 #include <memory>
 
-#include "rain/lang/ast/expr/method.hpp"
+#include "absl/base/nullability.h"
+#include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
     lex::Lexer& lexer, ast::Scope& scope) {
@@ -60,7 +62,7 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
             FORWARD_ERROR(argument_type);
 
             arguments.emplace_back(std::make_unique<ast::BlockVariable>(
-                argument_name.text(), std::move(argument_type).value()));
+                argument_name.text(), std::move(argument_type).value(), /*mutable*/ false));
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {

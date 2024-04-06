@@ -30,7 +30,7 @@ class FunctionExpression : public FunctionDeclarationExpression {
         return serial::ExpressionKind::Function;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _declaration_location.merge(_block->location());
     }
 
@@ -47,11 +47,11 @@ class FunctionExpression : public FunctionDeclarationExpression {
     [[nodiscard]] constexpr bool has_return_type() const noexcept {
         return _return_type != nullptr;
     }
-    [[nodiscard]] constexpr absl::Nullable<Type*> return_type() const noexcept {
+    [[nodiscard]] /*constexpr*/ absl::Nullable<Type*> return_type() const noexcept {
         return _return_type.get();
     }
 
-    [[nodiscard]] constexpr bool has_arguments() const noexcept { return !_arguments.empty(); }
+    [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
 
     [[nodiscard]] absl::Nonnull<BlockExpression*>   block() const noexcept { return _block.get(); }

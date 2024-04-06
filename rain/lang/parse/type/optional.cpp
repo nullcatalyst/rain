@@ -1,16 +1,18 @@
 #include <memory>
 
+#include "absl/base/nullability.h"
+#include "rain/lang/ast/scope/scope.hpp"
+#include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
-#include "rain/lang/parse/util/int_value.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::OptionalType>> parse_optional_type(lex::Lexer& lexer,
-                                                                     ast::Scope& scope) {
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
+
+util::Result<absl::Nonnull<ast::OptionalType*>> parse_optional_type(lex::Lexer& lexer,
+                                                                    ast::Scope& scope) {
     const auto question_token = lexer.next();
     IF_DEBUG {
         if (question_token.kind != lex::TokenKind::Question) {
@@ -28,7 +30,7 @@ util::Result<std::unique_ptr<ast::OptionalType>> parse_optional_type(lex::Lexer&
         return ERR_PTR(err::SyntaxError, location, "nested optional types are not allowed");
     }
 
-    return std::make_unique<ast::OptionalType>(std::move(wrapped_type), location);
+    return &wrapped_type->get_optional_type();
 }
 
 }  // namespace rain::lang::parse

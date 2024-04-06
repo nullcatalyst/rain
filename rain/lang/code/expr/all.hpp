@@ -20,12 +20,12 @@
 #include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/ast/expr/let.hpp"
 #include "rain/lang/ast/expr/member.hpp"
-#include "rain/lang/ast/expr/module.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
 #include "rain/lang/ast/expr/struct_literal.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/expr/unary_operator.hpp"
 #include "rain/lang/ast/expr/while.hpp"
+#include "rain/lang/ast/module.hpp"
 
 namespace rain::lang::code {
 

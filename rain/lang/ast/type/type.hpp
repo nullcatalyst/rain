@@ -14,6 +14,7 @@
 namespace rain::lang::ast {
 
 class Scope;
+class Expression;
 
 class ArrayType;
 class OptionalType;
@@ -33,7 +34,7 @@ class Type {
         return type->display_name();
     }
 
-    virtual ~Type() = default;
+    virtual ~Type() { std::cout << "Type::~Type() for " << display_name() << std::endl; }
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
     [[nodiscard]] virtual std::string      display_name() const noexcept { return "<error_type>"; }
@@ -80,9 +81,9 @@ class ArrayType : public Type {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             display_name() const noexcept override;
 
-    [[nodiscard]] constexpr size_t      length() const noexcept { return _length; }
-    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
-    [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
+    [[nodiscard]] constexpr size_t          length() const noexcept { return _length; }
+    [[nodiscard]] /*constexpr*/ const Type& type() const noexcept { return *_type.get(); }
+    [[nodiscard]] /*constexpr*/ Type&       type() noexcept { return *_type.get(); }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
@@ -105,8 +106,8 @@ class OptionalType : public Type {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             display_name() const noexcept override;
 
-    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
-    [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
+    [[nodiscard]] /*constexpr*/ const Type& type() const noexcept { return *_type.get(); }
+    [[nodiscard]] /*constexpr*/ Type&       type() noexcept { return *_type.get(); }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

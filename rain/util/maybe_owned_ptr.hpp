@@ -76,14 +76,15 @@ class MaybeOwnedPtr {
         return *this;
     }
 
-    MaybeOwnedPtr(std::nullptr_t) : _type(State::None) {}
+    constexpr MaybeOwnedPtr(std::nullptr_t) : _type(State::None) {}
     MaybeOwnedPtr& operator=(std::nullptr_t) {
         _reset();
         _type = State::None;
         return *this;
     }
 
-    MaybeOwnedPtr(absl::Nonnull<T*> ptr) : _ptr(ptr), _type(State::Ptr) {}
+    MaybeOwnedPtr(absl::Nullable<T*> ptr)
+        : _ptr(ptr), _type(ptr != nullptr ? State::Ptr : State::None) {}
     MaybeOwnedPtr& operator=(absl::Nonnull<T*> ptr) {
         _reset();
         _ptr  = ptr;
@@ -100,7 +101,7 @@ class MaybeOwnedPtr {
         return *this;
     }
 
-    bool operator==(const std::nullptr_t) const {
+    constexpr bool operator==(const std::nullptr_t) const {
         switch (_type) {
             case State::None:
                 return true;
@@ -112,7 +113,7 @@ class MaybeOwnedPtr {
         util::unreachable();
     }
 
-    bool operator!=(const std::nullptr_t) const {
+    constexpr bool operator!=(const std::nullptr_t) const {
         switch (_type) {
             case State::None:
                 return false;
@@ -121,6 +122,7 @@ class MaybeOwnedPtr {
             case State::OwnedPtr:
                 return _owned_ptr != nullptr;
         }
+        util::unreachable();
     }
 
     T* operator->() const {
@@ -132,6 +134,7 @@ class MaybeOwnedPtr {
             case State::OwnedPtr:
                 return _owned_ptr.get();
         }
+        util::unreachable();
     }
 
     absl::Nullable<T*> get() const {
@@ -143,6 +146,7 @@ class MaybeOwnedPtr {
             case State::OwnedPtr:
                 return _owned_ptr.get();
         }
+        util::unreachable();
     }
 
     absl::Nullable<T*> get_nonnull() const {
@@ -154,6 +158,18 @@ class MaybeOwnedPtr {
             case State::OwnedPtr:
                 return _owned_ptr.get();
         }
+        util::unreachable();
+    }
+
+    std::unique_ptr<T> take() {
+        switch (_type) {
+            case State::None:
+            case State::Ptr:
+                return std::unique_ptr<T>();
+            case State::OwnedPtr:
+                return std::move(_owned_ptr);
+        }
+        util::unreachable();
     }
 
     [[nodiscard]] constexpr bool is_owned() const { return _type == State::OwnedPtr; }

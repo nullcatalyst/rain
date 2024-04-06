@@ -1,13 +1,20 @@
 #include <memory>
 
+#include "absl/base/nullability.h"
 #include "rain/lang/ast/expr/array_literal.hpp"
+#include "rain/lang/ast/expr/struct_literal.hpp"
+#include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
+
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
 namespace {
 

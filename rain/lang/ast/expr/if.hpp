@@ -42,15 +42,17 @@ class IfExpression : public Expression {
     [[nodiscard]] bool compile_time_capable() const noexcept override;
 
     // IfExpression
-    [[nodiscard]] constexpr const Expression& condition() const noexcept { return *_condition; }
-    [[nodiscard]] constexpr Expression&       condition() noexcept { return *_condition; }
+    [[nodiscard]] /*constexpr*/ const Expression& condition() const noexcept { return *_condition; }
+    [[nodiscard]] /*constexpr*/ Expression&       condition() noexcept { return *_condition; }
 
-    [[nodiscard]] constexpr const BlockExpression& then() const noexcept { return *_then; }
-    [[nodiscard]] constexpr BlockExpression&       then() noexcept { return *_then; }
+    [[nodiscard]] /*constexpr*/ const BlockExpression& then() const noexcept { return *_then; }
+    [[nodiscard]] /*constexpr*/ BlockExpression&       then() noexcept { return *_then; }
 
     [[nodiscard]] constexpr bool has_else() const noexcept { return _else.has_value(); }
-    [[nodiscard]] constexpr const BlockExpression& else_() const noexcept { return *_else.value(); }
-    [[nodiscard]] constexpr BlockExpression&       else_() noexcept { return *_else.value(); }
+    [[nodiscard]] /*constexpr*/ const BlockExpression& else_() const noexcept {
+        return *_else.value();
+    }
+    [[nodiscard]] /*constexpr*/ BlockExpression& else_() noexcept { return *_else.value(); }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

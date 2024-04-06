@@ -1,16 +1,18 @@
 #include <memory>
 
+#include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
 #include "rain/lang/parse/util/int_value.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::ArrayType>> parse_array_type(lex::Lexer& lexer,
-                                                               ast::Scope& scope) {
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
+
+util::Result<absl::Nonnull<ast::ArrayType*>> parse_array_type(lex::Lexer& lexer,
+                                                              ast::Scope& scope) {
     const auto lsquare_token = lexer.next();
     IF_DEBUG {
         if (lsquare_token.kind != lex::TokenKind::LSquareBracket) {
@@ -36,8 +38,7 @@ util::Result<std::unique_ptr<ast::ArrayType>> parse_array_type(lex::Lexer& lexer
     auto element_type = std::move(element_type_result).value();
 
     auto location = lsquare_token.location.merge(element_type->location());
-    return std::make_unique<ast::ArrayType>(std::move(element_type), std::move(length).value(),
-                                            location);
+    return &element_type->get_array_type(std::move(length).value());
 }
 
 }  // namespace rain::lang::parse

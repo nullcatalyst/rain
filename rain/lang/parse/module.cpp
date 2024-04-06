@@ -1,12 +1,23 @@
-#include "rain/lang/ast/expr/module.hpp"
+#include "rain/lang/ast/module.hpp"
 
 #include "rain/lang/ast/expr/export.hpp"
+#include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/type.hpp"
+#include "rain/lang/ast/type/interface.hpp"
+#include "rain/lang/ast/type/struct.hpp"
 #include "rain/lang/err/syntax.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 
 namespace rain::lang::parse {
 
+// Expressions
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
+                                                                      ast::Scope& scope);
+
+// Types
+util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
+                                                                   ast::Scope& scope);
+util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
 
 namespace {
@@ -26,16 +37,13 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
         case lex::TokenKind::Struct: {
             auto result = parse_struct_type(lexer, scope);
             FORWARD_ERROR(result);
-            return std::make_unique<ast::TypeExpression>(type_ptr);
+            return std::make_unique<ast::TypeExpression>(std::move(result).value());
         }
 
         case lex::TokenKind::Interface: {
             auto result = parse_interface_type(lexer, scope);
             FORWARD_ERROR(result);
-            auto  type     = std::move(result).value();
-            auto* type_ptr = type.get();
-            scope.add_type(type_ptr->name(), std::move(type));
-            return std::make_unique<ast::TypeExpression>(type_ptr);
+            return std::make_unique<ast::TypeExpression>(std::move(result).value());
         }
 
         case lex::TokenKind::Export: {

@@ -30,15 +30,15 @@ class BinaryOperatorExpression : public Expression {
         return serial::ExpressionKind::BinaryOperator;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _lhs->location().merge(_rhs->location());
     }
 
     // BinaryOperatorExpression
-    [[nodiscard]] constexpr const ast::Expression&            lhs() const { return *_lhs; }
-    [[nodiscard]] constexpr ast::Expression&                  lhs() { return *_lhs; }
-    [[nodiscard]] constexpr const ast::Expression&            rhs() const { return *_rhs; }
-    [[nodiscard]] constexpr ast::Expression&                  rhs() { return *_rhs; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression&        lhs() const { return *_lhs; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&              lhs() { return *_lhs; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression&        rhs() const { return *_rhs; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&              rhs() { return *_rhs; }
     [[nodiscard]] constexpr serial::BinaryOperatorKind        op() const { return _op; }
     [[nodiscard]] constexpr absl::Nullable<FunctionVariable*> method() const noexcept {
         return _method;

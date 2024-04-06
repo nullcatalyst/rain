@@ -9,8 +9,8 @@
 
 namespace rain::lang::parse {
 
-util::Result<absl::Nonnull<ast::StructType*>> parse_unresolved_type(lex::Lexer& lexer,
-                                                                    ast::Scope& scope) {
+util::Result<absl::Nonnull<ast::UnresolvedType*>> parse_unresolved_type(lex::Lexer& lexer,
+                                                                        ast::Scope& scope) {
     const auto name_token = lexer.next();
     IF_DEBUG {
         if (name_token.kind != lex::TokenKind::Identifier) {
@@ -19,10 +19,9 @@ util::Result<absl::Nonnull<ast::StructType*>> parse_unresolved_type(lex::Lexer& 
         }
     }
 
-    lexer.next();  // Consume the identifier token
-
-    return scope.add_type(name_token.text(), std::make_unique<ast::UnresolvedType>(
-                                                 name_token.text(), name_token.location));
+    return static_cast<ast::UnresolvedType*>(scope.add_type(
+        name_token.text(),
+        std::make_unique<ast::UnresolvedType>(name_token.text(), name_token.location)));
 }
 
 }  // namespace rain::lang::parse

@@ -1,13 +1,16 @@
+#include "rain/lang/ast/expr/block.hpp"
+
 #include <memory>
-#include <utility>
 
 #include "rain/lang/err/syntax.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 #include "rain/util/unreachable.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(lex::Lexer& lexer,
                                                                 ast::Scope& scope) {

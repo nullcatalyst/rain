@@ -41,10 +41,12 @@ class ExternExpression : public Expression {
 
     // ExternExpression
     [[nodiscard]] constexpr const llvm::SmallVector<std::string, 3>& keys() const { return _keys; }
-    [[nodiscard]] constexpr const FunctionDeclarationExpression&     declaration() const {
+    [[nodiscard]] /*constexpr*/ const FunctionDeclarationExpression& declaration() const {
         return *_declaration;
     }
-    [[nodiscard]] constexpr FunctionDeclarationExpression& declaration() { return *_declaration; }
+    [[nodiscard]] /*constexpr*/ FunctionDeclarationExpression& declaration() {
+        return *_declaration;
+    }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

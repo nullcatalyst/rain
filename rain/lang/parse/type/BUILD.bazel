@@ -1,19 +1,19 @@
 cc_library(
-    name = "parse",
+    name = "type",
     srcs = [
-        "module.cpp",
-    ],
-    hdrs = [
-        "module.hpp",
+        "any.cpp",
+        "array.cpp",
+        "interface.cpp",
+        "optional.cpp",
+        "struct.cpp",
+        "unresolved.cpp",
     ],
     visibility = [
         "//rain:__subpackages__",
     ],
     deps = [
-        "//rain/lang/ast",
+        "//rain/lang/ast:hdrs",
         "//rain/lang/lex",
-        "//rain/lang/parse/expr",
-        "//rain/lang/parse/type",
         "//rain/lang/parse/util",
         "//rain/util",
         "@abseil-cpp//absl/strings",

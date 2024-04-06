@@ -23,9 +23,9 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
 
     auto& ir = ctx.llvm_builder();
 
-    switch (call.callee()->kind()) {
+    switch (call.callee().kind()) {
         case serial::ExpressionKind::Member: {
-            ast::MemberExpression& member     = static_cast<ast::MemberExpression&>(*call.callee());
+            ast::MemberExpression& member     = static_cast<ast::MemberExpression&>(call.callee());
             llvm::Value*           self_value = compile_any_expression(ctx, member.lhs());
             ast::FunctionVariable* function   = call.function();
 

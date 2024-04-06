@@ -35,14 +35,14 @@ class LetExpression : public Expression {
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override {
         return _value->type();
     }
-    [[nodiscard]] constexpr lex::Location location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location location() const noexcept override {
         return _let_location.merge(_value->location());
     }
 
     // LetExpression
-    [[nodiscard]] constexpr std::string_view  name() const noexcept { return _name; }
-    [[nodiscard]] constexpr const Expression& value() const noexcept { return *_value.get(); }
-    [[nodiscard]] constexpr Expression&       value() noexcept { return *_value.get(); }
+    [[nodiscard]] constexpr std::string_view      name() const noexcept { return _name; }
+    [[nodiscard]] /*constexpr*/ const Expression& value() const noexcept { return *_value.get(); }
+    [[nodiscard]] /*constexpr*/ Expression&       value() noexcept { return *_value.get(); }
     [[nodiscard]] constexpr absl::Nullable<Variable*> variable() const noexcept {
         return _variable;
     }

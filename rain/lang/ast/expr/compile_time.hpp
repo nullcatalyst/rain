@@ -25,8 +25,8 @@ class CompileTimeExpression : public Expression {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
 
     // CompileTimeExpression
-    [[nodiscard]] constexpr const ast::Expression& expression() const { return *_expression; }
-    [[nodiscard]] constexpr ast::Expression&       expression() { return *_expression; }
+    [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }
+    [[nodiscard]] /*constexpr*/ ast::Expression&       expression() { return *_expression; }
 
     [[nodiscard]] bool compile_time_capable() const noexcept override {
         if (_expression->kind() == serial::ExpressionKind::CompileTime) {

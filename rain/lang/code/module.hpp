@@ -29,22 +29,24 @@ class Module {
 
     ~Module() = default;
 
-    [[nodiscard]] constexpr const llvm::LLVMContext& llvm_context() const noexcept {
+    [[nodiscard]] /*constexpr*/ const llvm::LLVMContext& llvm_context() const noexcept {
         return *_llvm_ctx;
     }
-    [[nodiscard]] constexpr llvm::LLVMContext&  llvm_context() noexcept { return *_llvm_ctx; }
-    [[nodiscard]] constexpr const llvm::Module& llvm_module() const noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::LLVMContext&  llvm_context() noexcept { return *_llvm_ctx; }
+    [[nodiscard]] /*constexpr*/ const llvm::Module& llvm_module() const noexcept {
         return *_llvm_module;
     }
-    [[nodiscard]] constexpr llvm::Module& llvm_module() noexcept { return *_llvm_module; }
-    [[nodiscard]] constexpr const llvm::ExecutionEngine& llvm_engine() const noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::Module& llvm_module() noexcept { return *_llvm_module; }
+    [[nodiscard]] /*constexpr*/ const llvm::ExecutionEngine& llvm_engine() const noexcept {
         return *_llvm_engine;
     }
-    [[nodiscard]] constexpr llvm::ExecutionEngine& llvm_engine() noexcept { return *_llvm_engine; }
-    [[nodiscard]] constexpr const llvm::TargetMachine& llvm_target_machine() const noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::ExecutionEngine& llvm_engine() noexcept {
+        return *_llvm_engine;
+    }
+    [[nodiscard]] /*constexpr*/ const llvm::TargetMachine& llvm_target_machine() const noexcept {
         return *_llvm_target_machine;
     }
-    [[nodiscard]] constexpr llvm::TargetMachine& llvm_target_machine() noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::TargetMachine& llvm_target_machine() noexcept {
         return *_llvm_target_machine;
     }
 

@@ -2,6 +2,7 @@ cc_library(
     name = "expr",
     srcs = [
         "any.cpp",
+        "array_or_struct_literal.cpp",
         "atom.cpp",
         "binary_operator.cpp",
         "block.cpp",
@@ -17,19 +18,9 @@ cc_library(
         "let.cpp",
         "list.hpp",
         "member.cpp",
-        "module.cpp",
         "parenthesis.cpp",
-        "struct_literal.cpp",
-        "type/array.cpp",
-        "type/interface.cpp",
-        "type/optional.cpp",
-        "type/struct.cpp",
         "unary_operator.cpp",
-        "util/int_value.hpp",
         "while.cpp",
-    ],
-    hdrs = [
-        "all.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",
@@ -37,6 +28,7 @@ cc_library(
     deps = [
         "//rain/lang/ast",
         "//rain/lang/lex",
+        "//rain/lang/parse/util",
         "//rain/util",
         "@abseil-cpp//absl/strings",
     ],

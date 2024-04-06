@@ -2,15 +2,21 @@
 
 #include <memory>
 
+#include "absl/base/nullability.h"
 #include "rain/lang/ast/expr/method.hpp"
+#include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
+
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
                                                                       ast::Scope& scope) {
@@ -23,9 +29,11 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     }
 
     const absl::Nullable<ast::ModuleScope*> module_scope = scope.module();
-    if (module_scope == nullptr) {
-        return ERR_PTR(err::SyntaxError, function_token.location,
-                       "function definition is not allowed in this context");
+    IF_DEBUG {
+        if (module_scope == nullptr) {
+            return ERR_PTR(err::SyntaxError, function_token.location,
+                           "function definition is not allowed in this context");
+        }
     }
 
     util::MaybeOwnedPtr<ast::Type> callee_type = nullptr;
@@ -85,7 +93,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
 
             has_self_argument = true;
 
-            auto self_argument = std::make_unique<ast::BlockVariable>("self", callee_type.get());
+            auto self_argument =
+                std::make_unique<ast::BlockVariable>("self", callee_type.get(), /*mutable*/ false);
             arguments.push_back(self_argument.get());
             body_scope.add_variable("self", std::move(self_argument));
         }
@@ -108,8 +117,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             auto argument_type = parse_any_type(lexer, scope);
             FORWARD_ERROR(argument_type);
 
-            auto argument = std::make_unique<ast::BlockVariable>(argument_name.text(),
-                                                                 std::move(argument_type).value());
+            auto argument = std::make_unique<ast::BlockVariable>(
+                argument_name.text(), std::move(argument_type).value(), /*mutable*/ false);
             arguments.push_back(argument.get());
             body_scope.add_variable(argument_name.text(), std::move(argument));
             return {};

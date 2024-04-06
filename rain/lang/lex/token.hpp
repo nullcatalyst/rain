@@ -95,7 +95,7 @@ struct Token {
      */
     bool whitespace_before = false;
 
-    constexpr std::string_view text() const { return location.text(); }
+    /*constexpr*/ std::string_view text() const { return location.text(); }
 };
 
 }  // namespace rain::lang::lex

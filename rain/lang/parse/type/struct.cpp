@@ -5,10 +5,12 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
 util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexer,
                                                                 ast::Scope& scope) {
@@ -20,21 +22,16 @@ util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexe
         }
     }
 
-    std::optional<std::string_view> struct_name;
-    auto                            next_token = lexer.next();
-    {
-        // Temporarily make struct names required, while we determine the best semantics for unnamed
-        // structs.
-        if (next_token.kind != lex::TokenKind::Identifier) {
-            return ERR_PTR(err::SyntaxError, next_token.location,
-                           "expected identifier for struct name");
-        }
-        struct_name = next_token.text();
-        next_token  = lexer.next();
+    auto name_token = lexer.next();
+    if (name_token.kind != lex::TokenKind::Identifier) {
+        return ERR_PTR(err::SyntaxError, name_token.location,
+                       "expected identifier for struct name");
     }
+    std::string_view struct_name = name_token.text();
 
-    if (next_token.kind != lex::TokenKind::LCurlyBracket) {
-        return ERR_PTR(err::SyntaxError, next_token.location, "expected '{' after struct name");
+    if (auto lbracket_token = lexer.next(); lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
+        return ERR_PTR(err::SyntaxError, lbracket_token.location,
+                       "expected '{' after interface name");
     }
 
     std::vector<ast::StructField> fields;
@@ -66,9 +63,10 @@ util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexe
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
-    return scope.add_type(struct_name, std::make_unique<ast::StructType>(
-                                           struct_name, std::move(fields),
-                                           struct_token.location.merge(rbracket_token.location)));
+    return static_cast<ast::StructType*>(scope.add_type(
+        struct_name,
+        std::make_unique<ast::StructType>(struct_name, std::move(fields),
+                                          struct_token.location.merge(rbracket_token.location))));
 }
 
 }  // namespace rain::lang::parse

@@ -22,23 +22,13 @@ class FunctionDeclarationExpression : public Expression {
     ArgumentList _arguments;
 
     /**
-     * The return type of the function, or null if the function does not return a value.
-     *
-     * This is a "maybe owned pointer" because the return type may be a type that is not yet defined
-     * (eg: an unresolved type referenced only by name), in which case this instance owns the
-     * pointer. But if the type is already defined, then this instance does not own the pointer,
-     * since the type will be owned by the scope.
-     */
-    util::MaybeOwnedPtr<Type> _return_type;
-
-    /**
      * If the function has a name, this will be non-null and will point to the variable that
      * references it.
      */
-    absl::Nullable<FunctionVariable*> _variable = nullptr;
+    absl::Nonnull<FunctionVariable*> _variable = nullptr;
 
     /** The type of the function. */
-    absl::Nullable<FunctionType*> _type = nullptr;
+    absl::Nonnull<FunctionType*> _type = nullptr;
 
     /** The location of the declaration. */
     lex::Location _declaration_location;
@@ -74,11 +64,11 @@ class FunctionDeclarationExpression : public Expression {
     [[nodiscard]] constexpr bool has_return_type() const noexcept {
         return _return_type != nullptr;
     }
-    [[nodiscard]] constexpr absl::Nullable<Type*> return_type() const noexcept {
+    [[nodiscard]] /*constexpr*/ absl::Nullable<Type*> return_type() const noexcept {
         return _return_type.get();
     }
 
-    [[nodiscard]] constexpr bool has_arguments() const noexcept { return !_arguments.empty(); }
+    [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
 

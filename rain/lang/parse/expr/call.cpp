@@ -1,15 +1,17 @@
+#include "rain/lang/ast/expr/call.hpp"
+
 #include <memory>
 
-#include "absl/strings/str_cat.h"
-#include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::CallExpression>> parse_call(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> callee) {

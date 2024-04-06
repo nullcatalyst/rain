@@ -3,6 +3,7 @@
 #include "rain/crypto/sha256.hpp"
 #include "rain/lang/err/simple.hpp"
 #include "rain/lang/serial/header_v0.hpp"
+#include "rain/util/result.hpp"
 
 namespace rain::lang::serial {
 
@@ -54,7 +55,7 @@ void Module::_set_pointers() {
     _expressions_count = v0->expressions_count;
     _indices           = reinterpret_cast<const uint32_t*>(&_expressions[_expressions_count]);
     _indices_count     = v0->indices_count;
-    _strings           = reinterpret_cast<const char*>(_indices[_indices_count]);
+    _strings           = reinterpret_cast<const char*>(&_indices[_indices_count]);
     _strings_size      = v0->strings_size;
 }
 

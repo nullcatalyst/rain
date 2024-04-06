@@ -1,15 +1,19 @@
+#include "rain/lang/ast/expr/extern.hpp"
+
 #include <memory>
 
-#include "rain/lang/ast/expr/method.hpp"
+#include "rain/lang/ast/expr/function_declaration.hpp"
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/lang/lex/string_value.hpp"
-#include "rain/lang/parse/all.hpp"
-#include "rain/lang/parse/list.hpp"
+#include "rain/lang/parse/util/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
+    lex::Lexer& lexer, ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& lexer,
                                                                   ast::Scope& scope) {

@@ -10,8 +10,10 @@ util::Result<void> FunctionExpression::validate(Options& options, Scope& scope) 
         FORWARD_ERROR(result);
     }
 
-    _variable = scope.add_function(nullptr, _type->argument_types(), _name,
-                                   std::make_unique<FunctionVariable>(_name, _type));
+    // TODO: Add the proper location
+    _variable =
+        scope.add_function(nullptr, _type->argument_types(), _name,
+                           std::make_unique<FunctionVariable>(_name, _type, lex::Location()));
 
     return _block->validate(options, scope);
 }

@@ -4,12 +4,13 @@
 #include <cstdint>
 
 #include "rain/crypto/sha256.hpp"
+#include "rain/lang/serial/packed.hpp"
 
 namespace rain::lang::serial {
 
 using MagicNumber = std::array<uint8_t, 8>;
 
-struct __attribute__((packed)) Header {
+PACKED_STRUCT(struct Header {
     MagicNumber magic;
 
     /**
@@ -22,7 +23,7 @@ struct __attribute__((packed)) Header {
 
     uint8_t                version;
     std::array<uint8_t, 3> _reserved_1;  // Padding to end the struct on a 4 byte boundary
-};
+});
 
 constexpr const MagicNumber RAIN_MAGIC_NUMBER{
     // clang-format off

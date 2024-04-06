@@ -2,13 +2,18 @@
 
 #include <memory>
 
+#include "rain/lang/ast/expr/block.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>>      parse_any_expression(lex::Lexer& lexer,
+                                                                         ast::Scope& scope);
+util::Result<std::unique_ptr<ast::BlockExpression>> parse_block(lex::Lexer& lexer,
+                                                                ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast::Scope& scope) {
     const auto if_token = lexer.next();

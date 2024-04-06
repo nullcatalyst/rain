@@ -37,26 +37,28 @@ class Context {
     [[nodiscard]] constexpr const Options& options() const noexcept { return _options; }
     [[nodiscard]] constexpr Options&       options() noexcept { return _options; }
 
-    [[nodiscard]] constexpr const llvm::LLVMContext& llvm_context() const noexcept {
+    [[nodiscard]] /*constexpr*/ const llvm::LLVMContext& llvm_context() const noexcept {
         return _module.llvm_context();
     }
-    [[nodiscard]] constexpr llvm::LLVMContext& llvm_context() noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::LLVMContext& llvm_context() noexcept {
         return _module.llvm_context();
     }
-    [[nodiscard]] constexpr const llvm::Module& llvm_module() const noexcept {
+    [[nodiscard]] /*constexpr*/ const llvm::Module& llvm_module() const noexcept {
         return _module.llvm_module();
     }
-    [[nodiscard]] constexpr llvm::Module& llvm_module() noexcept { return _module.llvm_module(); }
-    [[nodiscard]] constexpr const llvm::ExecutionEngine& llvm_engine() const noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::Module& llvm_module() noexcept {
+        return _module.llvm_module();
+    }
+    [[nodiscard]] /*constexpr*/ const llvm::ExecutionEngine& llvm_engine() const noexcept {
         return _module.llvm_engine();
     }
-    [[nodiscard]] constexpr llvm::ExecutionEngine& llvm_engine() noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::ExecutionEngine& llvm_engine() noexcept {
         return _module.llvm_engine();
     }
-    [[nodiscard]] constexpr const llvm::TargetMachine& llvm_target_machine() const noexcept {
+    [[nodiscard]] /*constexpr*/ const llvm::TargetMachine& llvm_target_machine() const noexcept {
         return _module.llvm_target_machine();
     }
-    [[nodiscard]] constexpr llvm::TargetMachine& llvm_target_machine() noexcept {
+    [[nodiscard]] /*constexpr*/ llvm::TargetMachine& llvm_target_machine() noexcept {
         return _module.llvm_target_machine();
     }
     [[nodiscard]] constexpr llvm::IRBuilder<>& llvm_builder() noexcept { return _llvm_builder; }

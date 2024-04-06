@@ -1,11 +1,11 @@
+#include "rain/lang/ast/expr/member.hpp"
+
 #include <memory>
 
 #include "absl/strings/str_cat.h"
-#include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {

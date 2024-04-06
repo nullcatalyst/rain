@@ -30,13 +30,14 @@ class CallExpression : public Expression {
         return serial::ExpressionKind::Call;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _callee->location().merge(_arguments_location);
     }
     [[nodiscard]] bool compile_time_capable() const noexcept override;
 
     // CallExpression
-    [[nodiscard]] constexpr const std::unique_ptr<Expression>& callee() const { return _callee; }
+    [[nodiscard]] /*constexpr*/ Expression&       callee() { return *_callee; }
+    [[nodiscard]] /*constexpr*/ const Expression& callee() const { return *_callee; }
     [[nodiscard]] constexpr const llvm::SmallVector<std::unique_ptr<Expression>, 4>& arguments()
         const {
         return _arguments;

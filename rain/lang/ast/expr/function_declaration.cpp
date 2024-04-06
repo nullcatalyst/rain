@@ -13,8 +13,10 @@ util::Result<void> FunctionDeclarationExpression::validate(Options& options, Sco
 }
 
 void FunctionDeclarationExpression::add_to_scope(Scope& scope) {
-    _variable = scope.add_function(nullptr, _type->argument_types(), _name,
-                                   std::make_unique<FunctionVariable>(_name, _type));
+    // TODO: Add the proper location
+    _variable =
+        scope.add_function(nullptr, _type->argument_types(), _name,
+                           std::make_unique<FunctionVariable>(_name, _type, lex::Location()));
 }
 
 util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options& options,

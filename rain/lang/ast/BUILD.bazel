@@ -1,5 +1,11 @@
 cc_library(
     name = "ast",
+    srcs = [
+        "module.cpp",
+    ],
+    hdrs = [
+        "module.hpp",
+    ],
     visibility = [
         "//rain:__subpackages__",
     ],
@@ -13,6 +19,9 @@ cc_library(
 
 cc_library(
     name = "hdrs",
+    hdrs = [
+        "module.hpp",
+    ],
     visibility = [
         "//rain:__subpackages__",
     ],

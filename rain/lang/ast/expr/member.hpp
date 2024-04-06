@@ -29,15 +29,15 @@ class MemberExpression : public Expression {
         return serial::ExpressionKind::Member;
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _lhs->location().merge(_member_location);
     }
 
     // MemberExpression
-    [[nodiscard]] constexpr const Expression& lhs() const { return *_lhs; }
-    [[nodiscard]] constexpr Expression&       lhs() { return *_lhs; }
-    [[nodiscard]] constexpr std::string_view  name() const noexcept { return _name; }
-    [[nodiscard]] constexpr lex::Location     member_location() const noexcept {
+    [[nodiscard]] /*constexpr*/ const Expression& lhs() const { return *_lhs; }
+    [[nodiscard]] /*constexpr*/ Expression&       lhs() { return *_lhs; }
+    [[nodiscard]] constexpr std::string_view      name() const noexcept { return _name; }
+    [[nodiscard]] constexpr lex::Location         member_location() const noexcept {
         return _member_location;
     }
 

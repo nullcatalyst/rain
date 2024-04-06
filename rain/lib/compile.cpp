@@ -8,7 +8,7 @@
 #include "rain/lang/err/simple.hpp"
 #include "rain/lang/lex/lazy.hpp"
 #include "rain/lang/lex/lazy_list.hpp"
-#include "rain/lang/parse/all.hpp"
+#include "rain/lang/parse/module.hpp"
 #include "rain/lang/target/wasm/options.hpp"
 #include "rain/util/result.hpp"
 
