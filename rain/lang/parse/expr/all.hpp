@@ -28,6 +28,7 @@
 #include "rain/lang/ast/expr/while.hpp"
 
 // Types
+#include "rain/lang/ast/type/interface.hpp"
 #include "rain/lang/ast/type/struct.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/ast/type/unresolved.hpp"
@@ -82,11 +83,13 @@ util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& le
 // Types
 util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
 
-util::Result<std::unique_ptr<ast::ArrayType>>  parse_array_type(lex::Lexer& lexer,
-                                                                ast::Scope& scope);
-util::Result<std::unique_ptr<ast::OptionalType>>  parse_optional_type(lex::Lexer& lexer,
+util::Result<std::unique_ptr<ast::ArrayType>>     parse_array_type(lex::Lexer& lexer,
                                                                    ast::Scope& scope);
-util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lexer,
-                                                                 ast::Scope& scope);
+util::Result<std::unique_ptr<ast::OptionalType>>  parse_optional_type(lex::Lexer& lexer,
+                                                                      ast::Scope& scope);
+util::Result<std::unique_ptr<ast::StructType>>    parse_struct_type(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
+util::Result<std::unique_ptr<ast::InterfaceType>> parse_interface_type(lex::Lexer& lexer,
+                                                                       ast::Scope& scope);
 
 }  // namespace rain::lang::parse

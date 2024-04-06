@@ -39,6 +39,7 @@ enum class ExpressionKind {
     Method,
     Let,
     Type,
+    Implementation,
 
     Count,
 };

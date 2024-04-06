@@ -13,6 +13,7 @@ namespace rain::lang::ast {
 absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument_types,
                                                         Type*           return_type) {
     const bool owns_types =
+        (argument_types.empty() && builtin() == this) ||
         std::any_of(argument_types.begin(), argument_types.end(),
                     [this](auto* type) { return _owned_types.contains(_unwrap_type(type)); }) ||
         (return_type != nullptr && _owned_types.contains(_unwrap_type(return_type)));
@@ -78,6 +79,7 @@ absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexce
     if (const auto it = _named_types.find(name); it != _named_types.end()) {
         return it->second;
     }
+
     return nullptr;
 }
 
@@ -124,6 +126,15 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
     _named_variables.insert_or_assign(name, variable_ptr);
     _owned_variables.insert(std::move(variable));
     return variable_ptr;
+}
+
+util::Result<void> Scope::validate(code::Options& options) {
+    for (auto& type : _owned_types) {
+        auto result = type->validate(options, *this);
+        FORWARD_ERROR(result);
+    }
+
+    return {};
 }
 
 }  // namespace rain::lang::ast

@@ -1,15 +1,17 @@
+#include "rain/lang/ast/type/struct.hpp"
+
 #include <memory>
 
+#include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
-#include "rain/lang/parse/all.hpp"
 #include "rain/lang/parse/list.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
 
-util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lexer,
-                                                                 ast::Scope& scope) {
+util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexer,
+                                                                ast::Scope& scope) {
     const auto struct_token = lexer.next();
     IF_DEBUG {
         if (struct_token.kind != lex::TokenKind::Struct) {
@@ -64,8 +66,9 @@ util::Result<std::unique_ptr<ast::StructType>> parse_struct_type(lex::Lexer& lex
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
-    return std::make_unique<ast::StructType>(std::move(struct_name), std::move(fields),
-                                             struct_token.location.merge(rbracket_token.location));
+    return scope.add_type(struct_name, std::make_unique<ast::StructType>(
+                                           struct_name, std::move(fields),
+                                           struct_token.location.merge(rbracket_token.location)));
 }
 
 }  // namespace rain::lang::parse

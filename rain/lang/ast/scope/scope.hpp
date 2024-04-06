@@ -7,6 +7,8 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/hash/hash.h"
 #include "llvm/ADT/SmallVector.h"
+#include "rain/lang/options.hpp"
+#include "rain/util/result.hpp"
 
 namespace llvm {
 
@@ -98,6 +100,8 @@ class Scope {
 
     virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
                                                   std::unique_ptr<Variable> variable);
+
+    virtual util::Result<void> validate(Options& options);
 
   protected:
     [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type(

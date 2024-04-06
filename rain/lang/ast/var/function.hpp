@@ -22,9 +22,12 @@ class FunctionVariable : public Variable {
     std::string_view             _name;
     absl::Nonnull<FunctionType*> _function_type;
 
+    lex::Location _location;
+
   public:
-    FunctionVariable(const std::string_view name, absl::Nonnull<FunctionType*> type)
-        : _name(name), _function_type(type) {}
+    FunctionVariable(const std::string_view name, absl::Nonnull<FunctionType*> type,
+                     lex::Location location)
+        : _name(name), _function_type(type), _location(location) {}
     ~FunctionVariable() override = default;
 
     [[nodiscard]] serial::VariableKind kind() const noexcept override {
@@ -35,6 +38,7 @@ class FunctionVariable : public Variable {
     [[nodiscard]] absl::Nonnull<FunctionType*> function_type() const noexcept {
         return _function_type;
     }
+    [[nodiscard]] lex::Location location() const noexcept override { return _location; }
 
     [[nodiscard]] virtual llvm::Value* build_call(
         code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept;

@@ -6,6 +6,14 @@
 
 namespace rain::lang::ast {
 
+void UnresolvedType::add_ref(Expression& expression) noexcept {
+    _expression_refs.insert(&expression);
+}
+
+void UnresolvedType::remove_ref(Expression& expression) noexcept {
+    _expression_refs.erase(&expression);
+}
+
 util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Options& options, Scope& scope) {
     auto resolved_type = scope.find_type(_name);
     if (resolved_type == nullptr) {

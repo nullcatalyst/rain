@@ -28,6 +28,7 @@ cc_library(
         "type/all.hpp",
         "type/array.cpp",
         "type/function.cpp",
+        "type/interface.cpp",
         "type/optional.cpp",
         "type/struct.cpp",
         "type/type.cpp",

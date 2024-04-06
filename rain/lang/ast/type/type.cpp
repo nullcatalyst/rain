@@ -26,6 +26,14 @@ std::string ArrayType::display_name() const noexcept {
     return absl::StrCat("[", _length, "]", _type->display_name());
 }
 
+void Type::add_ref(Expression& expression) noexcept {
+    // Do nothing.
+}
+
+void Type::remove_ref(Expression& expression) noexcept {
+    // Do nothing.
+}
+
 util::Result<absl::Nonnull<Type*>> ArrayType::resolve(Options& options, Scope& scope) {
     auto result = _type->resolve(options, scope);
     FORWARD_ERROR(result);

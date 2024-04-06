@@ -1,6 +1,7 @@
 #include "rain/lang/ast/type/type.hpp"
 
 #include "rain/lang/ast/type/function.hpp"
+#include "rain/lang/ast/type/interface.hpp"
 #include "rain/lang/ast/type/struct.hpp"
 #include "rain/lang/code/type/all.hpp"
 #include "rain/util/console.hpp"
@@ -32,6 +33,9 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
 
         case serial::TypeKind::Struct:
             return compile_struct_type(ctx, static_cast<ast::StructType&>(type));
+
+        case serial::TypeKind::Interface:
+            return compile_interface_type(ctx, static_cast<ast::InterfaceType&>(type));
 
         case serial::TypeKind::Array:
             return compile_array_type(ctx, static_cast<ast::ArrayType&>(type));

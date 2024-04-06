@@ -23,6 +23,8 @@ class Type {
     std::unique_ptr<OptionalType>                           _optional_type;
     absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>> _array_types;
 
+    std::vector<absl::Nonnull<Type*>> _interface_implementations;
+
   public:
     static std::string type_name(absl::Nullable<Type*> type) noexcept {
         if (type == nullptr) {
@@ -39,6 +41,9 @@ class Type {
 
     [[nodiscard]] OptionalType& get_optional_type();
     [[nodiscard]] ArrayType&    get_array_type(size_t length);
+
+    virtual void add_ref(Expression& expression) noexcept;
+    virtual void remove_ref(Expression& expression) noexcept;
 
     [[nodiscard]] constexpr const absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>>&
     array_types() const noexcept {

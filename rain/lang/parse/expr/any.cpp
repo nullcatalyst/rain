@@ -22,6 +22,9 @@ util::Result<std::unique_ptr<ast::Type>> parse_any_type(lex::Lexer& lexer, ast::
         case lex::TokenKind::Struct:
             return parse_struct_type(lexer, scope);
 
+        case lex::TokenKind::Interface:
+            return parse_interface_type(lexer, scope);
+
         case lex::TokenKind::LSquareBracket:
             return parse_array_type(lexer, scope);
 

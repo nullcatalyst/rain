@@ -17,6 +17,8 @@ class UnresolvedType : public Type {
 
     lex::Location _location;
 
+    absl::flat_hash_set<absl::Nonnull<ast::Expression*>> _expression_refs;
+
   public:
     UnresolvedType(std::string_view name, lex::Location location)
         : _name(name), _location(location) {}
@@ -30,6 +32,9 @@ class UnresolvedType : public Type {
         return std::string(_name);
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+
+    void add_ref(Expression& expression) noexcept override;
+    void remove_ref(Expression& expression) noexcept override;
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

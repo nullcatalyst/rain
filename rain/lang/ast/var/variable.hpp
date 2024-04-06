@@ -20,6 +20,7 @@ class Variable {
     [[nodiscard]] virtual std::string_view     name() const noexcept = 0;
     [[nodiscard]] virtual absl::Nonnull<Type*> type() const noexcept = 0;
     [[nodiscard]] virtual bool                 mutable_() const noexcept { return false; }
+    [[nodiscard]] virtual lex::Location        location() const noexcept = 0;
 
     [[nodiscard]] virtual util::Result<void> validate(Options& options, Scope& scope) noexcept = 0;
 };

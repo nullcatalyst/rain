@@ -12,10 +12,9 @@ util::Result<void> FunctionDeclarationExpression::validate(Options& options, Sco
     return {};
 }
 
-util::Result<void> FunctionDeclarationExpression::add_to_scope(Options& options, Scope& scope) {
+void FunctionDeclarationExpression::add_to_scope(Scope& scope) {
     _variable = scope.add_function(nullptr, _type->argument_types(), _name,
                                    std::make_unique<FunctionVariable>(_name, _type));
-    return {};
 }
 
 util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options& options,
