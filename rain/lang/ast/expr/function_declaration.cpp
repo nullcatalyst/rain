@@ -3,6 +3,16 @@
 
 namespace rain::lang::ast {
 
+FunctionDeclarationExpression::FunctionDeclarationExpression(
+    std::string_view name, ArgumentList arguments, absl::Nonnull<FunctionType*> function_type,
+    lex::Location declaration_location)
+    : _name(name),
+      _arguments(std::move(arguments)),
+      _type(function_type),
+      _declaration_location(declaration_location) {
+    _type->add_ref(*this);
+}
+
 util::Result<void> FunctionDeclarationExpression::validate(Options& options, Scope& scope) {
     {
         auto result = _validate_declaration(options, scope);
@@ -26,21 +36,34 @@ util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options&
         FORWARD_ERROR(result);
     }
 
-    if (_return_type != nullptr) {
-        auto return_type = _return_type->resolve(options, scope);
-        FORWARD_ERROR(return_type);
+    // if (_return_type != nullptr) {
+    //     auto return_type = _return_type->resolve(options, scope);
+    //     FORWARD_ERROR(return_type);
 
-        _return_type = std::move(return_type).value();
-    }
+    //     _return_type = std::move(return_type).value();
+    // }
 
-    Scope::TypeList argument_types;
-    argument_types.reserve(_arguments.size());
-    for (const auto& argument : _arguments) {
-        argument_types.push_back(argument->type());
-    }
-    _type = scope.get_function_type(argument_types, _return_type.get());
+    // Scope::TypeList argument_types;
+    // argument_types.reserve(_arguments.size());
+    // for (const auto& argument : _arguments) {
+    //     argument_types.push_back(argument->type());
+    // }
+    // _type = scope.get_function_type(argument_types, _return_type.get());
+
+    _type = static_cast<FunctionType*>(_type->should_be_replaced_with(scope));
 
     return {};
+}
+
+void FunctionDeclarationExpression::replace_type(absl::Nonnull<Type*> old_type,
+                                                 absl::Nonnull<Type*> new_type) {
+    // for (auto& argument : _arguments) {
+    //     argument->replace_type(old_type, new_type);
+    // }
+
+    if (_type == old_type) {
+        _type = static_cast<FunctionType*>(new_type);
+    }
 }
 
 }  // namespace rain::lang::ast

@@ -87,8 +87,15 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
                                           ? function_token.location.merge(return_type->location())
                                           : function_token.location.merge(rparen_location);
 
+    ast::Scope::TypeList argument_types;
+    argument_types.reserve(arguments.size());
+    for (const auto& argument : arguments) {
+        argument_types.emplace_back(argument->type());
+    }
+    auto* function_type = scope.get_function_type(argument_types, return_type.get());
+
     return std::make_unique<ast::FunctionDeclarationExpression>(
-        std::move(fn_name), std::move(arguments), std::move(return_type), declaration_location);
+        std::move(fn_name), std::move(arguments), function_type, declaration_location);
 }
 
 }  // namespace rain::lang::parse

@@ -7,6 +7,7 @@
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"
+#include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
 
@@ -83,6 +84,20 @@ absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexce
     return nullptr;
 }
 
+absl::Nonnull<Type*> Scope::find_or_unresolved_type(const std::string_view name,
+                                                    lex::Location          location) noexcept {
+    // NOTE: We cannot use the `find_type()` method here, because some derived classes may
+    // recursively search parent scopes for a type. This would be a problem if a tyep defined in
+    // this scope shadows the type defined in a parent scope, and we accidentally pass back the
+    // parent's version of the type instead of our own (not yet defined) version.
+
+    if (const auto it = _named_types.find(name); it != _named_types.end()) {
+        return it->second;
+    }
+
+    return _unresolved_types.emplace_back(std::make_unique<UnresolvedType>(name, location)).get();
+}
+
 absl::Nullable<FunctionVariable*> Scope::find_function(absl::Nullable<Type*>  callee_type,
                                                        const TypeList&        argument_types,
                                                        const std::string_view name) const noexcept {
@@ -111,7 +126,6 @@ absl::Nonnull<FunctionVariable*> Scope::add_function(absl::Nullable<Type*>  call
                                                      std::unique_ptr<FunctionVariable> function) {
     assert(function != nullptr);
 
-    std::cout << "Scope::add_function(" << name << ")" << argument_types.size() << std::endl;
     auto* function_ptr = function.get();
     _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name),
                                          function_ptr);
@@ -130,10 +144,18 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
 }
 
 util::Result<void> Scope::validate(Options& options) {
-    // for (auto& type : _owned_types) {
-    //     auto result = type->validate(options, *this);
-    //     FORWARD_ERROR(result);
-    // }
+    for (auto& unresolved_type : _unresolved_types) {
+        auto  name = unresolved_type->name();
+        auto* type = find_type(name);
+        if (type == nullptr) {
+            return ERR_PTR(err::SyntaxError, unresolved_type->location(),
+                           absl::StrCat("no type named '", name, "' found in scope"));
+        }
+
+        unresolved_type->resolve_to_type(type);
+    }
+
+    _unresolved_types.clear();
 
     return {};
 }

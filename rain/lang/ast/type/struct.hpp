@@ -12,16 +12,13 @@
 namespace rain::lang::ast {
 
 struct StructField {
-    std::string_view          name;
-    util::MaybeOwnedPtr<Type> type;
-
-    StructField(std::string_view name, util::MaybeOwnedPtr<Type> type)
-        : name(name), type(std::move(type)) {}
+    std::string_view     name;
+    absl::Nonnull<Type*> type;
 };
 
 class StructType : public Type {
-    /** The name of the struct, if it has one. */
-    std::optional<std::string_view> _name;
+    /** The name of the struct. */
+    std::string_view _name;
 
     /** The set of fields contained in the struct. */
     std::vector<StructField> _fields;
@@ -29,27 +26,17 @@ class StructType : public Type {
     lex::Location _location;
 
   public:
-    StructType(std::optional<std::string_view> name, std::vector<StructField> fields,
-               lex::Location location)
-        : _name(std::move(name)), _fields(std::move(fields)), _location(location) {}
+    StructType(std::string_view name, std::vector<StructField> fields, lex::Location location);
 
     // Type
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Struct;
     }
-    [[nodiscard]] std::string display_name() const noexcept override {
-        if (_name.has_value()) {
-            return std::string(_name.value());
-        }
-        return "<unnamed_struct>";
-    }
+    [[nodiscard]] std::string display_name() const noexcept override { return std::string(_name); }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
 
     // StructType
-    [[nodiscard]] constexpr bool   is_named() const noexcept { return _name.has_value(); }
-    [[nodiscard]] std::string_view name_or_empty() const noexcept {
-        return _name.value_or(std::string_view());
-    }
+    [[nodiscard]] std::string_view name() const noexcept { return _name; }
 
     [[nodiscard]] constexpr bool has_fields() const noexcept { return !_fields.empty(); }
     [[nodiscard]] constexpr const std::vector<StructField>& fields() const noexcept {
@@ -67,6 +54,8 @@ class StructType : public Type {
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
+
+    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
 };
 
 }  // namespace rain::lang::ast

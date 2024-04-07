@@ -6,7 +6,7 @@
 namespace rain::lang::code {
 
 llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& array_literal) {
-    ast::ArrayType&  array_type = *static_cast<ast::ArrayType*>(array_literal.type());
+    ast::ArrayType&  array_type = static_cast<ast::ArrayType&>(*array_literal.type());
     llvm::ArrayType* llvm_type  = static_cast<llvm::ArrayType*>(ctx.llvm_type(&array_type));
 
     std::vector<llvm::Value*> llvm_element_values;

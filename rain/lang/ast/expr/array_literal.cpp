@@ -8,18 +8,31 @@
 
 namespace rain::lang::ast {
 
-util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& scope) {
-    auto type = _type->resolve(options, scope);
-    FORWARD_ERROR(type);
-    _type = std::move(type).value();
+ArrayLiteralExpression::ArrayLiteralExpression(absl::Nonnull<Type*>                     type,
+                                               std::vector<std::unique_ptr<Expression>> elements,
+                                               lex::Location                            location)
+    : _type(type), _elements(std::move(elements)), _location(location) {
+    _type->add_ref(*this);
+}
 
-    // Check if the type is a struct.
-    if (_type->kind() != serial::TypeKind::Array) {
+ArrayLiteralExpression::~ArrayLiteralExpression() { _type->remove_ref(*this); }
+
+util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& scope) {
+    // auto type = _type->resolve(options, scope);
+    // FORWARD_ERROR(type);
+    // _type = std::move(type).value();
+
+    _type = _type->should_be_replaced_with(scope);
+
+    IF_DEBUG {
+        // Check if the type is an array.
+        if (_type->kind() != serial::TypeKind::Array) {
         return ERR_PTR(err::SimpleError,
                        absl::StrCat("type \"", _type->display_name(), "\" is not an array type"));
+        }
     }
 
-    ArrayType& array_type = static_cast<ArrayType&>(*_type.get());
+    ArrayType& array_type = static_cast<ArrayType&>(*_type);
 
     // Validate each field.
     for (int i = 0, end = _elements.size(); i < end; ++i) {

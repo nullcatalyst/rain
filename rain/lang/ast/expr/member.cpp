@@ -33,7 +33,7 @@ util::Result<void> MemberExpression::validate(Options& options, Scope& scope) {
                        absl::StrCat("struct member ", _name, " not found"));
     }
 
-    _type = struct_type->fields()[member.value()].type.get_nonnull();
+    _type = struct_type->fields()[member.value()].type;
     return {};
 }
 

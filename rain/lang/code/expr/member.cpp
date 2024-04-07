@@ -26,14 +26,12 @@ llvm::Value* compile_member(Context& ctx, ast::MemberExpression& member) {
         assert(variable != nullptr && "variable is null");
 
         // if (variable->mutable_()) {
-        auto* llvm_member_type =
-            ctx.llvm_type(struct_type.fields()[member_index].type.get_nonnull());
+        auto* llvm_member_type = ctx.llvm_type(struct_type.fields()[member_index].type);
         assert(llvm_member_type != nullptr && "member type is null");
 
         return llvm_ir.CreateLoad(
             llvm_member_type,
             llvm_ir.CreateStructGEP(llvm_owner_type, ctx.llvm_value(variable), member_index));
-        // }
     }
 
     return llvm_ir.CreateExtractValue(llvm_owner, static_cast<unsigned int>(member_index));

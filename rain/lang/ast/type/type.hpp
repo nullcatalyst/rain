@@ -34,7 +34,7 @@ class Type {
         return type->display_name();
     }
 
-    virtual ~Type() { std::cout << "Type::~Type() for " << display_name() << std::endl; }
+    virtual ~Type() = default;
 
     [[nodiscard]] virtual serial::TypeKind kind() const noexcept = 0;
     [[nodiscard]] virtual std::string      display_name() const noexcept { return "<error_type>"; }
@@ -45,6 +45,8 @@ class Type {
 
     virtual void add_ref(Expression& expression) noexcept;
     virtual void remove_ref(Expression& expression) noexcept;
+    virtual void add_ref(Type& type) noexcept;
+    virtual void remove_ref(Type& type) noexcept;
 
     [[nodiscard]] constexpr const absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>>&
     array_types() const noexcept {
@@ -60,6 +62,23 @@ class Type {
      */
     [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                                      Scope&   scope) = 0;
+
+    /**
+     * When a type contains a reference to an unresolved type, when the scope is being validated,
+     * this method will be called with the unresolved type, and a pointer to the new type that it
+     * should be replaced with.
+     */
+    virtual void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type);
+
+    /**
+     * When either a type or an expression is being fully resolved (after unresolved types have been
+     * dealt with and replaced), this method will be called to replace duplicate type instances with
+     * the singleton type instance (for example, to ensure that there is only a single optional type
+     * of a type).
+     */
+    [[nodiscard]] virtual absl::Nonnull<Type*> should_be_replaced_with(Scope& scope) noexcept {
+        return this;
+    }
 };
 
 class ArrayType : public Type {
@@ -69,10 +88,8 @@ class ArrayType : public Type {
     lex::Location _location;
 
   public:
-    ArrayType(util::MaybeOwnedPtr<Type> type, size_t length)
-        : _type(std::move(type)), _length(length) {}
-    ArrayType(util::MaybeOwnedPtr<Type> type, size_t length, lex::Location location)
-        : _type(std::move(type)), _length(length), _location(location) {}
+    ArrayType(util::MaybeOwnedPtr<Type> type, size_t length);
+    ArrayType(util::MaybeOwnedPtr<Type> type, size_t length, lex::Location location);
     ~ArrayType() override = default;
 
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
@@ -87,6 +104,9 @@ class ArrayType : public Type {
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
+
+    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
+    [[nodiscard]] absl::Nonnull<Type*> should_be_replaced_with(Scope& scope) noexcept override;
 };
 
 class OptionalType : public Type {
@@ -111,6 +131,9 @@ class OptionalType : public Type {
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
+
+    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
+    [[nodiscard]] absl::Nonnull<Type*> should_be_replaced_with(Scope& scope) noexcept override;
 };
 
 }  // namespace rain::lang::ast

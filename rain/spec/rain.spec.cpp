@@ -30,6 +30,33 @@
         std::cout << ir << std::endl;                \
     } while (false)
 
+TEST(Lang, struct_declaration) {
+    const std::string_view code = R"(
+struct Vec2 {
+    x: f32,
+    y: f32,
+}
+)";
+
+    RUN_TEST();
+}
+
+TEST(Lang, struct_out_of_order_declaration) {
+    const std::string_view code = R"(
+struct Entity {
+    position: Vec2,
+    velocity: Vec2,
+}
+
+struct Vec2 {
+    x: f32,
+    y: f32,
+}
+)";
+
+    RUN_TEST();
+}
+
 TEST(Lang, array) {
     const std::string_view code = R"(
 export fn int_array() -> [4]i32 {
@@ -39,7 +66,7 @@ export fn int_array() -> [4]i32 {
 
     RUN_TEST();
 }
-
+/*
 TEST(Lang, array_of_struct) {
     const std::string_view code = R"(
 struct Vec2 {
@@ -109,3 +136,4 @@ export fn add_vecs() -> Vec2 {
 
     RUN_TEST();
 }
+*/

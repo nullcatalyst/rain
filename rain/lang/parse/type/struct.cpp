@@ -52,7 +52,10 @@ util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexe
             auto field_type = parse_any_type(lexer, scope);
             FORWARD_ERROR(field_type);
 
-            fields.emplace_back(field_name.text(), std::move(field_type).value());
+            fields.emplace_back(ast::StructField{
+                                         .name = field_name.text(),
+                                         .type = std::move(field_type).value(),
+            });
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {

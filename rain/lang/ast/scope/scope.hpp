@@ -1,12 +1,14 @@
 #pragma once
 
 #include <tuple>
+#include <vector>
 
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/hash/hash.h"
 #include "llvm/ADT/SmallVector.h"
+#include "rain/lang/lex/location.hpp"
 #include "rain/lang/options.hpp"
 #include "rain/util/result.hpp"
 
@@ -24,6 +26,7 @@ namespace rain::lang::ast {
 class Type;
 class MetaType;
 class FunctionType;
+class UnresolvedType;
 
 class Variable;
 class FunctionVariable;
@@ -45,6 +48,11 @@ class Scope {
     absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>>  _function_types;
     absl::flat_hash_map<absl::Nonnull<Type*>, absl::Nonnull<MetaType*>> _meta_types;
     absl::flat_hash_set<std::unique_ptr<Type>>                          _owned_types;
+
+    /**
+     * Stores the set of types that need to be resolved after parsing.
+     */
+    std::vector<std::unique_ptr<UnresolvedType>> _unresolved_types;
 
     absl::flat_hash_map<FunctionVariableKey, absl::Nonnull<FunctionVariable*>> _function_variables;
     absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>            _named_variables;
@@ -79,6 +87,9 @@ class Scope {
 
     [[nodiscard]] virtual absl::Nullable<Type*> find_type(
         const std::string_view name) const noexcept;
+
+    [[nodiscard]] virtual absl::Nonnull<Type*> find_or_unresolved_type(
+        const std::string_view name, lex::Location location) noexcept;
 
     /**
      * The passed in `callee_type` can be null for any function that is not a method, and does not
@@ -120,5 +131,6 @@ class Scope {
 
 #include "rain/lang/ast/type/function.hpp"
 #include "rain/lang/ast/type/type.hpp"
+#include "rain/lang/ast/type/unresolved.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"

@@ -37,8 +37,8 @@ llvm::Value* compile_struct_literal(Context& ctx, ast::StructLiteralExpression& 
                 continue;
             }
 
-            llvm_field_values[i] = llvm::Constant::getNullValue(
-                ctx.llvm_type(struct_type.fields()[i].type.get_nonnull()));
+            llvm_field_values[i] =
+                llvm::Constant::getNullValue(ctx.llvm_type(struct_type.fields()[i].type));
         }
 
         llvm::ArrayRef<llvm::Constant*> llvm_constants(

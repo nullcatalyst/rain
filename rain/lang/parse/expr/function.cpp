@@ -166,13 +166,20 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
                                           ? function_token.location.merge(return_type->location())
                                           : function_token.location.merge(rparen_location);
 
+    ast::Scope::TypeList argument_types;
+    argument_types.reserve(arguments.size());
+    for (const auto& argument : arguments) {
+        argument_types.emplace_back(argument->type());
+    }
+    auto* function_type = scope.get_function_type(argument_types, return_type.get());
+
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(
-            std::move(callee_type), fn_name, std::move(arguments), std::move(return_type),
-            std::move(body), has_self_argument, declaration_location, callee_type->location());
+            std::move(callee_type), fn_name, std::move(arguments), function_type, std::move(body),
+            has_self_argument, declaration_location, callee_type->location());
     }
     return std::make_unique<ast::FunctionExpression>(std::move(fn_name), std::move(arguments),
-                                                     std::move(return_type), std::move(body),
+                                                     function_type, std::move(body),
                                                      declaration_location);
 }
 

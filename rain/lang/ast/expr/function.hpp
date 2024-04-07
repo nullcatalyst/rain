@@ -18,10 +18,17 @@ class FunctionExpression : public FunctionDeclarationExpression {
     std::unique_ptr<BlockExpression> _block;
 
   public:
+    // FunctionExpression(std::string_view name, ArgumentList arguments,
+    //                    util::MaybeOwnedPtr<Type>        return_type,
+    //                    std::unique_ptr<BlockExpression> block, lex::Location
+    //                    declaration_location)
+    //     : FunctionDeclarationExpression(name, std::move(arguments), std::move(return_type),
+    //                                     declaration_location),
+    //       _block(std::move(block)) {}
     FunctionExpression(std::string_view name, ArgumentList arguments,
-                       util::MaybeOwnedPtr<Type>        return_type,
+                       absl::Nonnull<FunctionType*>     function_type,
                        std::unique_ptr<BlockExpression> block, lex::Location declaration_location)
-        : FunctionDeclarationExpression(name, std::move(arguments), std::move(return_type),
+        : FunctionDeclarationExpression(name, std::move(arguments), function_type,
                                         declaration_location),
           _block(std::move(block)) {}
 
@@ -43,13 +50,6 @@ class FunctionExpression : public FunctionDeclarationExpression {
 
     // FunctionExpression
     [[nodiscard]] std::string_view name() const noexcept { return _name; }
-
-    [[nodiscard]] constexpr bool has_return_type() const noexcept {
-        return _return_type != nullptr;
-    }
-    [[nodiscard]] /*constexpr*/ absl::Nullable<Type*> return_type() const noexcept {
-        return _return_type.get();
-    }
 
     [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }

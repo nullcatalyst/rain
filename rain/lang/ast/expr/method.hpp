@@ -19,11 +19,21 @@ class MethodExpression : public FunctionExpression {
     lex::Location _callee_type_location;
 
   public:
+    // MethodExpression(util::MaybeOwnedPtr<Type> callee_type, std::string_view name,
+    //                  ArgumentList arguments, util::MaybeOwnedPtr<Type> return_type,
+    //                  std::unique_ptr<BlockExpression> block, bool has_self_argument,
+    //                  lex::Location declaration_location, lex::Location callee_type_location)
+    //     : FunctionExpression(name, std::move(arguments), std::move(return_type),
+    //     std::move(block),
+    //                          declaration_location),
+    //       _callee_type(std::move(callee_type)),
+    //       _has_self_argument(has_self_argument),
+    //       _callee_type_location(callee_type_location) {}
     MethodExpression(util::MaybeOwnedPtr<Type> callee_type, std::string_view name,
-                     ArgumentList arguments, util::MaybeOwnedPtr<Type> return_type,
+                     ArgumentList arguments, absl::Nonnull<FunctionType*> function_type,
                      std::unique_ptr<BlockExpression> block, bool has_self_argument,
                      lex::Location declaration_location, lex::Location callee_type_location)
-        : FunctionExpression(name, std::move(arguments), std::move(return_type), std::move(block),
+        : FunctionExpression(name, std::move(arguments), function_type, std::move(block),
                              declaration_location),
           _callee_type(std::move(callee_type)),
           _has_self_argument(has_self_argument),

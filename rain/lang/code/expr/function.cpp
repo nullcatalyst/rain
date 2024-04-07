@@ -20,11 +20,11 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
     }
 
     llvm::Value* llvm_return_value = compile_block(ctx, *function.block());
-    if (function.return_type() == nullptr) {
+    if (auto* return_type = function.function_type()->return_type(); return_type == nullptr) {
         llvm_ir.CreateRetVoid();
     } else {
-        if (function.return_type()->kind() == serial::TypeKind::Optional) {
-            auto* llvm_return_type = get_or_compile_type(ctx, *function.return_type());
+        if (return_type->kind() == serial::TypeKind::Optional) {
+            auto* llvm_return_type = get_or_compile_type(ctx, *return_type);
             if (llvm_return_value == nullptr) {
                 llvm_return_value = llvm::Constant::getNullValue(llvm_return_type);
             } else if (llvm_return_value->getType() != llvm_return_type) {

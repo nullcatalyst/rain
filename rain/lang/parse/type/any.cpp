@@ -14,14 +14,13 @@
 namespace rain::lang::parse {
 
 util::Result<absl::Nonnull<ast::ArrayType*>> parse_array_type(lex::Lexer& lexer, ast::Scope& scope);
-util::Result<absl::Nonnull<ast::OptionalType*>>   parse_optional_type(lex::Lexer& lexer,
+util::Result<absl::Nonnull<ast::OptionalType*>>  parse_optional_type(lex::Lexer& lexer,
+                                                                     ast::Scope& scope);
+util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
+                                                                   ast::Scope& scope);
+util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
-util::Result<absl::Nonnull<ast::StructType*>>     parse_struct_type(lex::Lexer& lexer,
-                                                                    ast::Scope& scope);
-util::Result<absl::Nonnull<ast::InterfaceType*>>  parse_interface_type(lex::Lexer& lexer,
-                                                                       ast::Scope& scope);
-util::Result<absl::Nonnull<ast::UnresolvedType*>> parse_unresolved_type(lex::Lexer& lexer,
-                                                                        ast::Scope& scope);
+util::Result<absl::Nonnull<ast::Type*>> parse_named_type(lex::Lexer& lexer, ast::Scope& scope);
 
 util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope) {
     const auto token = lexer.peek();
@@ -39,7 +38,7 @@ util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::S
             return parse_optional_type(lexer, scope);
 
         case lex::TokenKind::Identifier:
-            return parse_unresolved_type(lexer, scope);
+            return parse_named_type(lexer, scope);
 
         default:
             return ERR_PTR(err::SyntaxError, token.location,

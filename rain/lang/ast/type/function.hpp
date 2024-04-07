@@ -15,8 +15,7 @@ class FunctionType : public Type {
     absl::Nullable<Type*> _return_type;
 
   public:
-    FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type)
-        : _argument_types(argument_types), _return_type(return_type) {}
+    FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type);
 
     ~FunctionType() override = default;
 
@@ -39,6 +38,9 @@ class FunctionType : public Type {
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
+
+    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
+    [[nodiscard]] absl::Nonnull<Type*> should_be_replaced_with(Scope& scope) noexcept override;
 };
 
 }  // namespace rain::lang::ast

@@ -4,9 +4,9 @@ cc_library(
         "any.cpp",
         "array.cpp",
         "interface.cpp",
+        "named.cpp",
         "optional.cpp",
         "struct.cpp",
-        "unresolved.cpp",
     ],
     visibility = [
         "//rain:__subpackages__",

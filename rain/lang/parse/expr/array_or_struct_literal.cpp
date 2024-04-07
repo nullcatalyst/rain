@@ -40,7 +40,8 @@ util::Result<std::unique_ptr<ast::ArrayLiteralExpression>> parse_array_literal(
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
     return std::make_unique<ast::ArrayLiteralExpression>(
-        std::move(type), std::move(elements), first_token.location.merge(rbracket_token.location));
+        type.get_nonnull(), std::move(elements),
+        first_token.location.merge(rbracket_token.location));
 }
 
 util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(
