@@ -115,9 +115,8 @@ class OptionalType : public Type {
     lex::Location _location;
 
   public:
-    OptionalType(util::MaybeOwnedPtr<Type> type) : _type(std::move(type)) {}
-    OptionalType(util::MaybeOwnedPtr<Type> type, lex::Location location)
-        : _type(std::move(type)), _location(location) {}
+    OptionalType(util::MaybeOwnedPtr<Type> type);
+    OptionalType(util::MaybeOwnedPtr<Type> type, lex::Location location);
     ~OptionalType() override = default;
 
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {

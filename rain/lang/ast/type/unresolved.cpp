@@ -1,6 +1,7 @@
 #include "rain/lang/ast/type/unresolved.hpp"
 
 #include "absl/strings/str_cat.h"
+#include "rain/lang/ast/expr/expression.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/simple.hpp"
 #include "rain/util/console.hpp"
@@ -34,12 +35,12 @@ util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Options& options, Sco
 }
 
 util::Result<void> UnresolvedType::resolve_to_type(absl::Nonnull<Type*> resolved_type) {
-    // for (auto& expression : _expression_refs) {
-    //     expression->replace_type(this, resolved_type);
-    // }
-
     for (auto& type : _type_refs) {
         type->replace_type(this, resolved_type);
+    }
+
+    for (auto& expression : _expression_refs) {
+        expression->replace_type(this, resolved_type);
     }
 
     IF_DEBUG {

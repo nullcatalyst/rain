@@ -82,8 +82,12 @@ class Scope {
         return _owned_variables;
     }
 
-    [[nodiscard]] virtual absl::Nonnull<FunctionType*> get_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept = 0;
+    /**
+     * Tries to recursively find a function type with the given argument types and return type. If
+     * the function type does not exist, it will be created and returned.
+     */
+    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
+        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
 
     [[nodiscard]] virtual absl::Nullable<Type*> find_type(
         const std::string_view name) const noexcept;
@@ -113,9 +117,21 @@ class Scope {
                                                   std::unique_ptr<Variable> variable);
 
     virtual util::Result<void> validate(Options& options);
+    virtual util::Result<void> cleanup();
 
   protected:
-    [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type(
+    /**
+     * Try to find or create a function type with the given argument types and return type, but only
+     * if it is owned by the current scope.
+     */
+    [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type_in_current_scope(
+        const TypeList& argument_types, absl::Nullable<Type*> return_type);
+
+    /**
+     * Create a new function type with the given argument types and return type, adding it to the
+     * current scope. This does NOT check if the function type already exists.
+     */
+    [[nodiscard]] absl::Nonnull<FunctionType*> _create_function_type(
         const TypeList& argument_types, absl::Nullable<Type*> return_type);
 
     absl::Nonnull<Type*> _add_owned_named_type(const std::string_view name,

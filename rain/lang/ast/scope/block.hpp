@@ -25,8 +25,8 @@ class BlockScope : public Scope {
         return _module.builtin();
     }
 
-    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
+    // [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
+    //     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
 
     [[nodiscard]] absl::Nullable<Type*> find_type(
         const std::string_view name) const noexcept override;

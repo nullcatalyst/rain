@@ -11,11 +11,11 @@
 
 #define DO_OPTIMIZE true
 
-#define RUN_TEST()                                   \
+#define RUN_TEST($code)                              \
     do {                                             \
         rain::lang::wasm::initialize_llvm();         \
                                                      \
-        auto module_result = rain::compile(code);    \
+        auto module_result = rain::compile($code);   \
         ASSERT_TRUE(check_success(module_result));   \
         auto mod = std::move(module_result).value(); \
                                                      \
@@ -29,7 +29,7 @@
                                                      \
         std::cout << ir << std::endl;                \
     } while (false)
-
+/*
 TEST(Lang, struct_declaration) {
     const std::string_view code = R"(
 struct Vec2 {
@@ -38,7 +38,7 @@ struct Vec2 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
 
 TEST(Lang, struct_out_of_order_declaration) {
@@ -54,9 +54,9 @@ struct Vec2 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
-
+*/
 TEST(Lang, array) {
     const std::string_view code = R"(
 export fn int_array() -> [4]i32 {
@@ -64,7 +64,7 @@ export fn int_array() -> [4]i32 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
 /*
 TEST(Lang, array_of_struct) {

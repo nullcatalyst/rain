@@ -31,7 +31,8 @@ class UnresolvedType : public Type {
         return serial::TypeKind::Unresolved;
     }
     [[nodiscard]] constexpr std::string display_name() const noexcept override {
-        return std::string(_name);
+        // return std::string(_name);
+        return std::string(_name) + " (unresolved)";
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
 
@@ -41,6 +42,7 @@ class UnresolvedType : public Type {
     void remove_ref(Type& type) noexcept override;
 
     [[nodiscard]] constexpr std::string_view name() const noexcept { return _name; }
+    [[nodiscard]] bool is_used() const { return !_expression_refs.empty() || !_type_refs.empty(); }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

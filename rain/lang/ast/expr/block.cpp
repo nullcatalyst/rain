@@ -10,8 +10,18 @@ bool BlockExpression::compile_time_capable() const noexcept {
 }
 
 util::Result<void> BlockExpression::validate(Options& options, Scope& scope) {
-    for (auto& expr : _expressions) {
-        auto result = expr->validate(options, _scope);
+    {
+        auto result = _scope.validate(options);
+        FORWARD_ERROR(result);
+    }
+
+    for (auto& expression : _expressions) {
+        auto result = expression->validate(options, _scope);
+        FORWARD_ERROR(result);
+    }
+
+    {
+        auto result = _scope.cleanup();
         FORWARD_ERROR(result);
     }
 

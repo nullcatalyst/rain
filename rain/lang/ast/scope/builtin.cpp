@@ -25,10 +25,10 @@ BuiltinScope::BuiltinScope() {
                          // unknown reason).
                          std::vector<StructField> fields;
                          fields.reserve(4);
-                         fields.emplace_back("x", _f32_type);
-                         fields.emplace_back("y", _f32_type);
-                         fields.emplace_back("z", _f32_type);
-                         fields.emplace_back("w", _f32_type);
+                         fields.emplace_back(StructField{"x", _f32_type});
+                         fields.emplace_back(StructField{"y", _f32_type});
+                         fields.emplace_back(StructField{"z", _f32_type});
+                         fields.emplace_back(StructField{"w", _f32_type});
                          return fields;
                      }(),
                      lex::Location()));
@@ -36,31 +36,32 @@ BuiltinScope::BuiltinScope() {
 #include "rain/lang/ast/scope/builtin/all.inl"
 }
 
-absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
-    const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
-    IF_DEBUG {
-        // All of the argument types must be non-null.
-        // The return type MAY BE null (in the case of a void function).
-        // All of the involved types (arguments and return type) must be owned by this scope.
-        for ([[maybe_unused]] auto* argument_type : argument_types) {
-            assert(argument_type != nullptr);
-            assert(_owned_types.contains(_unwrap_type(argument_type)));
-        }
-        if (return_type != nullptr) {
-            if (!_owned_types.contains(_unwrap_type(return_type))) {
-                util::panic("builtin scope does not own return type");
-            }
-        }
-    }
+// absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
+//     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
+//     IF_DEBUG {
+//         // All of the argument types must be non-null.
+//         // The return type MAY BE null (in the case of a void function).
+//         // All of the involved types (arguments and return type) must be owned by this scope.
+//         for ([[maybe_unused]] auto* argument_type : argument_types) {
+//             assert(argument_type != nullptr);
+//             assert(_owned_types.contains(_unwrap_type(argument_type)));
+//         }
+//         if (return_type != nullptr) {
+//             std::cout << "return type: " << return_type->display_name() << "\n";
+//             if (!_owned_types.contains(_unwrap_type(return_type))) {
+//                 util::panic("builtin scope does not own return type");
+//             }
+//         }
+//     }
 
-    auto type = Scope::_get_function_type(argument_types, return_type);
-    if (type == nullptr) {
-        util::panic(
-            "failed to find function type: cannot create a function type with types not found in "
-            "scope at any level (this should never happen)");
-    }
-    return type;
-}
+//     auto type = Scope::_get_function_type(argument_types, return_type);
+//     if (type == nullptr) {
+//         util::panic(
+//             "failed to find function type: cannot create a function type with types not found in
+//             " "scope at any level (this should never happen)");
+//     }
+//     return type;
+// }
 
 void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
     _function_variables.insert_or_assign(

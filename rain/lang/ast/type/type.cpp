@@ -99,6 +99,15 @@ absl::Nonnull<Type*> ArrayType::should_be_replaced_with(Scope& scope) noexcept {
 ////////////////////////////////////////////////////////////////
 // OptionalType
 
+OptionalType::OptionalType(util::MaybeOwnedPtr<Type> type) : _type(std::move(type)) {
+    _type->add_ref(*this);
+}
+
+OptionalType::OptionalType(util::MaybeOwnedPtr<Type> type, lex::Location location)
+    : _type(std::move(type)), _location(location) {
+    _type->add_ref(*this);
+}
+
 std::string OptionalType::display_name() const noexcept {
     return absl::StrCat("?", _type->display_name());
 }

@@ -14,8 +14,11 @@ class FunctionType : public Type {
     ArgumentTypeList      _argument_types;
     absl::Nullable<Type*> _return_type;
 
+    bool _unresolved;
+
   public:
-    FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type);
+    FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type,
+                 bool unresolved);
 
     ~FunctionType() override = default;
 

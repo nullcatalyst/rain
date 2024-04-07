@@ -30,7 +30,7 @@ class BlockVariable : public Variable {
         return _type.get_nonnull();
     }
     [[nodiscard]] bool          mutable_() const noexcept override { return _mutable; }
-    [[nodiscard]] lex::Location location() const noexcept { return lex::Location(); }
+    [[nodiscard]] lex::Location location() const noexcept override { return lex::Location(); }
 
     [[nodiscard]] util::Result<void> validate(Options& options, Scope& scope) noexcept override;
 };

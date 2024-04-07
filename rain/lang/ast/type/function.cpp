@@ -4,8 +4,9 @@
 
 namespace rain::lang::ast {
 
-FunctionType::FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type)
-    : _argument_types(argument_types), _return_type(return_type) {
+FunctionType::FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type,
+                           bool unresolved)
+    : _argument_types(argument_types), _return_type(return_type), _unresolved(unresolved) {
     for (auto* argument_type : _argument_types) {
         argument_type->add_ref(*this);
     }
@@ -26,10 +27,12 @@ std::string FunctionType::display_name() const noexcept {
         }
     }
 
+    auto prefix = _unresolved ? "unresolved " : "";
     if (_return_type != nullptr) {
-        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->display_name());
+        return absl::StrCat(prefix, "fn(", argument_type_names, ") -> ",
+                            _return_type->display_name());
     } else {
-        return absl::StrCat("fn(", argument_type_names, ")");
+        return absl::StrCat(prefix, "fn(", argument_type_names, ")");
     }
 }
 

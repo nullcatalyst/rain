@@ -53,20 +53,13 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         }
     }
 
-    std::string_view fn_name;
-    lex::Location    fn_name_location;
-    auto             next_token = lexer.next();
-    if (next_token.kind == lex::TokenKind::Identifier) {
-        fn_name          = next_token.text();
-        fn_name_location = next_token.location;
-        next_token       = lexer.next();
-    } else if (callee_type != nullptr) {
-        return ERR_PTR(err::SyntaxError, next_token.location,
-                       "a function name is required when defining a function with a callee type");
+    auto name_token = lexer.next();
+    if (name_token.kind != lex::TokenKind::Identifier) {
+        return ERR_PTR(err::SyntaxError, name_token.location, "expected function name");
     }
 
-    if (next_token.kind != lex::TokenKind::LRoundBracket) {
-        return ERR_PTR(err::SyntaxError, next_token.location,
+    if (auto lparen_token = lexer.next(); lparen_token.kind != lex::TokenKind::LRoundBracket) {
+        return ERR_PTR(err::SyntaxError, lparen_token.location,
                        "expected '(' before function arguments");
     }
 
@@ -132,8 +125,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     const auto rparen_location = lexer.next().location;  // Consume the ')'
 
     util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
-    next_token                                 = lexer.peek();
-    if (next_token.kind == lex::TokenKind::RArrow) {
+    if (auto arrow_token = lexer.peek(); arrow_token.kind == lex::TokenKind::RArrow) {
         lexer.next();  // Consume the '->' token
 
         auto return_type_result = parse_any_type(lexer, scope);
@@ -175,10 +167,10 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
 
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(
-            std::move(callee_type), fn_name, std::move(arguments), function_type, std::move(body),
-            has_self_argument, declaration_location, callee_type->location());
+            std::move(callee_type), name_token.text(), std::move(arguments), function_type,
+            std::move(body), has_self_argument, declaration_location, callee_type->location());
     }
-    return std::make_unique<ast::FunctionExpression>(std::move(fn_name), std::move(arguments),
+    return std::make_unique<ast::FunctionExpression>(name_token.text(), std::move(arguments),
                                                      function_type, std::move(body),
                                                      declaration_location);
 }

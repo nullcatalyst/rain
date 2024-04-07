@@ -49,8 +49,10 @@ util::Result<void> FunctionDeclarationExpression::_validate_declaration(Options&
     //     argument_types.push_back(argument->type());
     // }
     // _type = scope.get_function_type(argument_types, _return_type.get());
-
     _type = static_cast<FunctionType*>(_type->should_be_replaced_with(scope));
+
+    std::cout << "FunctionDeclarationExpression::_validate_declaration " << _type->display_name()
+              << std::endl;
 
     return {};
 }

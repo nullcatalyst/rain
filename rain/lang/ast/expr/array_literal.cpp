@@ -15,7 +15,9 @@ ArrayLiteralExpression::ArrayLiteralExpression(absl::Nonnull<Type*>             
     _type->add_ref(*this);
 }
 
-ArrayLiteralExpression::~ArrayLiteralExpression() { _type->remove_ref(*this); }
+ArrayLiteralExpression::~ArrayLiteralExpression() {
+    //_type->remove_ref(*this);
+}
 
 util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& scope) {
     // auto type = _type->resolve(options, scope);
@@ -27,8 +29,8 @@ util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& sco
     IF_DEBUG {
         // Check if the type is an array.
         if (_type->kind() != serial::TypeKind::Array) {
-        return ERR_PTR(err::SimpleError,
-                       absl::StrCat("type \"", _type->display_name(), "\" is not an array type"));
+            return ERR_PTR(err::SimpleError, absl::StrCat("type \"", _type->display_name(),
+                                                          "\" is not an array type"));
         }
     }
 

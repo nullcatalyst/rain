@@ -2,13 +2,24 @@
 
 namespace rain::lang::ast {
 
-absl::Nonnull<FunctionType*> BlockScope::get_function_type(
-    const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
-    if (auto* type = Scope::_get_function_type(argument_types, return_type); type != nullptr) {
-        return type;
-    }
-    return _parent.get_function_type(argument_types, return_type);
-}
+// absl::Nonnull<FunctionType*> BlockScope::get_function_type(
+//     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
+//     if (auto* type = Scope::_get_function_type_in_current_scope(argument_types, return_type);
+//         type != nullptr) {
+//         return type;
+//     }
+
+//     auto* parent = &_parent;
+//     while (_parent != nullptr) {
+//         if (auto* type = _parent->get_function_type_in_current_scope(argument_types,
+//         return_type);
+//             type != nullptr) {
+//             return type;
+//         }
+//     }
+
+//     return _create_function_type(argument_types, return_type);
+// }
 
 absl::Nullable<Type*> BlockScope::find_type(const std::string_view name) const noexcept {
     if (const auto it = Scope::find_type(name); it != nullptr) {

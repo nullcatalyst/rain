@@ -11,8 +11,8 @@
 
 namespace rain::lang::ast {
 
-absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument_types,
-                                                        Type*           return_type) {
+absl::Nullable<FunctionType*> Scope::_get_function_type_in_current_scope(
+    const TypeList& argument_types, Type* return_type) {
     const bool owns_types =
         (argument_types.empty() && builtin() == this) ||
         std::any_of(argument_types.begin(), argument_types.end(),
@@ -30,9 +30,15 @@ absl::Nullable<FunctionType*> Scope::_get_function_type(const TypeList& argument
         return it->second;
     }
 
-    auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type);
+    return _create_function_type(argument_types, return_type);
+}
+
+absl::Nonnull<FunctionType*> Scope::_create_function_type(const TypeList& argument_types,
+                                                          Type*           return_type) {
+    auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type, false);
     auto* function_type_ptr = function_type.get();
-    _function_types.insert_or_assign(key, function_type_ptr);
+    _function_types.insert_or_assign(std::make_tuple(argument_types, return_type),
+                                     function_type_ptr);
     _owned_types.insert(std::move(function_type));
     return function_type_ptr;
 }
@@ -74,6 +80,32 @@ absl::Nonnull<Type*> Scope::_unwrap_type(absl::Nonnull<Type*> type) {
                 return type;
         }
     }
+}
+
+absl::Nonnull<FunctionType*> Scope::get_function_type(const TypeList&       argument_types,
+                                                      absl::Nullable<Type*> return_type) noexcept {
+    if (auto* type = Scope::_get_function_type_in_current_scope(argument_types, return_type);
+        type != nullptr) {
+        return type;
+    }
+
+    auto* parent = this->parent();
+    while (parent != nullptr) {
+        if (auto* type = parent->_get_function_type_in_current_scope(argument_types, return_type);
+            type != nullptr) {
+            return type;
+        }
+        parent = parent->parent();
+    }
+
+    // return _create_function_type(argument_types, return_type);
+
+    auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type, true);
+    auto* function_type_ptr = function_type.get();
+    _function_types.insert_or_assign(std::make_tuple(argument_types, return_type),
+                                     function_type_ptr);
+    _owned_types.insert(std::move(function_type));
+    return function_type_ptr;
 }
 
 absl::Nullable<Type*> Scope::find_type(const std::string_view name) const noexcept {
@@ -145,6 +177,13 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
 
 util::Result<void> Scope::validate(Options& options) {
     for (auto& unresolved_type : _unresolved_types) {
+        if (!unresolved_type->is_used()) {
+            // Unresolved types that are not referenced anywhere can occur because of attempting to
+            // parse a method callee type, but it isn't a method, which causes the parsing to fail
+            // and fallback to parsing a simple function, leaving the callee type unreferenced.
+            continue;
+        }
+
         auto  name = unresolved_type->name();
         auto* type = find_type(name);
         if (type == nullptr) {
@@ -155,7 +194,22 @@ util::Result<void> Scope::validate(Options& options) {
         unresolved_type->resolve_to_type(type);
     }
 
+    return {};
+}
+
+util::Result<void> Scope::cleanup() {
     _unresolved_types.clear();
+
+    // If a type should have been replaced with another type, then that means the original tyep is
+    // no longer needed. We can remove it from the list of owned types.
+    for (auto it = _owned_types.begin(); it != _owned_types.end(); ++it) {
+        auto* owned_type   = it->get();
+        auto* replace_with = owned_type->should_be_replaced_with(*this);
+
+        if (replace_with != owned_type) {
+            _owned_types.erase(it);
+        }
+    }
 
     return {};
 }

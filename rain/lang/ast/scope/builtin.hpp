@@ -50,8 +50,8 @@ class BuiltinScope : public Scope {
         return _external_functions;
     }
 
-    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
+    // [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
+    //     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
 
     absl::Nonnull<Type*> add_type(const std::string_view name,
                                   std::unique_ptr<Type>  type) noexcept override {

@@ -8,15 +8,16 @@ util::Result<void> Module::validate(Options& options) {
         FORWARD_ERROR(result);
     }
 
-    // for (auto& type : _scope.owned_types()) {
-    //     auto result = type->resolve(options, _scope);
-    //     FORWARD_ERROR(result);
-    // }
+    for (auto& expression : _expressions) {
+        auto result = expression->validate(options, _scope);
+        FORWARD_ERROR(result);
+    }
 
-    // for (auto& expression : _expressions) {
-    //     auto result = expression->validate(options, _scope);
-    //     FORWARD_ERROR(result);
-    // }
+    {
+        auto result = _scope.cleanup();
+        FORWARD_ERROR(result);
+    }
+
     return {};
 }
 
