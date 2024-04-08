@@ -2,15 +2,19 @@ cc_library(
     name = "err",
     srcs = [
         "binary_operator.cpp",
+        "multiple_definition.cpp",
         "syntax.cpp",
         "unary_operator.cpp",
+        "underline.cpp",
     ],
     hdrs = [
         "all.hpp",
         "binary_operator.hpp",
+        "multiple_definition.hpp",
         "simple.hpp",
         "syntax.hpp",
         "unary_operator.hpp",
+        "underline.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

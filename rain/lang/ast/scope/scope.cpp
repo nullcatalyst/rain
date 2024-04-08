@@ -8,6 +8,7 @@
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"
+#include "rain/lang/err/multiple_definition.hpp"
 #include "rain/lang/err/syntax.hpp"
 
 namespace rain::lang::ast {
@@ -231,11 +232,17 @@ util::Result<void> Scope::validate(Options& options) {
         // Add the resolved function to the list of owned functions.
         auto* function_type = function->function_type();
 
-        auto* function_ptr = function.get();
-        _function_variables.insert_or_assign(
+        auto* function_ptr        = function.get();
+        const auto [it, inserted] = _function_variables.try_emplace(
             std::make_tuple(function->name(), function_type->callee_type(),
                             function_type->argument_types()),
             function_ptr);
+        if (!inserted) {
+            return ERR_PTR(err::MultipleDefinitionError, it->second->location(),
+                           function->location(),
+                           absl::StrCat("function '", function->name(), "' with type '",
+                                        function_type->display_name(), "' already declared"));
+        }
         _owned_variables.insert(std::move(function));
     }
 
@@ -243,8 +250,8 @@ util::Result<void> Scope::validate(Options& options) {
 }
 
 util::Result<void> Scope::cleanup() {
-    // Performing a swap here allows the capacity of the vector to be freed, instead of `.clear()`
-    // just setting a "used size" to 0.
+    // Performing a swap here allows the capacity of the vector to be freed, instead of
+    // `.clear()` just setting a "used size" to 0.
     decltype(_unresolved_types) empty_unresolved_types;
     std::swap(_unresolved_types, empty_unresolved_types);
 

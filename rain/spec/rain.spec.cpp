@@ -12,7 +12,7 @@
 #define DO_OPTIMIZE true
 #define DO_PRINT false
 
-#define RUN_TEST($code)                              \
+#define EXPECT_COMPILE_SUCCESS($code)                \
     do {                                             \
         rain::lang::wasm::initialize_llvm();         \
                                                      \
@@ -33,6 +33,14 @@
         }                                            \
     } while (false)
 
+#define EXPECT_COMPILE_ERROR($code)                 \
+    do {                                            \
+        rain::lang::wasm::initialize_llvm();        \
+                                                    \
+        auto module_result = rain::compile($code);  \
+        ASSERT_FALSE(check_success(module_result)); \
+    } while (false)
+
 TEST(Lang, function) {
     const std::string_view code = R"(
 export fn four() -> i32 {
@@ -40,7 +48,7 @@ export fn four() -> i32 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, function_calling_other_function) {
@@ -54,7 +62,7 @@ export fn double_four() -> i32 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, out_of_order_function_declaration) {
@@ -68,7 +76,7 @@ export fn four() -> i32 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, struct_declaration) {
@@ -79,7 +87,7 @@ struct Vec2 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, struct_out_of_order_declaration) {
@@ -95,7 +103,7 @@ struct Vec2 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, array) {
@@ -105,7 +113,7 @@ export fn int_array() -> [4]i32 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, array_of_struct) {
@@ -123,7 +131,7 @@ export fn array_of_structs() -> [2]Vec2 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
 }
 
 TEST(Lang, optional) {
@@ -141,7 +149,21 @@ export fn pass_int(value: ?i32) -> ?i32 {
 }
 )";
 
-    RUN_TEST(code);
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
+TEST(Lang, multiple_definition) {
+    const std::string_view code = R"(
+export fn four() -> i32 {  // first
+    4
+}
+
+export fn four() -> i32 {  // second
+    4
+}
+)";
+
+    EXPECT_COMPILE_ERROR(code);
 }
 /*
 TEST(Lang, struct) {

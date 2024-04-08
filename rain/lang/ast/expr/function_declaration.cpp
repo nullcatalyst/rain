@@ -6,8 +6,8 @@ namespace rain::lang::ast {
 FunctionDeclarationExpression::FunctionDeclarationExpression(
     absl::Nullable<FunctionVariable*> variable, ArgumentList arguments,
     absl::Nonnull<FunctionType*> function_type, lex::Location declaration_location)
-    : _variable(variable),
-      _arguments(std::move(arguments)),
+    : _arguments(std::move(arguments)),
+      _variable(variable),
       _type(function_type),
       _declaration_location(declaration_location) {}
 

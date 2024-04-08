@@ -35,7 +35,6 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
         return ERR_PTR(err::SyntaxError, name_token.location,
                        "a name is required when declaring a function");
     }
-    const std::string_view fn_name = name_token.text();
 
     if (const auto lparen_token = lexer.next();
         lparen_token.kind != lex::TokenKind::LRoundBracket) {
