@@ -3,7 +3,10 @@ cc_test(
     size = "small",
     timeout = "short",
     srcs = [
-        "rain.spec.cpp",
+        "array.spec.cpp",
+        "function.spec.cpp",
+        "struct.spec.cpp",
+        "util.hpp",
     ],
     deps = [
         "//rain:lib",
