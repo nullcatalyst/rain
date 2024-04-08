@@ -38,16 +38,16 @@ export fn four() -> i32 {
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-// TEST(Function, nested) {
-//     const std::string_view code = R"(
-// export fn double_four() -> i32 {
-//     2 * four()
+TEST(Function, nested) {
+    const std::string_view code = R"(
+export fn double_four() -> i32 {
+    2 * four()
 
-//     fn four() -> i32 {
-//         4
-//     }
-// }
-// )";
+    fn four() -> i32 {
+        4
+    }
+}
+)";
 
-//     EXPECT_COMPILE_SUCCESS(code);
-// }
+    EXPECT_COMPILE_SUCCESS(code);
+}

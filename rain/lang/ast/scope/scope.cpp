@@ -226,12 +226,13 @@ util::Result<void> Scope::validate(Options& options) {
 
     // Resolve all of the functions.
     for (auto& function : _unresolved_functions) {
+        assert(function.get() != nullptr);
+
         auto result = function->validate(options, *this);
         FORWARD_ERROR(result);
 
         // Add the resolved function to the list of owned functions.
-        auto* function_type = function->function_type();
-
+        auto* function_type       = function->function_type();
         auto* function_ptr        = function.get();
         const auto [it, inserted] = _function_variables.try_emplace(
             std::make_tuple(function->name(), function_type->callee_type(),
@@ -254,6 +255,9 @@ util::Result<void> Scope::cleanup() {
     // `.clear()` just setting a "used size" to 0.
     decltype(_unresolved_types) empty_unresolved_types;
     std::swap(_unresolved_types, empty_unresolved_types);
+
+    decltype(_unresolved_functions) empty_unresolved_functions;
+    std::swap(_unresolved_functions, empty_unresolved_functions);
 
     return {};
 }
