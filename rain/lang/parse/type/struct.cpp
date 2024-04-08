@@ -66,7 +66,7 @@ util::Result<absl::Nonnull<ast::StructType*>> parse_struct_type(lex::Lexer& lexe
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
-    return static_cast<ast::StructType*>(scope.add_type(
+    return static_cast<ast::StructType*>(scope.add_named_type(
         struct_name,
         std::make_unique<ast::StructType>(struct_name, std::move(fields),
                                           struct_token.location.merge(rbracket_token.location))));

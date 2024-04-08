@@ -29,7 +29,7 @@
                                                      \
         std::cout << ir << std::endl;                \
     } while (false)
-/*
+
 TEST(Lang, struct_declaration) {
     const std::string_view code = R"(
 struct Vec2 {
@@ -56,7 +56,17 @@ struct Vec2 {
 
     RUN_TEST(code);
 }
-*/
+
+TEST(Lang, function) {
+    const std::string_view code = R"(
+export fn four() -> i32 {
+    4
+}
+)";
+
+    RUN_TEST(code);
+}
+
 TEST(Lang, array) {
     const std::string_view code = R"(
 export fn int_array() -> [4]i32 {
@@ -66,7 +76,7 @@ export fn int_array() -> [4]i32 {
 
     RUN_TEST(code);
 }
-/*
+
 TEST(Lang, array_of_struct) {
     const std::string_view code = R"(
 struct Vec2 {
@@ -82,7 +92,7 @@ export fn array_of_structs() -> [2]Vec2 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
 
 TEST(Lang, optional) {
@@ -100,9 +110,9 @@ export fn pass_int(value: ?i32) -> ?i32 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
-
+/*
 TEST(Lang, struct) {
     const std::string_view code = R"(
 struct Vec2 {
@@ -115,7 +125,7 @@ export fn Vec2.new(x: f32, y: f32) -> Vec2 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
 
 TEST(Lang, operator_overload) {
@@ -134,6 +144,6 @@ export fn add_vecs() -> Vec2 {
 }
 )";
 
-    RUN_TEST();
+    RUN_TEST(code);
 }
 */

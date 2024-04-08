@@ -12,62 +12,70 @@
 namespace rain::lang::ast {
 
 BuiltinScope::BuiltinScope() {
-    _bool_type  = _add_owned_named_type("bool", std::make_unique<OpaqueType>("bool"));
-    _i32_type   = _add_owned_named_type("i32", std::make_unique<OpaqueType>("i32"));
-    _i64_type   = _add_owned_named_type("i64", std::make_unique<OpaqueType>("i64"));
-    _f32_type   = _add_owned_named_type("f32", std::make_unique<OpaqueType>("f32"));
-    _f64_type   = _add_owned_named_type("f64", std::make_unique<OpaqueType>("f64"));
-    _f32x4_type = _add_owned_named_type(
-        "f32x4", std::make_unique<StructType>(
-                     "f32x4",
-                     [_f32_type = this->_f32_type]() -> std::vector<StructField> {
-                         // std::initializer_list of move-only types is not allowed (for some
-                         // unknown reason).
-                         std::vector<StructField> fields;
-                         fields.reserve(4);
-                         fields.emplace_back(StructField{"x", _f32_type});
-                         fields.emplace_back(StructField{"y", _f32_type});
-                         fields.emplace_back(StructField{"z", _f32_type});
-                         fields.emplace_back(StructField{"w", _f32_type});
-                         return fields;
-                     }(),
-                     lex::Location()));
+    _bool_type = _add_builtin_type("bool", std::make_unique<OpaqueType>("bool"));
+    _i32_type  = _add_builtin_type("i32", std::make_unique<OpaqueType>("i32"));
+    _i64_type  = _add_builtin_type("i64", std::make_unique<OpaqueType>("i64"));
+    _f32_type  = _add_builtin_type("f32", std::make_unique<OpaqueType>("f32"));
+    _f64_type  = _add_builtin_type("f64", std::make_unique<OpaqueType>("f64"));
+    _f32x4_type =
+        _add_builtin_type("f32x4", std::make_unique<StructType>(
+                                       "f32x4",
+                                       [_f32_type = this->_f32_type]() -> std::vector<StructField> {
+                                           // std::initializer_list of move-only types is not
+                                           // allowed (for some unknown reason).
+                                           std::vector<StructField> fields;
+                                           fields.reserve(4);
+                                           fields.emplace_back(StructField{"x", _f32_type});
+                                           fields.emplace_back(StructField{"y", _f32_type});
+                                           fields.emplace_back(StructField{"z", _f32_type});
+                                           fields.emplace_back(StructField{"w", _f32_type});
+                                           return fields;
+                                       }(),
+                                       lex::Location()));
+
+    {
+        // The no-return-value, no-argument function type has to be specially added to the builtin
+        // scope, as without having any types to determine which scope should own the type, no scope
+        // would be selected as its owner. Intentionally adding it here avoids that issue.
+        const TypeList no_args;
+        auto           function_type     = std::make_unique<FunctionType>(no_args, nullptr);
+        auto*          function_type_ptr = function_type.get();
+        _function_types.insert_or_assign(std::make_tuple(no_args, nullptr), function_type_ptr);
+        _owned_types.insert(std::move(function_type));
+    }
 
 #include "rain/lang/ast/scope/builtin/all.inl"
 }
 
-// absl::Nonnull<FunctionType*> BuiltinScope::get_function_type(
-//     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
-//     IF_DEBUG {
-//         // All of the argument types must be non-null.
-//         // The return type MAY BE null (in the case of a void function).
-//         // All of the involved types (arguments and return type) must be owned by this scope.
-//         for ([[maybe_unused]] auto* argument_type : argument_types) {
-//             assert(argument_type != nullptr);
-//             assert(_owned_types.contains(_unwrap_type(argument_type)));
-//         }
-//         if (return_type != nullptr) {
-//             std::cout << "return type: " << return_type->display_name() << "\n";
-//             if (!_owned_types.contains(_unwrap_type(return_type))) {
-//                 util::panic("builtin scope does not own return type");
-//             }
-//         }
-//     }
+absl::Nonnull<Type*> BuiltinScope::add_named_type(const std::string_view name,
+                                                  std::unique_ptr<Type>  type) noexcept {
+    util::panic("the builtin scope is immutable and cannot have custom types added to it");
+}
 
-//     auto type = Scope::_get_function_type(argument_types, return_type);
-//     if (type == nullptr) {
-//         util::panic(
-//             "failed to find function type: cannot create a function type with types not found in
-//             " "scope at any level (this should never happen)");
-//     }
-//     return type;
-// }
+absl::Nonnull<FunctionVariable*> BuiltinScope::add_function(
+    absl::Nonnull<Type*> callee_type, const TypeList& argument_types, const std::string_view name,
+    std::unique_ptr<FunctionVariable> variable) noexcept {
+    util::panic("the builtin scope is immutable and cannot have custom functions added to it");
+}
+
+absl::Nonnull<Variable*> BuiltinScope::add_variable(const std::string_view    name,
+                                                    std::unique_ptr<Variable> variable) noexcept {
+    util::panic("the builtin scope is immutable and cannot have custom variables added to it");
+}
 
 void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
     _function_variables.insert_or_assign(
         std::make_tuple(nullptr, variable->function_type()->argument_types(), variable->name()),
         variable.get());
     _external_functions.emplace_back(std::move(variable));
+}
+
+absl::Nonnull<Type*> BuiltinScope::_add_builtin_type(const std::string_view name,
+                                                     std::unique_ptr<Type>  type) noexcept {
+    auto* const type_ptr = type.get();
+    _named_types.emplace(name, type_ptr);
+    _owned_types.insert(std::move(type));
+    return type_ptr;
 }
 
 }  // namespace rain::lang::ast

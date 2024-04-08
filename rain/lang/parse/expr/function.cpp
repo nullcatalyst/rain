@@ -163,7 +163,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     for (const auto& argument : arguments) {
         argument_types.emplace_back(argument->type());
     }
-    auto* function_type = scope.get_function_type(argument_types, return_type.get());
+    auto* function_type =
+        scope.find_or_create_unresolved_function_type(argument_types, return_type.get());
 
     if (callee_type != nullptr) {
         return std::make_unique<ast::MethodExpression>(

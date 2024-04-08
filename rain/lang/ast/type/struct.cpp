@@ -4,11 +4,7 @@ namespace rain::lang::ast {
 
 StructType::StructType(std::string_view name, std::vector<StructField> fields,
                        lex::Location location)
-    : _name(std::move(name)), _fields(std::move(fields)), _location(location) {
-    for (auto& field : _fields) {
-        field.type->add_ref(*this);
-    }
-}
+    : _name(std::move(name)), _fields(std::move(fields)), _location(location) {}
 
 util::Result<absl::Nonnull<Type*>> StructType::resolve(Options& options, Scope& scope) {
     for (auto& field : _fields) {
@@ -19,20 +15,6 @@ util::Result<absl::Nonnull<Type*>> StructType::resolve(Options& options, Scope& 
     }
 
     return this;
-}
-
-void StructType::replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) {
-    for (auto& field : _fields) {
-        if (field.type == old_type) {
-            field.type = new_type;
-        }
-    }
-
-    IF_DEBUG {
-        // Only remove the ref in debug/test builds, so that a (potentially) expensive search isn't
-        // needed for every replaced instance of every type.
-        old_type->remove_ref(*this);
-    }
 }
 
 }  // namespace rain::lang::ast

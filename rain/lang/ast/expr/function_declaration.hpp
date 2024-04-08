@@ -84,8 +84,6 @@ class FunctionDeclarationExpression : public Expression {
     util::Result<void> validate(Options& options, Scope& scope) override;
     void               add_to_scope(Scope& scope);
 
-    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
-
   protected:
     util::Result<void> _validate_declaration(Options& options, Scope& scope);
 };

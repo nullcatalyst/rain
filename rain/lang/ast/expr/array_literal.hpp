@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rain/lang/ast/expr/expression.hpp"
-#include "rain/lang/ast/type/struct.hpp"
+#include "rain/lang/ast/type/type.hpp"
 
 namespace rain::lang::ast {
 
@@ -15,7 +15,7 @@ class ArrayLiteralExpression : public Expression {
     ArrayLiteralExpression(absl::Nonnull<Type*>                     type,
                            std::vector<std::unique_ptr<Expression>> elements,
                            lex::Location                            location);
-    ~ArrayLiteralExpression() override;
+    ~ArrayLiteralExpression() override = default;
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {

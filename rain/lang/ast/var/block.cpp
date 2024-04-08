@@ -3,10 +3,13 @@
 namespace rain::lang::ast {
 
 util::Result<void> BlockVariable::validate(Options& options, Scope& scope) noexcept {
-    auto resolved_type = _type->resolve(options, scope);
-    FORWARD_ERROR(resolved_type);
+    {
+        auto result = _type->resolve(options, scope);
+        FORWARD_ERROR(result);
 
-    _type = std::move(resolved_type).value();
+        _type = std::move(result).value();
+    }
+
     return {};
 }
 

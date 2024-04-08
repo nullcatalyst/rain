@@ -13,10 +13,13 @@ llvm::Value* FunctionVariable::build_call(
 
 [[nodiscard]] util::Result<void> FunctionVariable::validate(Options& options,
                                                             Scope&   scope) noexcept {
-    auto resolved_type = _function_type->resolve(options, scope);
-    FORWARD_ERROR(resolved_type);
+    {
+        auto result = _function_type->resolve(options, scope);
+        FORWARD_ERROR(result);
 
-    _function_type = reinterpret_cast<FunctionType*>(std::move(resolved_type).value());
+        _function_type = static_cast<FunctionType*>(std::move(result).value());
+    }
+
     return {};
 }
 

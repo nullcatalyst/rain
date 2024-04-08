@@ -14,9 +14,9 @@ class BuiltinFunctionVariable : public FunctionVariable {
     BuildFn _build_fn;
 
   public:
-    BuiltinFunctionVariable(std::string_view name, FunctionType* type, BuildFn&& build_fn)
-        : FunctionVariable(name, std::move(type), lex::Location()),
-          _build_fn(std::move(build_fn)) {}
+    BuiltinFunctionVariable(std::string_view name, absl::Nonnull<FunctionType*> function_type,
+                            BuildFn&& build_fn)
+        : FunctionVariable(name, function_type, lex::Location()), _build_fn(std::move(build_fn)) {}
     ~BuiltinFunctionVariable() override = default;
 
     [[nodiscard]] llvm::Value* build_call(

@@ -50,26 +50,24 @@ class BuiltinScope : public Scope {
         return _external_functions;
     }
 
-    // [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
-    //     const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept override;
+    ////////////////////////////////////////////////////////////////
+    // Add AST nodes
 
-    absl::Nonnull<Type*> add_type(const std::string_view name,
-                                  std::unique_ptr<Type>  type) noexcept override {
-        util::panic("the builtin scope is immutable and cannot have custom types added to it");
-    }
+    absl::Nonnull<Type*> add_named_type(const std::string_view name,
+                                        std::unique_ptr<Type>  type) noexcept override;
 
     absl::Nonnull<FunctionVariable*> add_function(
         absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
-        const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override {
-        util::panic("the builtin scope is immutable and cannot have custom functions added to it");
-    }
+        const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override;
 
     absl::Nonnull<Variable*> add_variable(const std::string_view    name,
-                                          std::unique_ptr<Variable> variable) noexcept override {
-        util::panic("the builtin scope is immutable and cannot have custom variables added to it");
-    }
+                                          std::unique_ptr<Variable> variable) noexcept override;
 
     void declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable);
+
+  private:
+    absl::Nonnull<Type*> _add_builtin_type(const std::string_view name,
+                                           std::unique_ptr<Type>  type) noexcept;
 };
 
 }  // namespace rain::lang::ast

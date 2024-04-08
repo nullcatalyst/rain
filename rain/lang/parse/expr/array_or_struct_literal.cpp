@@ -19,8 +19,7 @@ util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::S
 namespace {
 
 util::Result<std::unique_ptr<ast::ArrayLiteralExpression>> parse_array_literal(
-    lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token,
-    util::MaybeOwnedPtr<ast::Type> type) {
+    lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token, absl::Nonnull<ast::Type*> type) {
     std::vector<std::unique_ptr<ast::Expression>> elements;
     auto                                          result = parse_list(
         lexer, lex::TokenKind::Comma, lex::TokenKind::RCurlyBracket,
@@ -40,13 +39,11 @@ util::Result<std::unique_ptr<ast::ArrayLiteralExpression>> parse_array_literal(
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
     return std::make_unique<ast::ArrayLiteralExpression>(
-        type.get_nonnull(), std::move(elements),
-        first_token.location.merge(rbracket_token.location));
+        type, std::move(elements), first_token.location.merge(rbracket_token.location));
 }
 
 util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(
-    lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token,
-    util::MaybeOwnedPtr<ast::Type> type) {
+    lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token, absl::Nonnull<ast::Type*> type) {
     std::vector<ast::StructLiteralField> fields;
     auto                                 result = parse_list(
         lexer, lex::TokenKind::Comma, lex::TokenKind::RCurlyBracket,
@@ -81,7 +78,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
     return std::make_unique<ast::StructLiteralExpression>(
-        std::move(type), std::move(fields), first_token.location.merge(rbracket_token.location));
+        type, std::move(fields), first_token.location.merge(rbracket_token.location));
 }
 
 }  // namespace
@@ -92,7 +89,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(lex::Lexer& 
 
     auto type_result = parse_any_type(lexer, scope);
     FORWARD_ERROR(type_result);
-    util::MaybeOwnedPtr<ast::Type> type = std::move(type_result).value();
+    absl::Nonnull<ast::Type*> type = std::move(type_result).value();
 
     const auto lbracket_token = lexer.next();
     if (lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
@@ -106,9 +103,9 @@ util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(lex::Lexer& 
     }
 
     if (type->kind() == serial::TypeKind::Array) {
-        return parse_array_literal(lexer, scope, first_token, std::move(type));
+        return parse_array_literal(lexer, scope, first_token, type);
     }
-    return parse_struct_literal(lexer, scope, first_token, std::move(type));
+    return parse_struct_literal(lexer, scope, first_token, type);
 }
 
 }  // namespace rain::lang::parse

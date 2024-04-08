@@ -52,7 +52,7 @@ class Scope {
     /**
      * Stores the set of types that need to be resolved after parsing.
      */
-    std::vector<std::unique_ptr<UnresolvedType>> _unresolved_types;
+    std::vector<std::unique_ptr<Type>> _unresolved_types;
 
     absl::flat_hash_map<FunctionVariableKey, absl::Nonnull<FunctionVariable*>> _function_variables;
     absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>            _named_variables;
@@ -61,52 +61,45 @@ class Scope {
   public:
     virtual ~Scope() = default;
 
-    [[nodiscard]] constexpr const absl::flat_hash_set<std::unique_ptr<Type>>& owned_types()
-        const noexcept {
-        return _owned_types;
-    }
-    [[nodiscard]] constexpr const absl::flat_hash_set<std::unique_ptr<Variable>>& owned_variables()
-        const noexcept {
+    [[nodiscard]] constexpr const auto& owned_types() const noexcept { return _owned_types; }
+    [[nodiscard]] constexpr auto&       owned_types() noexcept { return _owned_types; }
+    [[nodiscard]] constexpr const auto& owned_variables() const noexcept {
         return _owned_variables;
     }
+    [[nodiscard]] constexpr auto& owned_variables() noexcept { return _owned_variables; }
 
     [[nodiscard]] virtual absl::Nullable<Scope*>       parent() const noexcept  = 0;
     [[nodiscard]] virtual absl::Nonnull<ModuleScope*>  module() const noexcept  = 0;
     [[nodiscard]] virtual absl::Nonnull<BuiltinScope*> builtin() const noexcept = 0;
 
-    [[nodiscard]] constexpr absl::flat_hash_set<std::unique_ptr<Type>>& owned_types() noexcept {
-        return _owned_types;
-    }
-    [[nodiscard]] constexpr absl::flat_hash_set<std::unique_ptr<Variable>>&
-    owned_variables() noexcept {
-        return _owned_variables;
-    }
+    ////////////////////////////////////////////////////////////////
+    // Find AST nodes
 
-    /**
-     * Tries to recursively find a function type with the given argument types and return type. If
-     * the function type does not exist, it will be created and returned.
-     */
+    [[nodiscard]] absl::Nonnull<Type*> find_or_create_unresolved_named_type(
+        const std::string_view name, lex::Location location) noexcept;
+    [[nodiscard]] absl::Nullable<Type*> find_named_type(const std::string_view name) const noexcept;
+
+    [[nodiscard]] absl::Nonnull<FunctionType*> find_or_create_unresolved_function_type(
+        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
     [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
         const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
-
-    [[nodiscard]] virtual absl::Nullable<Type*> find_type(
-        const std::string_view name) const noexcept;
-
-    [[nodiscard]] virtual absl::Nonnull<Type*> find_or_unresolved_type(
-        const std::string_view name, lex::Location location) noexcept;
 
     /**
      * The passed in `callee_type` can be null for any function that is not a method, and does not
      * need a callee object.
      */
-    [[nodiscard]] virtual absl::Nullable<FunctionVariable*> find_function(
+    [[nodiscard]] absl::Nullable<FunctionVariable*> find_function(
         absl::Nullable<Type*> callee_type, const TypeList& argument_types,
         const std::string_view name) const noexcept;
 
-    [[nodiscard]] virtual absl::Nullable<Variable*> find_variable(
+    [[nodiscard]] absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
 
-    virtual absl::Nonnull<Type*> add_type(const std::string_view name, std::unique_ptr<Type> type);
+    ////////////////////////////////////////////////////////////////
+    // Add AST nodes
+
+    virtual absl::Nonnull<Type*> add_named_type(const std::string_view name,
+                                                std::unique_ptr<Type>  type);
 
     virtual absl::Nonnull<FunctionVariable*> add_function(absl::Nullable<Type*>  callee_type,
                                                           const TypeList&        argument_types,
@@ -116,31 +109,11 @@ class Scope {
     virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
                                                   std::unique_ptr<Variable> variable);
 
+    ////////////////////////////////////////////////////////////////
+    // Validation
+
     virtual util::Result<void> validate(Options& options);
     virtual util::Result<void> cleanup();
-
-  protected:
-    /**
-     * Try to find or create a function type with the given argument types and return type, but only
-     * if it is owned by the current scope.
-     */
-    [[nodiscard]] absl::Nullable<FunctionType*> _get_function_type_in_current_scope(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type);
-
-    /**
-     * Create a new function type with the given argument types and return type, adding it to the
-     * current scope. This does NOT check if the function type already exists.
-     */
-    [[nodiscard]] absl::Nonnull<FunctionType*> _create_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type);
-
-    absl::Nonnull<Type*> _add_owned_named_type(const std::string_view name,
-                                               std::unique_ptr<Type>  type);
-
-    absl::Nonnull<Type*>       _unwrap_type(absl::Nonnull<Type*> type);
-    absl::Nonnull<const Type*> _unwrap_type(absl::Nonnull<const Type*> type) {
-        return absl::Nonnull<const Type*>(_unwrap_type(absl::Nonnull<Type*>(type)));
-    }
 };
 
 }  // namespace rain::lang::ast

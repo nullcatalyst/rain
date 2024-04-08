@@ -25,8 +25,6 @@ class Expression {
     [[nodiscard]] virtual bool is_assignable() const noexcept { return false; }
 
     [[nodiscard]] virtual util::Result<void> validate(Options& options, Scope& scope) = 0;
-
-    virtual void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type);
 };
 
 }  // namespace rain::lang::ast

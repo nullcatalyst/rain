@@ -32,16 +32,6 @@ class ModuleScope : public Scope {
     [[nodiscard]] absl::Nonnull<BuiltinScope*> builtin() const noexcept override {
         return &_builtin;
     }
-
-    [[nodiscard]] absl::Nullable<Type*> find_type(
-        const std::string_view name) const noexcept override;
-
-    [[nodiscard]] absl::Nullable<FunctionVariable*> find_function(
-        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
-        const std::string_view name) const noexcept override;
-
-    [[nodiscard]] absl::Nullable<Variable*> find_variable(
-        const std::string_view name) const noexcept override;
 };
 
 }  // namespace rain::lang::ast

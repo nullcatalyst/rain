@@ -47,7 +47,7 @@ util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
-    return static_cast<ast::InterfaceType*>(scope.add_type(
+    return static_cast<ast::InterfaceType*>(scope.add_named_type(
         interface_name, std::make_unique<ast::InterfaceType>(
                             interface_name, std::move(methods),
                             interface_token.location.merge(rbracket_token.location))));

@@ -54,8 +54,6 @@ class StructType : public Type {
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
-
-    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
 };
 
 }  // namespace rain::lang::ast

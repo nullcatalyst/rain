@@ -4,17 +4,8 @@
 
 namespace rain::lang::ast {
 
-FunctionType::FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type,
-                           bool unresolved)
-    : _argument_types(argument_types), _return_type(return_type), _unresolved(unresolved) {
-    for (auto* argument_type : _argument_types) {
-        argument_type->add_ref(*this);
-    }
-
-    if (return_type != nullptr) {
-        return_type->add_ref(*this);
-    }
-}
+FunctionType::FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type)
+    : _argument_types(argument_types), _return_type(return_type) {}
 
 std::string FunctionType::display_name() const noexcept {
     std::string argument_type_names;
@@ -27,12 +18,10 @@ std::string FunctionType::display_name() const noexcept {
         }
     }
 
-    auto prefix = _unresolved ? "unresolved " : "";
     if (_return_type != nullptr) {
-        return absl::StrCat(prefix, "fn(", argument_type_names, ") -> ",
-                            _return_type->display_name());
+        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->display_name());
     } else {
-        return absl::StrCat(prefix, "fn(", argument_type_names, ")");
+        return absl::StrCat("fn(", argument_type_names, ")");
     }
 }
 
@@ -52,39 +41,6 @@ util::Result<absl::Nonnull<Type*>> FunctionType::resolve(Options& options, Scope
         FORWARD_ERROR(return_type);
 
         resolved_return_type = std::move(return_type).value();
-    }
-
-    return scope.get_function_type(resolved_argument_types, resolved_return_type);
-}
-
-void FunctionType::replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) {
-    for (auto* argument_type : _argument_types) {
-        if (argument_type == old_type) {
-            argument_type = new_type;
-        }
-    }
-
-    if (_return_type == old_type) {
-        _return_type = new_type;
-    }
-
-    IF_DEBUG {
-        // Only remove the ref in debug/test builds, so that a (potentially) expensive search isn't
-        // needed for every replaced instance of every type.
-        old_type->remove_ref(*this);
-    }
-}
-
-absl::Nonnull<Type*> FunctionType::should_be_replaced_with(Scope& scope) noexcept {
-    Scope::TypeList resolved_argument_types;
-    resolved_argument_types.reserve(_argument_types.size());
-    for (auto* argument : _argument_types) {
-        resolved_argument_types.emplace_back(argument->should_be_replaced_with(scope));
-    }
-
-    absl::Nullable<Type*> resolved_return_type = nullptr;
-    if (_return_type != nullptr) {
-        resolved_return_type = _return_type->should_be_replaced_with(scope);
     }
 
     return scope.get_function_type(resolved_argument_types, resolved_return_type);

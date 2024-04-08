@@ -21,8 +21,6 @@ class OptionalType : public Type {
 
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
-
-    void replace_type(absl::Nonnull<Type*> old_type, absl::Nonnull<Type*> new_type) override;
 };
 
 }  // namespace rain::lang::ast

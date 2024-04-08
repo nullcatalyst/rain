@@ -12,10 +12,10 @@ class ExternalFunctionVariable : public FunctionVariable {
     std::string_view _wasm_function_name;
 
   public:
-    ExternalFunctionVariable(std::string_view name, FunctionType* type,
+    ExternalFunctionVariable(std::string_view name, absl::Nonnull<FunctionType*> function_type,
                              std::string_view wasm_namespace, std::string_view wasm_function_name,
                              lex::Location location)
-        : FunctionVariable(name, std::move(type), location),
+        : FunctionVariable(name, std::move(function_type), location),
           _wasm_namespace(wasm_namespace),
           _wasm_function_name(wasm_function_name) {}
     ~ExternalFunctionVariable() override = default;

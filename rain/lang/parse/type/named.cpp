@@ -16,7 +16,7 @@ util::Result<absl::Nonnull<ast::Type*>> parse_named_type(lex::Lexer& lexer, ast:
         }
     }
 
-    return scope.find_or_unresolved_type(name_token.text(), name_token.location);
+    return scope.find_or_create_unresolved_named_type(name_token.text(), name_token.location);
 }
 
 }  // namespace rain::lang::parse
