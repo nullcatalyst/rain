@@ -2,7 +2,7 @@
     auto type = _f32x4_type;
 
     auto  binop_args = Scope::TypeList{type, type};
-    auto* math_type  = get_function_type(binop_args, type);
+    auto* math_type  = get_resolved_function_type(type, binop_args, type);
     ADD_BUILTIN_METHOD("__add__", type, math_type, binop_args,
                        { return ctx.llvm_builder().CreateFAdd(arguments[0], arguments[1]); });
     ADD_BUILTIN_METHOD("__sub__", type, math_type, binop_args,

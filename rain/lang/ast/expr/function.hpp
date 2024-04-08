@@ -18,19 +18,9 @@ class FunctionExpression : public FunctionDeclarationExpression {
     std::unique_ptr<BlockExpression> _block;
 
   public:
-    // FunctionExpression(std::string_view name, ArgumentList arguments,
-    //                    util::MaybeOwnedPtr<Type>        return_type,
-    //                    std::unique_ptr<BlockExpression> block, lex::Location
-    //                    declaration_location)
-    //     : FunctionDeclarationExpression(name, std::move(arguments), std::move(return_type),
-    //                                     declaration_location),
-    //       _block(std::move(block)) {}
-    FunctionExpression(std::string_view name, ArgumentList arguments,
+    FunctionExpression(absl::Nullable<FunctionVariable*> variable, ArgumentList arguments,
                        absl::Nonnull<FunctionType*>     function_type,
-                       std::unique_ptr<BlockExpression> block, lex::Location declaration_location)
-        : FunctionDeclarationExpression(name, std::move(arguments), function_type,
-                                        declaration_location),
-          _block(std::move(block)) {}
+                       std::unique_ptr<BlockExpression> block, lex::Location declaration_location);
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
@@ -49,7 +39,9 @@ class FunctionExpression : public FunctionDeclarationExpression {
     }
 
     // FunctionExpression
-    [[nodiscard]] std::string_view name() const noexcept { return _name; }
+    [[nodiscard]] std::string_view name() const noexcept {
+        return _variable != nullptr ? _variable->name() : std::string_view();
+    }
 
     [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }

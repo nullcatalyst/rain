@@ -44,7 +44,7 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
     // Specially handle the callee expression, in order to support function overloading.
     switch (_callee->kind()) {
         case serial::ExpressionKind::Member: {
-            auto& member = *reinterpret_cast<MemberExpression*>(_callee.get());
+            auto& member = static_cast<MemberExpression&>(*_callee.get());
             auto  result = member.lhs().validate(options, scope);
             FORWARD_ERROR(result);
 
@@ -63,12 +63,12 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
             FORWARD_ERROR(argument_types_result);
             auto argument_types = std::move(argument_types_result).value();
 
-            auto* function = scope.find_function(callee_type, argument_types, member.name());
+            auto* function = scope.find_function(member.name(), callee_type, argument_types);
             if (function == nullptr) {
                 if (try_self) {
                     // Remove the self argument from the list.
                     argument_types.erase(argument_types.begin());
-                    function = scope.find_function(callee_type, argument_types, member.name());
+                    function = scope.find_function(member.name(), callee_type, argument_types);
                 }
 
                 if (function == nullptr) {
@@ -84,14 +84,14 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
         }
 
         case serial::ExpressionKind::Variable: {
-            auto* identifier = reinterpret_cast<IdentifierExpression*>(_callee.get());
+            auto& identifier = static_cast<IdentifierExpression&>(*_callee.get());
 
             auto argument_types_result = validate_arguments(nullptr);
             FORWARD_ERROR(argument_types_result);
             auto argument_types = std::move(argument_types_result).value();
 
             FunctionVariable* function =
-                scope.find_function(nullptr, argument_types, identifier->name());
+                scope.find_function(identifier.name(), nullptr, argument_types);
             if (function != nullptr) {
                 _function = function;
                 _type     = function->function_type()->return_type();

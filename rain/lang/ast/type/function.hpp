@@ -11,11 +11,14 @@ namespace rain::lang::ast {
 using ArgumentTypeList = llvm::SmallVector<Type*, 4>;
 
 class FunctionType : public Type {
+    absl::Nullable<Type*> _callee_type;
     ArgumentTypeList      _argument_types;
     absl::Nullable<Type*> _return_type;
+    bool                  _self_argument = false;
 
   public:
-    FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type);
+    FunctionType(absl::Nullable<Type*> callee_type, ArgumentTypeList argument_types,
+                 absl::Nullable<Type*> return_type, bool self_argument = false);
     ~FunctionType() override = default;
 
     // Type
@@ -29,11 +32,9 @@ class FunctionType : public Type {
     }
 
     // FunctionType
-    [[nodiscard]] constexpr const ArgumentTypeList& argument_types() const noexcept {
-        return _argument_types;
-    }
-
-    [[nodiscard]] absl::Nullable<Type*> return_type() const noexcept { return _return_type; }
+    [[nodiscard]] constexpr auto        callee_type() const noexcept { return _callee_type; }
+    [[nodiscard]] constexpr const auto& argument_types() const noexcept { return _argument_types; }
+    [[nodiscard]] constexpr auto        return_type() const noexcept { return _return_type; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

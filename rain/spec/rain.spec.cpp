@@ -10,6 +10,7 @@
 #include "rain/rain.hpp"
 
 #define DO_OPTIMIZE true
+#define DO_PRINT false
 
 #define RUN_TEST($code)                              \
     do {                                             \
@@ -27,8 +28,48 @@
         ASSERT_TRUE(check_success(ir_result));       \
         auto ir = std::move(ir_result).value();      \
                                                      \
-        std::cout << ir << std::endl;                \
+        if (DO_PRINT) {                              \
+            std::cout << ir << std::endl;            \
+        }                                            \
     } while (false)
+
+TEST(Lang, function) {
+    const std::string_view code = R"(
+export fn four() -> i32 {
+    4
+}
+)";
+
+    RUN_TEST(code);
+}
+
+TEST(Lang, function_calling_other_function) {
+    const std::string_view code = R"(
+export fn four() -> i32 {
+    4
+}
+
+export fn double_four() -> i32 {
+    2 * four()
+}
+)";
+
+    RUN_TEST(code);
+}
+
+TEST(Lang, out_of_order_function_declaration) {
+    const std::string_view code = R"(
+export fn double_four() -> i32 {
+    2 * four()
+}
+
+export fn four() -> i32 {
+    4
+}
+)";
+
+    RUN_TEST(code);
+}
 
 TEST(Lang, struct_declaration) {
     const std::string_view code = R"(
@@ -51,16 +92,6 @@ struct Entity {
 struct Vec2 {
     x: f32,
     y: f32,
-}
-)";
-
-    RUN_TEST(code);
-}
-
-TEST(Lang, function) {
-    const std::string_view code = R"(
-export fn four() -> i32 {
-    4
 }
 )";
 

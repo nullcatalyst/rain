@@ -73,7 +73,7 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
 
     const auto rparen_location = lexer.next().location;  // Consume the ')'
 
-    util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
+    absl::Nullable<ast::Type*> return_type = nullptr;
     if (const auto arrow_token = lexer.peek(); arrow_token.kind == lex::TokenKind::RArrow) {
         lexer.next();  // Consume the '->' token
 
@@ -92,10 +92,12 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
     for (const auto& argument : arguments) {
         argument_types.emplace_back(argument->type());
     }
-    auto* function_type = scope.get_function_type(argument_types, return_type.get());
+    auto* function_type = scope.get_resolved_function_type(nullptr, argument_types, return_type);
+    auto* function_variable =
+        scope.create_unresolved_function(name_token.text(), function_type, name_token.location);
 
     return std::make_unique<ast::FunctionDeclarationExpression>(
-        std::move(fn_name), std::move(arguments), function_type, declaration_location);
+        function_variable, std::move(arguments), function_type, declaration_location);
 }
 
 }  // namespace rain::lang::parse

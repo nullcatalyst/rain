@@ -6,6 +6,9 @@
 
 namespace rain::lang::code {
 
+llvm::Function* compile_function_declaration(Context&               ctx,
+                                             ast::FunctionVariable& function_variable);
+
 llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
     const auto get_arguments = [&](llvm::Value* self_value =
                                        nullptr) -> llvm::SmallVector<llvm::Value*, 4> {
@@ -46,11 +49,14 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call) {
         }
 
         case serial::ExpressionKind::Variable: {
-            if (call.function() != nullptr) {
-                ast::FunctionVariable* function = call.function();
-                llvm::FunctionType*    llvm_function_type =
+            if (ast::FunctionVariable* function = call.function(); call.function() != nullptr) {
+                llvm::FunctionType* llvm_function_type =
                     reinterpret_cast<llvm::FunctionType*>(ctx.llvm_type(function->function_type()));
                 llvm::Value* llvm_function = ctx.llvm_value(function);
+
+                if (llvm_function == nullptr) {
+                    llvm_function = compile_function_declaration(ctx, *function);
+                }
 
                 const auto arguments = get_arguments();
                 return ir.CreateCall(llvm_function_type, llvm_function, arguments);

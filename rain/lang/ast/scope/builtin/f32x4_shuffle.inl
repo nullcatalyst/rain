@@ -2,7 +2,7 @@
     auto type = _f32x4_type;
 
     auto  unop_args = Scope::TypeList{type};
-    auto* math_type = get_function_type(unop_args, type);
+    auto* math_type = get_resolved_function_type(type, unop_args, type);
 
 #define SHUF_0 "x"
 #define SHUF_1 "y"

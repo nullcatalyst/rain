@@ -2,7 +2,7 @@
     do {                                                                                         \
         auto method = make_builtin_function_variable(                                            \
             name, function_type, [](auto& ctx, auto& arguments) { __VA_ARGS__ });                \
-        _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name), \
+        _function_variables.insert_or_assign(std::make_tuple(name, callee_type, argument_types), \
                                              method.get());                                      \
         _owned_variables.insert(std::move(method));                                              \
     } while (0)

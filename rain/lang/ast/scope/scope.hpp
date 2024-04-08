@@ -40,23 +40,44 @@ class Scope {
 
   protected:
     using FunctionTypeKey =
-        std::tuple<TypeList /*argument_types*/, absl::Nullable<Type*> /*return_type*/>;
-    using FunctionVariableKey = std::tuple<absl::Nullable<Type*> /*callee*/, TypeList /*arguments*/,
-                                           std::string_view /*name*/>;
+        std::tuple<absl::Nullable<Type*> /*callee_type*/, TypeList /*argument_types*/,
+                   absl::Nullable<Type*> /*return_type*/>;
+
+    /**
+     * Since we do not know the return type of a function until after we have already found the
+     * correct overload for that function, we cannot use the full function type as the lookup key.
+     * Instead we have to look up based on the function name, the callee type, and the argument
+     * types.
+     */
+    using FunctionVariableKey =
+        std::tuple<std::string_view /*name*/, absl::Nullable<Type*> /*callee_type*/,
+                   TypeList /*argument_types*/>;
 
     absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>         _named_types;
     absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>>  _function_types;
     absl::flat_hash_map<absl::Nonnull<Type*>, absl::Nonnull<MetaType*>> _meta_types;
     absl::flat_hash_set<std::unique_ptr<Type>>                          _owned_types;
 
-    /**
-     * Stores the set of types that need to be resolved after parsing.
-     */
-    std::vector<std::unique_ptr<Type>> _unresolved_types;
-
     absl::flat_hash_map<FunctionVariableKey, absl::Nonnull<FunctionVariable*>> _function_variables;
     absl::flat_hash_map<std::string_view, absl::Nonnull<Variable*>>            _named_variables;
     absl::flat_hash_set<std::unique_ptr<Variable>>                             _owned_variables;
+
+    /**
+     * Stores the set of types that need to be resolved after parsing.
+     *
+     * These are not stored in either the `_named_types` map or the `_owned_types` set because they
+     * are inherently short lived, and only exist between the time that the source code is parsed
+     * and the time that the AST is validated.
+     */
+    std::vector<std::unique_ptr<Type>> _unresolved_types;
+
+    /**
+     * Stores the set of functions that need to be resolved after parsing.
+     *
+     * These cannot be stored in the _function_variables map because those are keyed off of the
+     * function type, and the function type is not known until after all the types are resolved.
+     */
+    std::vector<std::unique_ptr<FunctionVariable>> _unresolved_functions;
 
   public:
     virtual ~Scope() = default;
@@ -80,17 +101,19 @@ class Scope {
     [[nodiscard]] absl::Nullable<Type*> find_named_type(const std::string_view name) const noexcept;
 
     [[nodiscard]] absl::Nonnull<FunctionType*> find_or_create_unresolved_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
-    [[nodiscard]] absl::Nonnull<FunctionType*> get_function_type(
-        const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept;
+        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+        absl::Nullable<Type*> return_type) noexcept;
+    [[nodiscard]] absl::Nonnull<FunctionType*> get_resolved_function_type(
+        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+        absl::Nullable<Type*> return_type) noexcept;
 
     /**
      * The passed in `callee_type` can be null for any function that is not a method, and does not
      * need a callee object.
      */
     [[nodiscard]] absl::Nullable<FunctionVariable*> find_function(
-        absl::Nullable<Type*> callee_type, const TypeList& argument_types,
-        const std::string_view name) const noexcept;
+        const std::string_view name, absl::Nullable<Type*> callee_type,
+        TypeList argument_types) const noexcept;
 
     [[nodiscard]] absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
@@ -99,15 +122,14 @@ class Scope {
     // Add AST nodes
 
     virtual absl::Nonnull<Type*> add_named_type(const std::string_view name,
-                                                std::unique_ptr<Type>  type);
+                                                std::unique_ptr<Type>  type) noexcept;
 
-    virtual absl::Nonnull<FunctionVariable*> add_function(absl::Nullable<Type*>  callee_type,
-                                                          const TypeList&        argument_types,
-                                                          const std::string_view name,
-                                                          std::unique_ptr<FunctionVariable> method);
+    virtual absl::Nonnull<FunctionVariable*> create_unresolved_function(
+        const std::string_view name, absl::Nullable<FunctionType*> function_type,
+        lex::Location location) noexcept;
 
     virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
-                                                  std::unique_ptr<Variable> variable);
+                                                  std::unique_ptr<Variable> variable) noexcept;
 
     ////////////////////////////////////////////////////////////////
     // Validation

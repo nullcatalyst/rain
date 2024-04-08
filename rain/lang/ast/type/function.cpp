@@ -4,8 +4,12 @@
 
 namespace rain::lang::ast {
 
-FunctionType::FunctionType(ArgumentTypeList argument_types, absl::Nullable<Type*> return_type)
-    : _argument_types(argument_types), _return_type(return_type) {}
+FunctionType::FunctionType(absl::Nullable<Type*> callee_type, ArgumentTypeList argument_types,
+                           absl::Nullable<Type*> return_type, bool self_argument)
+    : _callee_type(callee_type),
+      _argument_types(argument_types),
+      _return_type(return_type),
+      _self_argument(self_argument) {}
 
 std::string FunctionType::display_name() const noexcept {
     std::string argument_type_names;
@@ -18,14 +22,28 @@ std::string FunctionType::display_name() const noexcept {
         }
     }
 
+    std::string callee_prefix;
+    if (callee_type() != nullptr) {
+        callee_prefix = absl::StrCat(callee_type()->display_name(), ".");
+    }
+
     if (_return_type != nullptr) {
-        return absl::StrCat("fn(", argument_type_names, ") -> ", _return_type->display_name());
+        return absl::StrCat(callee_prefix, "fn(", argument_type_names, ") -> ",
+                            _return_type->display_name());
     } else {
-        return absl::StrCat("fn(", argument_type_names, ")");
+        return absl::StrCat(callee_prefix, "fn(", argument_type_names, ")");
     }
 }
 
 util::Result<absl::Nonnull<Type*>> FunctionType::resolve(Options& options, Scope& scope) {
+    absl::Nullable<Type*> resolved_callee_type = nullptr;
+    if (_callee_type != nullptr) {
+        auto callee_type = _callee_type->resolve(options, scope);
+        FORWARD_ERROR(callee_type);
+
+        resolved_callee_type = std::move(callee_type).value();
+    }
+
     Scope::TypeList resolved_argument_types;
     resolved_argument_types.reserve(_argument_types.size());
     for (auto* argument : _argument_types) {
@@ -43,7 +61,8 @@ util::Result<absl::Nonnull<Type*>> FunctionType::resolve(Options& options, Scope
         resolved_return_type = std::move(return_type).value();
     }
 
-    return scope.get_function_type(resolved_argument_types, resolved_return_type);
+    return scope.get_resolved_function_type(resolved_callee_type, resolved_argument_types,
+                                            resolved_return_type);
 }
 
 }  // namespace rain::lang::ast

@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "absl/base/nullability.h"
-#include "rain/lang/ast/expr/method.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/err/syntax.hpp"
@@ -36,7 +35,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         }
     }
 
-    util::MaybeOwnedPtr<ast::Type> callee_type = nullptr;
+    absl::Nullable<ast::Type*> callee_type = nullptr;
     {
         const auto state = lexer.save_state();
 
@@ -87,7 +86,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             has_self_argument = true;
 
             auto self_argument =
-                std::make_unique<ast::BlockVariable>("self", callee_type.get(), /*mutable*/ false);
+                std::make_unique<ast::BlockVariable>("self", callee_type, /*mutable*/ false);
             arguments.push_back(self_argument.get());
             body_scope.add_variable("self", std::move(self_argument));
         }
@@ -124,7 +123,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
 
     const auto rparen_location = lexer.next().location;  // Consume the ')'
 
-    util::MaybeOwnedPtr<ast::Type> return_type = nullptr;
+    absl::Nullable<ast::Type*> return_type = nullptr;
     if (auto arrow_token = lexer.peek(); arrow_token.kind == lex::TokenKind::RArrow) {
         lexer.next();  // Consume the '->' token
 
@@ -164,14 +163,11 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
         argument_types.emplace_back(argument->type());
     }
     auto* function_type =
-        scope.find_or_create_unresolved_function_type(argument_types, return_type.get());
+        scope.find_or_create_unresolved_function_type(callee_type, argument_types, return_type);
+    auto* function_variable =
+        scope.create_unresolved_function(name_token.text(), function_type, name_token.location);
 
-    if (callee_type != nullptr) {
-        return std::make_unique<ast::MethodExpression>(
-            std::move(callee_type), name_token.text(), std::move(arguments), function_type,
-            std::move(body), has_self_argument, declaration_location, callee_type->location());
-    }
-    return std::make_unique<ast::FunctionExpression>(name_token.text(), std::move(arguments),
+    return std::make_unique<ast::FunctionExpression>(function_variable, std::move(arguments),
                                                      function_type, std::move(body),
                                                      declaration_location);
 }

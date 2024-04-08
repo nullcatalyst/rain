@@ -70,12 +70,13 @@ absl::Nullable<Type*> Scope::find_named_type(const std::string_view name) const 
 }
 
 absl::Nonnull<FunctionType*> Scope::find_or_create_unresolved_function_type(
-    const TypeList& argument_types, absl::Nullable<Type*> return_type) noexcept {
+    absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+    absl::Nullable<Type*> return_type) noexcept {
     // This CANNOT be a recursive search through the parent scopes, because one or more of the types
     // in the function may not be fully resolved. And without the types being resolved, we don't
     // know which scope they are defined in, and type shadowing across scopes would change the
     // resolved type.
-    auto key = std::make_tuple(argument_types, return_type);
+    auto key = std::make_tuple(callee_type, argument_types, return_type);
     if (const auto it = _function_types.find(key); it != _function_types.end()) {
         return it->second;
     }
@@ -83,16 +84,21 @@ absl::Nonnull<FunctionType*> Scope::find_or_create_unresolved_function_type(
     // Create an unresolved version of the function type. We couldn't tell which scope the type
     // should properly linve in, so just create it in the current scope and delete it later
     // after the real type has been resolved.
-    auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type);
+    auto  function_type = std::make_unique<FunctionType>(callee_type, argument_types, return_type);
     auto* function_type_ptr = function_type.get();
     _unresolved_types.emplace_back(std::move(function_type));
     return function_type_ptr;
 }
 
-absl::Nonnull<FunctionType*> Scope::get_function_type(const TypeList&       argument_types,
-                                                      absl::Nullable<Type*> return_type) noexcept {
-    // Unwrap all of the types that we need to check against once, instead of repeatedl unwrapping
+absl::Nonnull<FunctionType*> Scope::get_resolved_function_type(
+    absl::Nullable<Type*> callee_type, const TypeList& argument_types,
+    absl::Nullable<Type*> return_type) noexcept {
+    // Unwrap all of the types that we need to check against once, instead of repeatedly unwrapping
     // on every check against each scope in the hierarchy.
+
+    absl::Nullable<Type*> unwrapped_callee_type =
+        callee_type != nullptr ? _unwrap_type(callee_type) : nullptr;
+
     TypeList unwrapped_argument_types;
     unwrapped_argument_types.reserve(argument_types.size());
     for (auto* type : argument_types) {
@@ -101,14 +107,18 @@ absl::Nonnull<FunctionType*> Scope::get_function_type(const TypeList&       argu
     absl::Nullable<Type*> unwrapped_return_type =
         return_type != nullptr ? _unwrap_type(return_type) : nullptr;
 
+    const auto key = std::make_tuple(callee_type, argument_types, return_type);
+
     Scope* scope = this;
     do {
-        auto key = std::make_tuple(argument_types, return_type);
         if (const auto it = scope->_function_types.find(key); it != scope->_function_types.end()) {
             return it->second;
         }
 
         const bool owns_any_type =
+            // Check callee type
+            (unwrapped_callee_type != nullptr &&
+             scope->_owned_types.contains(unwrapped_callee_type)) ||
             // Check return type
             (unwrapped_return_type != nullptr &&
              scope->_owned_types.contains(unwrapped_return_type)) ||
@@ -119,7 +129,8 @@ absl::Nonnull<FunctionType*> Scope::get_function_type(const TypeList&       argu
             // If one of the types is owned by the current scope, then this is the highest scope
             // that makes sense to own the function type.
 
-            auto  function_type     = std::make_unique<FunctionType>(argument_types, return_type);
+            auto function_type =
+                std::make_unique<FunctionType>(callee_type, argument_types, return_type);
             auto* function_type_ptr = function_type.get();
             scope->_function_types.insert_or_assign(key, function_type_ptr);
             scope->_owned_types.insert(std::move(function_type));
@@ -132,14 +143,21 @@ absl::Nonnull<FunctionType*> Scope::get_function_type(const TypeList&       argu
     util::panic("no scope found to own the function type; this is an internal error");
 }
 
-absl::Nullable<FunctionVariable*> Scope::find_function(absl::Nullable<Type*>  callee_type,
-                                                       const TypeList&        argument_types,
-                                                       const std::string_view name) const noexcept {
-    if (const auto it =
-            _function_variables.find(std::make_tuple(callee_type, argument_types, name));
-        it != _function_variables.end()) {
-        return it->second;
-    }
+absl::Nullable<FunctionVariable*> Scope::find_function(const std::string_view name,
+                                                       absl::Nullable<Type*>  callee_type,
+                                                       TypeList argument_types) const noexcept {
+    const auto key = std::make_tuple(name, callee_type, argument_types);
+
+    const Scope* scope = this;
+    do {
+        if (const auto it = scope->_function_variables.find(key);
+            it != scope->_function_variables.end()) {
+            return it->second;
+        }
+
+        scope = scope->parent();
+    } while (scope != nullptr);
+
     return nullptr;
 }
 
@@ -154,7 +172,7 @@ absl::Nullable<Variable*> Scope::find_variable(const std::string_view name) cons
 // Add AST nodes
 
 absl::Nonnull<Type*> Scope::add_named_type(const std::string_view name,
-                                           std::unique_ptr<Type>  type) {
+                                           std::unique_ptr<Type>  type) noexcept {
     assert(type != nullptr);
     assert(type->kind() != serial::TypeKind::Unresolved);
 
@@ -176,21 +194,17 @@ absl::Nonnull<Type*> Scope::add_named_type(const std::string_view name,
     return type_ptr;
 }
 
-absl::Nonnull<FunctionVariable*> Scope::add_function(absl::Nullable<Type*>  callee_type,
-                                                     const TypeList&        argument_types,
-                                                     const std::string_view name,
-                                                     std::unique_ptr<FunctionVariable> function) {
-    assert(function != nullptr);
-
+absl::Nonnull<FunctionVariable*> Scope::create_unresolved_function(
+    std::string_view name, absl::Nullable<FunctionType*> function_type,
+    lex::Location location) noexcept {
+    auto  function     = std::make_unique<FunctionVariable>(name, function_type, location);
     auto* function_ptr = function.get();
-    _function_variables.insert_or_assign(std::make_tuple(callee_type, argument_types, name),
-                                         function_ptr);
-    _owned_variables.insert(std::move(function));
+    _unresolved_functions.emplace_back(std::move(function));
     return function_ptr;
 }
 
 absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
-                                             std::unique_ptr<Variable> variable) {
+                                             std::unique_ptr<Variable> variable) noexcept {
     assert(variable != nullptr);
 
     auto* variable_ptr = variable.get();
@@ -202,11 +216,33 @@ absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
 ////////////////////////////////////////////////////////////////
 // Validation
 
-util::Result<void> Scope::validate(Options& options) { return {}; }
+util::Result<void> Scope::validate(Options& options) {
+    // Validate all of the owned types.
+    for (const auto& type : _owned_types) {
+        auto result = type->resolve(options, *this);
+        FORWARD_ERROR(result);
+    }
+
+    // Resolve all of the functions.
+    for (auto& function : _unresolved_functions) {
+        auto result = function->validate(options, *this);
+        FORWARD_ERROR(result);
+
+        // Add the resolved function to the list of owned functions.
+        auto* function_type = function->function_type();
+
+        auto* function_ptr = function.get();
+        _function_variables.insert_or_assign(
+            std::make_tuple(function->name(), function_type->callee_type(),
+                            function_type->argument_types()),
+            function_ptr);
+        _owned_variables.insert(std::move(function));
+    }
+
+    return {};
+}
 
 util::Result<void> Scope::cleanup() {
-    // _unresolved_types.clear();
-
     // Performing a swap here allows the capacity of the vector to be freed, instead of `.clear()`
     // just setting a "used size" to 0.
     decltype(_unresolved_types) empty_unresolved_types;

@@ -29,9 +29,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
         case lex::TokenKind::Fn: {
             auto result = parse_function(lexer, scope);
             FORWARD_ERROR(result);
-            auto function = std::move(result).value();
-            function->add_to_scope(scope);
-            return std::move(function);
+            return std::move(result).value();
         }
 
         case lex::TokenKind::Struct: {

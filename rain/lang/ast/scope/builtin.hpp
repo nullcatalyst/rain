@@ -56,9 +56,9 @@ class BuiltinScope : public Scope {
     absl::Nonnull<Type*> add_named_type(const std::string_view name,
                                         std::unique_ptr<Type>  type) noexcept override;
 
-    absl::Nonnull<FunctionVariable*> add_function(
-        absl::Nonnull<Type*> callee_type, const TypeList& argument_types,
-        const std::string_view name, std::unique_ptr<FunctionVariable> variable) noexcept override;
+    absl::Nonnull<FunctionVariable*> create_unresolved_function(
+        const std::string_view name, absl::Nullable<FunctionType*> function_type,
+        lex::Location location) noexcept override;
 
     absl::Nonnull<Variable*> add_variable(const std::string_view    name,
                                           std::unique_ptr<Variable> variable) noexcept override;

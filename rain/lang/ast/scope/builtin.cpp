@@ -38,9 +38,10 @@ BuiltinScope::BuiltinScope() {
         // scope, as without having any types to determine which scope should own the type, no scope
         // would be selected as its owner. Intentionally adding it here avoids that issue.
         const TypeList no_args;
-        auto           function_type     = std::make_unique<FunctionType>(no_args, nullptr);
+        auto           function_type = std::make_unique<FunctionType>(nullptr, no_args, nullptr);
         auto*          function_type_ptr = function_type.get();
-        _function_types.insert_or_assign(std::make_tuple(no_args, nullptr), function_type_ptr);
+        _function_types.insert_or_assign(std::make_tuple(nullptr, no_args, nullptr),
+                                         function_type_ptr);
         _owned_types.insert(std::move(function_type));
     }
 
@@ -52,9 +53,9 @@ absl::Nonnull<Type*> BuiltinScope::add_named_type(const std::string_view name,
     util::panic("the builtin scope is immutable and cannot have custom types added to it");
 }
 
-absl::Nonnull<FunctionVariable*> BuiltinScope::add_function(
-    absl::Nonnull<Type*> callee_type, const TypeList& argument_types, const std::string_view name,
-    std::unique_ptr<FunctionVariable> variable) noexcept {
+absl::Nonnull<FunctionVariable*> BuiltinScope::create_unresolved_function(
+    const std::string_view name, absl::Nullable<FunctionType*> function_type,
+    lex::Location location) noexcept {
     util::panic("the builtin scope is immutable and cannot have custom functions added to it");
 }
 
@@ -65,7 +66,7 @@ absl::Nonnull<Variable*> BuiltinScope::add_variable(const std::string_view    na
 
 void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
     _function_variables.insert_or_assign(
-        std::make_tuple(nullptr, variable->function_type()->argument_types(), variable->name()),
+        std::make_tuple(variable->name(), nullptr, variable->function_type()->argument_types()),
         variable.get());
     _external_functions.emplace_back(std::move(variable));
 }
