@@ -14,13 +14,13 @@ struct StructLiteralField {
 };
 
 class StructLiteralExpression : public Expression {
-    util::MaybeOwnedPtr<Type>       _type;
+    absl::Nonnull<Type*>            _type;
     std::vector<StructLiteralField> _fields;
 
     lex::Location _location;
 
   public:
-    StructLiteralExpression(util::MaybeOwnedPtr<Type> type, std::vector<StructLiteralField> fields,
+    StructLiteralExpression(absl::Nonnull<Type*> type, std::vector<StructLiteralField> fields,
                             lex::Location location)
         : _type(std::move(type)), _fields(std::move(fields)), _location(location) {}
     ~StructLiteralExpression() override = default;
@@ -29,9 +29,7 @@ class StructLiteralExpression : public Expression {
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
         return serial::ExpressionKind::StructLiteral;
     }
-    [[nodiscard]] /*constexpr*/ absl::Nullable<Type*> type() const noexcept override {
-        return _type.get();
-    }
+    [[nodiscard]] constexpr absl::Nonnull<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] bool                    compile_time_capable() const noexcept override {
         for (const auto& field : _fields) {

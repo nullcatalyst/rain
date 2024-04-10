@@ -19,7 +19,7 @@ util::Result<void> StructLiteralExpression::validate(Options& options, Scope& sc
                        absl::StrCat("type \"", _type->display_name(), "\" is not a struct type"));
     }
 
-    StructType* struct_type = static_cast<StructType*>(_type.get());
+    StructType* struct_type = static_cast<StructType*>(_type);
 
     // Validate each field.
     for (auto& field : _fields) {

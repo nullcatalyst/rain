@@ -15,9 +15,6 @@ llvm::Value* compile_member(Context& ctx, ast::MemberExpression& member) {
 
     auto& llvm_ir = ctx.llvm_builder();
 
-    auto* llvm_owner_type = ctx.llvm_type(&struct_type);
-    assert(llvm_owner_type != nullptr && "owner type is null");
-
     // The owner is a vector (think SIMD types like f32x4), so LLVM requires us to "extract the
     // element" instead of "extracting the value". So handle that here.
     if (llvm_owner->getType()->isVectorTy()) {
