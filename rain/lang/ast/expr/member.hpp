@@ -32,6 +32,7 @@ class MemberExpression : public Expression {
     [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _lhs->location().merge(_member_location);
     }
+    [[nodiscard]] bool is_assignable() const noexcept override;
 
     // MemberExpression
     [[nodiscard]] /*constexpr*/ const Expression& lhs() const { return *_lhs; }

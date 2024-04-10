@@ -5,24 +5,18 @@
 
 namespace rain::lang::code {
 
+llvm::Value* get_element_pointer(Context& ctx, ast::Expression& expression);
+
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator) {
     if (binary_operator.op() == serial::BinaryOperatorKind::Assign) {
-        switch (binary_operator.lhs().kind()) {
-            case serial::ExpressionKind::Member: {
-                util::panic("failed to compile binary operator: member assignment not implemented");
-            }
-
-            case serial::ExpressionKind::Variable: {
-                auto& lhs = reinterpret_cast<ast::IdentifierExpression&>(binary_operator.lhs());
-                llvm::Value* llvm_alloca = ctx.llvm_value(lhs.variable());
-                llvm::Value* rhs         = compile_any_expression(ctx, binary_operator.rhs());
-                ctx.llvm_builder().CreateStore(rhs, llvm_alloca);
-                return rhs;
-            }
-
-            default:
-                util::panic("failed to compile binary operator: unknown left hand side kind: ");
+        llvm::Value* llvm_value_ptr = get_element_pointer(ctx, binary_operator.lhs());
+        if (llvm_value_ptr == nullptr) {
+            util::panic("failed to compile binary operator: unknown left hand side kind: ");
         }
+
+        llvm::Value* llvm_value = compile_any_expression(ctx, binary_operator.rhs());
+        ctx.llvm_builder().CreateStore(llvm_value, llvm_value_ptr);
+        return llvm_value;
     }
 
     auto*                               method = binary_operator.method();

@@ -12,15 +12,14 @@
 namespace rain::lang::ast {
 
 class TypeExpression : public Expression {
-    util::MaybeOwnedPtr<Type> _declare_type;
+    absl::Nonnull<Type*> _declare_type;
 
     lex::Location _location;
 
   public:
-    TypeExpression(util::MaybeOwnedPtr<Type> declare_type)
-        : _declare_type(std::move(declare_type)) {}
-    TypeExpression(util::MaybeOwnedPtr<Type> declare_type, lex::Location location)
-        : _declare_type(std::move(declare_type)), _location(location) {}
+    TypeExpression(absl::Nonnull<Type*> declare_type) : _declare_type(declare_type) {}
+    TypeExpression(absl::Nonnull<Type*> declare_type, lex::Location location)
+        : _declare_type(declare_type), _location(location) {}
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
@@ -31,12 +30,8 @@ class TypeExpression : public Expression {
     [[nodiscard]] constexpr bool compile_time_capable() const noexcept override { return true; }
 
     // TypeExpression
-    [[nodiscard]] /*constexpr*/ const Type& declare_type() const noexcept {
-        return *_declare_type.get_nonnull();
-    }
-    [[nodiscard]] /*constexpr*/ Type& declare_type() noexcept {
-        return *_declare_type.get_nonnull();
-    }
+    [[nodiscard]] constexpr const Type& declare_type() const noexcept { return *_declare_type; }
+    [[nodiscard]] constexpr Type&       declare_type() noexcept { return *_declare_type; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

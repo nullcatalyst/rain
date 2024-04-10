@@ -53,4 +53,6 @@ llvm::Value*    compile_while(Context& ctx, ast::WhileExpression& while_);
 llvm::Value*    compile_export(Context& ctx, ast::ExportExpression& export_);
 llvm::Value*    compile_extern(Context& ctx, ast::ExternExpression& extern_);
 
+llvm::Value* get_element_pointer(Context& ctx, ast::Expression& expression);
+
 }  // namespace rain::lang::code

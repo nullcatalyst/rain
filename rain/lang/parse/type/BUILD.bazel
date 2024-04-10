@@ -6,6 +6,7 @@ cc_library(
         "interface.cpp",
         "named.cpp",
         "optional.cpp",
+        "reference.cpp",
         "struct.cpp",
     ],
     visibility = [

@@ -16,6 +16,8 @@ namespace rain::lang::parse {
 util::Result<absl::Nonnull<ast::ArrayType*>> parse_array_type(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<absl::Nonnull<ast::OptionalType*>>  parse_optional_type(lex::Lexer& lexer,
                                                                      ast::Scope& scope);
+util::Result<absl::Nonnull<ast::ReferenceType*>> parse_reference_type(lex::Lexer& lexer,
+                                                                      ast::Scope& scope);
 util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
                                                                    ast::Scope& scope);
 util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer& lexer,
@@ -36,6 +38,9 @@ util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::S
 
         case lex::TokenKind::Question:
             return parse_optional_type(lexer, scope);
+
+        case lex::TokenKind::Ampersand:
+            return parse_reference_type(lexer, scope);
 
         case lex::TokenKind::Identifier:
             return parse_named_type(lexer, scope);

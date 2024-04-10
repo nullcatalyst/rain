@@ -21,16 +21,17 @@ util::Result<absl::Nonnull<ast::OptionalType*>> parse_optional_type(lex::Lexer& 
         }
     }
 
-    auto wrapped_type_result = parse_any_type(lexer, scope);
-    FORWARD_ERROR(wrapped_type_result);
-    auto wrapped_type = std::move(wrapped_type_result).value();
+    auto type_result = parse_any_type(lexer, scope);
+    FORWARD_ERROR(type_result);
+    auto type = std::move(type_result).value();
 
-    const auto location = question_token.location.merge(wrapped_type->location());
-    if (wrapped_type->kind() == serial::TypeKind::Optional) {
-        return ERR_PTR(err::SyntaxError, location, "nested optional types are not allowed");
+    const auto location = question_token.location.merge(type->location());
+    if (type->kind() == serial::TypeKind::Optional) {
+        return ERR_PTR(err::SyntaxError, location,
+                       "optional types cannot be nested inside another optional type");
     }
 
-    return &wrapped_type->get_optional_type();
+    return &type->get_optional_type();
 }
 
 }  // namespace rain::lang::parse

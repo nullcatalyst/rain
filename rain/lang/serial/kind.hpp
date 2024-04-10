@@ -106,7 +106,7 @@ enum class TypeKind {
 
     Function,
     Optional,
-    Pointer,
+    Reference,
     Array,
     Slice,
     Tuple,

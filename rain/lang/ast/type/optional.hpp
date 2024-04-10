@@ -6,10 +6,10 @@
 namespace rain::lang::ast {
 
 class OptionalType : public Type {
-    util::MaybeOwnedPtr<Type> _type;
+    absl::Nonnull<Type*> _type;
 
   public:
-    OptionalType(util::MaybeOwnedPtr<Type> type) : _type(std::move(type)) {}
+    OptionalType(absl::Nonnull<Type*> type) : _type(type) {}
     ~OptionalType() override = default;
 
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
@@ -19,8 +19,8 @@ class OptionalType : public Type {
         return absl::StrCat("?", _type->display_name());
     }
 
-    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type.get(); }
-    [[nodiscard]] constexpr Type&       type() noexcept { return *_type.get(); }
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 };
 
 }  // namespace rain::lang::ast

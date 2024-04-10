@@ -66,10 +66,8 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Extern:
             return compile_extern(ctx, static_cast<ast::ExternExpression&>(expression));
 
-        case serial::ExpressionKind::Type: {
-            // compile_type(ctx, static_cast<ast::TypeExpression&>(expression).declare_type());
+        case serial::ExpressionKind::Type:
             return nullptr;
-        }
 
         default:
             util::panic("failed to compile expression: unknown expression kind: ",

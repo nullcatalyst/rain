@@ -18,21 +18,18 @@ class Expression;
 
 class ArrayType;
 class OptionalType;
+class ReferenceType;
 
 class Type {
   protected:
     std::unique_ptr<OptionalType>                           _optional_type;
+    std::unique_ptr<ReferenceType>                          _reference_type;
     absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>> _array_types;
 
     std::vector<absl::Nonnull<Type*>> _interface_implementations;
 
   public:
-    static std::string type_name(absl::Nullable<Type*> type) noexcept {
-        if (type == nullptr) {
-            return "<null_type>";
-        }
-        return type->display_name();
-    }
+    static Type& unwrap(Type& type) noexcept;
 
     virtual ~Type() = default;
 
@@ -40,8 +37,9 @@ class Type {
     [[nodiscard]] virtual std::string      display_name() const noexcept { return "<error_type>"; }
     [[nodiscard]] virtual lex::Location    location() const noexcept { return lex::Location(); }
 
-    [[nodiscard]] OptionalType& get_optional_type();
-    [[nodiscard]] ArrayType&    get_array_type(size_t length);
+    [[nodiscard]] ArrayType&     get_array_type(size_t length);
+    [[nodiscard]] OptionalType&  get_optional_type();
+    [[nodiscard]] ReferenceType& get_reference_type();
 
     [[nodiscard]] constexpr const auto& array_types() const noexcept { return _array_types; }
 
@@ -73,9 +71,9 @@ class ArrayType : public Type {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             display_name() const noexcept override;
 
-    [[nodiscard]] constexpr size_t          length() const noexcept { return _length; }
-    [[nodiscard]] /*constexpr*/ const Type& type() const noexcept { return *_type; }
-    [[nodiscard]] /*constexpr*/ Type&       type() noexcept { return *_type; }
+    [[nodiscard]] constexpr size_t      length() const noexcept { return _length; }
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;
@@ -97,8 +95,31 @@ class OptionalType : public Type {
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             display_name() const noexcept override;
 
-    [[nodiscard]] /*constexpr*/ const Type& type() const noexcept { return *_type; }
-    [[nodiscard]] /*constexpr*/ Type&       type() noexcept { return *_type; }
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
+
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
+                                                             Scope&   scope) override;
+};
+
+class ReferenceType : public Type {
+    absl::Nonnull<Type*> _type;
+
+    lex::Location _location;
+
+  public:
+    ReferenceType(absl::Nonnull<Type*> type);
+    ReferenceType(absl::Nonnull<Type*> type, lex::Location location);
+    ~ReferenceType() override = default;
+
+    [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
+        return serial::TypeKind::Reference;
+    }
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+    [[nodiscard]] std::string             display_name() const noexcept override;
+
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

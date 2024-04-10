@@ -36,10 +36,7 @@ class InterfaceType : public Type {
 
     // InterfaceType
     [[nodiscard]] constexpr std::string_view name() const noexcept { return _name; }
-    [[nodiscard]] constexpr const std::vector<std::unique_ptr<FunctionDeclarationExpression>>&
-    methods() const noexcept {
-        return _methods;
-    }
+    [[nodiscard]] constexpr const auto&      methods() const noexcept { return _methods; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

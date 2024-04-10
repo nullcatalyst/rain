@@ -63,3 +63,19 @@ export fn add_vecs() -> Vec2 {
 
     EXPECT_COMPILE_SUCCESS(code);
 }
+
+TEST(Struct, mutable_method) {
+    const std::string_view code = R"(
+struct Vec2 {
+    x: f32,
+    y: f32,
+}
+
+export fn Vec2.scale(&self, scale: f32) {
+    self.x = self.x * scale
+    self.y = self.y * scale
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}

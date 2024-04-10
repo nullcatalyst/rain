@@ -69,6 +69,14 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     bool              has_self_argument = false;
     ast::ArgumentList arguments;
     if (callee_type != nullptr) {
+        auto* self_type = callee_type;
+        if (auto ampersand_token = lexer.peek();
+            ampersand_token.kind == lex::TokenKind::Ampersand) {
+            lexer.next();  // Consume the '&' token
+
+            self_type = &callee_type->get_reference_type();
+        }
+
         if (auto self_token = lexer.peek(); self_token.kind == lex::TokenKind::Self) {
             lexer.next();  // Consume the 'self' token
 
@@ -86,7 +94,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
             has_self_argument = true;
 
             auto self_argument =
-                std::make_unique<ast::BlockVariable>("self", callee_type, /*mutable*/ false);
+                std::make_unique<ast::BlockVariable>("self", self_type, /*mutable*/ false);
             arguments.push_back(self_argument.get());
             body_scope.add_variable("self", std::move(self_argument));
         }

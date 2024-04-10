@@ -38,5 +38,6 @@ llvm::Type* compile_struct_type(Context& ctx, ast::StructType& struct_type);
 llvm::Type* compile_interface_type(Context& ctx, ast::InterfaceType& interface_type);
 llvm::Type* compile_array_type(Context& ctx, ast::ArrayType& array_type);
 llvm::Type* compile_optional_type(Context& ctx, ast::OptionalType& optional_type);
+llvm::Type* compile_reference_type(Context& ctx, ast::ReferenceType& reference_type);
 
 }  // namespace rain::lang::code

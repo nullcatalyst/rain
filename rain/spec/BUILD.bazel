@@ -5,6 +5,9 @@ cc_test(
     srcs = [
         "array.spec.cpp",
         "function.spec.cpp",
+        "interface.spec.cpp",
+        "optional.spec.cpp",
+        "reference.spec.cpp",
         "struct.spec.cpp",
         "util.hpp",
     ],

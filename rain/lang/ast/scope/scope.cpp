@@ -13,32 +13,6 @@
 
 namespace rain::lang::ast {
 
-namespace {
-
-absl::Nonnull<const Type*> _unwrap_type(absl::Nonnull<const Type*> type) {
-    for (;;) {
-        switch (type->kind()) {
-            case serial::TypeKind::Array:
-                type = &static_cast<const ArrayType&>(*type).type();
-                break;
-
-            case serial::TypeKind::Optional:
-                type = &static_cast<const OptionalType&>(*type).type();
-                break;
-
-            default:
-                return type;
-        }
-    }
-}
-
-absl::Nonnull<Type*> _unwrap_type(absl::Nonnull<Type*> type) {
-    return const_cast<absl::Nonnull<Type*>>(
-        _unwrap_type(const_cast<absl::Nonnull<const Type*>>(type)));
-}
-
-}  // namespace
-
 ////////////////////////////////////////////////////////////////
 // Find AST nodes
 
@@ -98,15 +72,15 @@ absl::Nonnull<FunctionType*> Scope::get_resolved_function_type(
     // on every check against each scope in the hierarchy.
 
     absl::Nullable<Type*> unwrapped_callee_type =
-        callee_type != nullptr ? _unwrap_type(callee_type) : nullptr;
+        callee_type != nullptr ? &ast::Type::unwrap(*callee_type) : nullptr;
 
     TypeList unwrapped_argument_types;
     unwrapped_argument_types.reserve(argument_types.size());
     for (auto* type : argument_types) {
-        unwrapped_argument_types.emplace_back(_unwrap_type(type));
+        unwrapped_argument_types.emplace_back(&ast::Type::unwrap(*type));
     }
     absl::Nullable<Type*> unwrapped_return_type =
-        return_type != nullptr ? _unwrap_type(return_type) : nullptr;
+        return_type != nullptr ? &ast::Type::unwrap(*return_type) : nullptr;
 
     const auto key = std::make_tuple(callee_type, argument_types, return_type);
 
