@@ -39,7 +39,6 @@ class Scope {
   public:
     using TypeList = llvm::SmallVector<Type*, 4>;
 
-  protected:
     using FunctionTypeKey =
         std::tuple<absl::Nullable<Type*> /*callee_type*/, TypeList /*argument_types*/,
                    absl::Nullable<Type*> /*return_type*/>;
@@ -54,6 +53,7 @@ class Scope {
         std::tuple<std::string_view /*name*/, absl::Nullable<Type*> /*callee_type*/,
                    TypeList /*argument_types*/>;
 
+  protected:
     absl::flat_hash_map<std::string_view, absl::Nonnull<Type*>>         _named_types;
     absl::flat_hash_map<FunctionTypeKey, absl::Nonnull<FunctionType*>>  _function_types;
     absl::flat_hash_map<absl::Nonnull<Type*>, absl::Nonnull<MetaType*>> _meta_types;

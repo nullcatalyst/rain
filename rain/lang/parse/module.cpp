@@ -2,6 +2,7 @@
 
 #include "rain/lang/ast/expr/export.hpp"
 #include "rain/lang/ast/expr/function.hpp"
+#include "rain/lang/ast/expr/interface_implementation.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/type/interface.hpp"
 #include "rain/lang/ast/type/struct.hpp"
@@ -14,6 +15,8 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(
     lex::Lexer& lexer, ast::Scope& scope, bool allow_callee_type, bool allow_self_argument,
     absl::Nullable<ast::Type*> default_callee_type);
+util::Result<std::unique_ptr<ast::InterfaceImplementationExpression>>
+parse_interface_implementation(lex::Lexer& lexer, ast::Scope& scope);
 
 // Types
 util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
@@ -43,6 +46,12 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
             auto result = parse_interface_type(lexer, scope);
             FORWARD_ERROR(result);
             return std::make_unique<ast::TypeExpression>(std::move(result).value());
+        }
+
+        case lex::TokenKind::Impl: {
+            auto result = parse_interface_implementation(lexer, scope);
+            FORWARD_ERROR(result);
+            return std::move(result).value();
         }
 
         case lex::TokenKind::Export: {

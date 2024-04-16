@@ -15,6 +15,7 @@ cc_library(
         "identifier.cpp",
         "if.cpp",
         "integer.cpp",
+        "interface_implementation.cpp",
         "let.cpp",
         "list.hpp",
         "member.cpp",
