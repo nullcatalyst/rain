@@ -119,7 +119,7 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
 
             auto argument = std::make_unique<ast::BlockVariable>(
                 argument_name.text(), std::move(argument_type).value(), /*mutable*/ false);
-            arguments.push_back(argument.get());
+            arguments.emplace_back(argument.get());
             body_scope.add_variable(argument_name.text(), std::move(argument));
             return {};
         },
@@ -175,9 +175,9 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer
     auto* function_variable =
         scope.create_unresolved_function(name_token.text(), function_type, name_token.location);
 
-    return std::make_unique<ast::FunctionExpression>(function_variable, std::move(arguments),
-                                                     function_type, std::move(body),
-                                                     declaration_location);
+    return std::make_unique<ast::FunctionExpression>(
+        function_variable, std::move(arguments), function_type, std::move(body),
+        declaration_location, return_type != nullptr ? return_type->location() : lex::Location());
 }
 
 }  // namespace rain::lang::parse

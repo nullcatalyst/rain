@@ -96,7 +96,8 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
         scope.create_unresolved_function(name_token.text(), function_type, name_token.location);
 
     return std::make_unique<ast::FunctionDeclarationExpression>(
-        function_variable, std::move(arguments), function_type, declaration_location);
+        function_variable, std::move(arguments), function_type, declaration_location,
+        return_type != nullptr ? return_type->location() : lex::Location());
 }
 
 }  // namespace rain::lang::parse

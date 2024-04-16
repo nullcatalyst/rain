@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "binary_operator.cpp",
         "multiple_definition.cpp",
+        "return_type_mismatch.cpp",
         "syntax.cpp",
         "unary_operator.cpp",
         "underline.cpp",
@@ -11,6 +12,7 @@ cc_library(
         "all.hpp",
         "binary_operator.hpp",
         "multiple_definition.hpp",
+        "return_type_mismatch.hpp",
         "simple.hpp",
         "syntax.hpp",
         "unary_operator.hpp",

@@ -45,8 +45,8 @@ llvm::Value* compile_call(Context& ctx, ast::CallExpression& call);
 llvm::Value* compile_compile_time(Context& ctx, ast::CompileTimeExpression& compile_time);
 llvm::Value* compile_parenthesis(Context& ctx, ast::ParenthesisExpression& parenthesis);
 llvm::Value* compile_block(Context& ctx, ast::BlockExpression& block);
-llvm::Function* compile_function_declaration(
-    Context& ctx, ast::FunctionDeclarationExpression& function_declaration);
+llvm::Function* compile_function_declaration(Context&               ctx,
+                                             ast::FunctionVariable& function_variable);
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function);
 llvm::Value*    compile_if(Context& ctx, ast::IfExpression& if_);
 llvm::Value*    compile_while(Context& ctx, ast::WhileExpression& while_);

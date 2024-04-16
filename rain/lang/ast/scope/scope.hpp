@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <tuple>
 #include <vector>
 
@@ -117,6 +118,13 @@ class Scope {
 
     [[nodiscard]] absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
+
+    template <typename Fn>
+    void for_each_function(Fn&& fn) const {
+        for (const auto& [_, function] : _function_variables) {
+            fn(*function);
+        }
+    }
 
     ////////////////////////////////////////////////////////////////
     // Add AST nodes

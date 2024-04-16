@@ -37,7 +37,6 @@ absl::Nullable<Type*> Scope::find_named_type(const std::string_view name) const 
         if (const auto it = scope->_named_types.find(name); it != scope->_named_types.end()) {
             return it->second;
         }
-
         scope = scope->parent();
     } while (scope != nullptr);
 
@@ -225,8 +224,8 @@ util::Result<void> Scope::validate(Options& options) {
 }
 
 util::Result<void> Scope::cleanup() {
-    // Performing a swap here allows the capacity of the vector to be freed, instead of
-    // `.clear()` just setting a "used size" to 0.
+    // Performing a swap here allows the capacity of the vector to be freed, instead of `.clear()`
+    // just setting a "used size" to 0.
     decltype(_unresolved_types) empty_unresolved_types;
     std::swap(_unresolved_types, empty_unresolved_types);
 

@@ -34,12 +34,14 @@ class FunctionDeclarationExpression : public Expression {
 
     /** The location of the declaration. */
     lex::Location _declaration_location;
+    lex::Location _return_type_location;
 
   public:
     FunctionDeclarationExpression(absl::Nullable<FunctionVariable*> variable,
                                   ArgumentList                      arguments,
                                   absl::Nonnull<FunctionType*>      function_type,
-                                  lex::Location                     declaration_location);
+                                  lex::Location                     declaration_location,
+                                  lex::Location                     return_type_location);
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {

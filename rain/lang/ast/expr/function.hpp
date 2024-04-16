@@ -20,7 +20,8 @@ class FunctionExpression : public FunctionDeclarationExpression {
   public:
     FunctionExpression(absl::Nullable<FunctionVariable*> variable, ArgumentList arguments,
                        absl::Nonnull<FunctionType*>     function_type,
-                       std::unique_ptr<BlockExpression> block, lex::Location declaration_location);
+                       std::unique_ptr<BlockExpression> block, lex::Location declaration_location,
+                       lex::Location return_type_location);
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {

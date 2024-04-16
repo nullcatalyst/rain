@@ -18,25 +18,16 @@ class Context;
 
 namespace rain::lang::ast {
 
-// enum class FunctionCompileState {
-//     Undefined,
-//     Declared,
-//     Compiling,
-//     Compiled,
-// };
-
 class FunctionVariable : public Variable {
     std::string_view             _name;
     absl::Nonnull<FunctionType*> _function_type;
 
-    // absl::Nullable<FunctionExpression*> _definition;
-    // FunctionCompileState                _compile_state = FunctionCompileState::Undefined;
     lex::Location _location;
 
   public:
     FunctionVariable(const std::string_view name, absl::Nonnull<FunctionType*> type,
-                     /*absl::Nullable<FunctionExpression*> definition,*/ lex::Location location)
-        : _name(name), _function_type(type), /*_definition(definition),*/ _location(location) {}
+                     lex::Location location)
+        : _name(name), _function_type(type), _location(location) {}
     ~FunctionVariable() override = default;
 
     // Variable
@@ -51,11 +42,6 @@ class FunctionVariable : public Variable {
     [[nodiscard]] lex::Location location() const noexcept override { return _location; }
 
     // FunctionVariable
-    // [[nodiscard]] absl::Nullable<FunctionExpression*> definition() const noexcept {
-    //     return _definition;
-    // }
-    // void set_compile_state(FunctionCompileState state) noexcept { _compile_state = state; }
-    // [[nodiscard]] FunctionCompileState compile_state() const noexcept { return _compile_state; }
 
     [[nodiscard]] virtual llvm::Value* build_call(
         code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept;

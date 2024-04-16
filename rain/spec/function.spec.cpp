@@ -41,11 +41,11 @@ export fn four() -> i32 {
 TEST(Function, nested) {
     const std::string_view code = R"(
 export fn double_four() -> i32 {
-    2 * four()
-
     fn four() -> i32 {
         4
     }
+
+    2 * four()
 }
 )";
 

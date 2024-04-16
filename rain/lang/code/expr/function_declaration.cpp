@@ -1,5 +1,6 @@
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/code/expr/all.hpp"
+#include "rain/lang/code/type/all.hpp"
 
 namespace rain::lang::code {
 
@@ -12,8 +13,9 @@ llvm::Function* compile_function_declaration(Context&               ctx,
     }
 
     auto* function_type = function_variable.function_type();
-    auto* llvm_type     = static_cast<llvm::FunctionType*>(ctx.llvm_type(function_type));
-    assert(llvm_type != nullptr && "function type not found");
+    assert(function_type != nullptr && "function type not found");
+    auto* llvm_type = static_cast<llvm::FunctionType*>(get_or_compile_type(ctx, *function_type));
+    assert(llvm_type != nullptr && "llvm function type not found");
 
     std::string name;
     if (function_type->callee_type() != nullptr) {
@@ -41,8 +43,9 @@ llvm::Function* compile_function_declaration(
     }
 
     auto* function_type = function_declaration.function_type();
-    auto* llvm_type     = static_cast<llvm::FunctionType*>(ctx.llvm_type(function_type));
-    assert(llvm_type != nullptr && "function type not found");
+    assert(function_type != nullptr && "function type not found");
+    auto* llvm_type = static_cast<llvm::FunctionType*>(get_or_compile_type(ctx, *function_type));
+    assert(llvm_type != nullptr && "llvm function type not found");
 
     std::string name;
     if (function_type->callee_type() != nullptr) {

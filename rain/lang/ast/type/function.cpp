@@ -15,8 +15,7 @@ std::string FunctionType::display_name() const noexcept {
     std::string argument_type_names;
     for (size_t i = 0; i < _argument_types.size(); ++i) {
         if (i > 0) {
-            absl::StrAppend(&argument_type_names, ", ", argument_type_names,
-                            _argument_types[i]->display_name());
+            absl::StrAppend(&argument_type_names, ", ", _argument_types[i]->display_name());
         } else {
             argument_type_names = _argument_types[i]->display_name();
         }

@@ -16,7 +16,8 @@ void compile_module(Context& ctx, ast::Module& module) {
     ctx.set_llvm_type(builtin.f32x4_type(), llvm::FixedVectorType::get(llvm_f32_type, 4));
 
     for (auto& type : builtin.owned_types()) {
-        compile_type(ctx, *type);
+        assert(type != nullptr && "type is null");
+        get_or_compile_type(ctx, *type);
     }
 
     for (auto& external_function : builtin.external_functions()) {
@@ -34,6 +35,10 @@ void compile_module(Context& ctx, ast::Module& module) {
 
         ctx.set_llvm_value(external_function.get(), llvm_function);
     }
+
+    module.scope().for_each_function([&ctx](ast::FunctionVariable& function_variable) {
+        compile_function_declaration(ctx, function_variable);
+    });
 
     for (auto& type : module.scope().owned_types()) {
         compile_type(ctx, *type);

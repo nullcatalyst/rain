@@ -6,7 +6,9 @@
 namespace rain::lang::code {
 
 llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function) {
-    llvm::Function* llvm_function = compile_function_declaration(ctx, function);
+    llvm::Function* llvm_function =
+        static_cast<llvm::Function*>(ctx.llvm_value(function.variable()));
+    assert(llvm_function != nullptr && "Function not found in context");
 
     auto& llvm_ir    = ctx.llvm_builder();
     auto* prev_block = llvm_ir.GetInsertBlock();
