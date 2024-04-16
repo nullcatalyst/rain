@@ -147,9 +147,16 @@ absl::Nullable<FunctionVariable*> Scope::find_function(const std::string_view na
 }
 
 absl::Nullable<Variable*> Scope::find_variable(const std::string_view name) const noexcept {
-    if (const auto it = _named_variables.find(name); it != _named_variables.end()) {
-        return it->second;
-    }
+    const Scope* scope = this;
+    do {
+        if (const auto it = scope->_named_variables.find(name);
+            it != scope->_named_variables.end()) {
+            return it->second;
+        }
+
+        scope = scope->parent();
+    } while (scope != nullptr);
+
     return nullptr;
 }
 
@@ -235,8 +242,8 @@ util::Result<void> Scope::validate(Options& options) {
 }
 
 util::Result<void> Scope::cleanup() {
-    // Performing a swap here allows the capacity of the vector to be freed, instead of `.clear()`
-    // just setting a "used size" to 0.
+    // Performing a swap here allows the capacity of the vector to be freed, instead of
+    // `.clear()` just setting a "used size" to 0.
     decltype(_unresolved_types) empty_unresolved_types;
     std::swap(_unresolved_types, empty_unresolved_types);
 

@@ -8,16 +8,13 @@
 #include "rain/lang/ast/scope/block.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/serial/expression.hpp"
-#include "rain/util/maybe_owned_ptr.hpp"
 
 namespace rain::lang::ast {
-
-using ArgumentList = llvm::SmallVector<util::MaybeOwnedPtr<Variable>, 4>;
 
 class FunctionDeclarationExpression : public Expression {
   protected:
     /** The set of arguments passed to the function. */
-    ArgumentList _arguments;
+    llvm::SmallVector<absl::Nonnull<Variable*>, 4> _arguments;
 
     /**
      * If the function has a name, this will be non-null and will point to the variable that
@@ -34,7 +31,7 @@ class FunctionDeclarationExpression : public Expression {
     absl::Nonnull<FunctionType*> _type;
 
     /** The scope which owns the argument variables. */
-    BlockScope _scope;
+    std::unique_ptr<BlockScope> _scope;
 
     /** The location of the declaration. */
     lex::Location _declaration_location;
@@ -44,10 +41,10 @@ class FunctionDeclarationExpression : public Expression {
 
   public:
     FunctionDeclarationExpression(Scope& parent, absl::Nullable<FunctionVariable*> variable,
-                                  ArgumentList                 arguments,
-                                  absl::Nonnull<FunctionType*> function_type,
-                                  lex::Location                declaration_location,
-                                  lex::Location                return_type_location);
+                                  llvm::SmallVector<std::unique_ptr<Variable>, 4> arguments,
+                                  absl::Nonnull<FunctionType*>                    function_type,
+                                  lex::Location declaration_location,
+                                  lex::Location return_type_location);
     FunctionDeclarationExpression(const FunctionDeclarationExpression&)            = delete;
     FunctionDeclarationExpression& operator=(const FunctionDeclarationExpression&) = delete;
     FunctionDeclarationExpression& operator=(FunctionDeclarationExpression&&)      = delete;
@@ -77,10 +74,10 @@ class FunctionDeclarationExpression : public Expression {
         return _type;
     }
     [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
-    [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
+    [[nodiscard]] constexpr const auto& arguments() const noexcept { return _arguments; }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
-    [[nodiscard]] Scope&                            scope() noexcept { return _scope; }
-    [[nodiscard]] const Scope&                      scope() const noexcept { return _scope; }
+    [[nodiscard]] Scope&                            scope() noexcept { return *_scope.get(); }
+    [[nodiscard]] const Scope&                      scope() const noexcept { return *_scope.get(); }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 

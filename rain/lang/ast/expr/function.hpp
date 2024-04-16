@@ -44,7 +44,7 @@ class FunctionExpression : public FunctionDeclarationExpression {
     }
 
     [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
-    [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
+    [[nodiscard]] constexpr const auto& arguments() const noexcept { return _arguments; }
 
     [[nodiscard]] absl::Nonnull<BlockExpression*>   block() const noexcept { return _block.get(); }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }

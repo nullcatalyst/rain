@@ -19,9 +19,10 @@ class BlockExpression : public Expression {
     lex::Location         _location;
 
   public:
-    // BlockExpression is the only expression that has to be created prior to finishing parseing,
-    // because the scope is needed to parse the expressions in the block.
-    BlockExpression(Scope& parent) : _scope(parent) {}
+    // BlockExpression is the only expression that has to be created prior to finishing parsing,
+    // because the scope is needed to have already been created in order to parse the expressions in
+    // the block.
+    explicit BlockExpression(Scope& parent) : _scope(parent) {}
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {

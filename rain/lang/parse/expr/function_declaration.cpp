@@ -61,7 +61,7 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
     }
 
     // Check if the method takes a 'self' argument.
-    ast::ArgumentList arguments;
+    llvm::SmallVector<std::unique_ptr<ast::Variable>, 4> arguments;
     if (allow_self_argument && callee_type != nullptr) {
         auto* self_type = callee_type;
         if (auto ampersand_token = lexer.peek();
@@ -85,9 +85,8 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
                 lexer.next();  // Consume the ',' token
             }
 
-            auto self_argument =
-                std::make_unique<ast::BlockVariable>("self", self_type, /*mutable*/ false);
-            arguments.push_back(self_argument.get());
+            arguments.emplace_back(
+                std::make_unique<ast::BlockVariable>("self", self_type, /*mutable*/ false));
         }
     }
 
@@ -108,9 +107,8 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
             auto argument_type = parse_any_type(lexer, scope);
             FORWARD_ERROR(argument_type);
 
-            auto argument = std::make_unique<ast::BlockVariable>(
-                argument_name.text(), std::move(argument_type).value(), /*mutable*/ false);
-            arguments.emplace_back(argument.get());
+            arguments.emplace_back(std::make_unique<ast::BlockVariable>(
+                argument_name.text(), std::move(argument_type).value(), /*mutable*/ false));
             return {};
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
@@ -141,7 +139,7 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
         argument_types.emplace_back(argument->type());
     }
     auto* function_type =
-        scope.find_or_create_unresolved_function_type(nullptr, argument_types, return_type);
+        scope.find_or_create_unresolved_function_type(callee_type, argument_types, return_type);
     auto* function_variable =
         scope.create_unresolved_function(name_token.text(), function_type, name_token.location);
 

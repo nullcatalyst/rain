@@ -19,7 +19,7 @@ llvm::Function* compile_function(Context& ctx, ast::FunctionExpression& function
     llvm_ir.SetInsertPoint(llvm_block);
     for (int i = 0; i < function.arguments().size(); ++i) {
         auto& argument = function.arguments()[i];
-        ctx.set_llvm_value(argument.get_nonnull(), llvm_function->arg_begin() + i);
+        ctx.set_llvm_value(argument, llvm_function->arg_begin() + i);
     }
 
     llvm::Value* llvm_return_value = compile_block(ctx, *function.block());

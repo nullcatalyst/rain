@@ -19,6 +19,7 @@ class InterfaceType : public Type {
     /** The set of fields contained in the struct. */
     std::vector<std::unique_ptr<FunctionDeclarationExpression>> _methods;
 
+    bool          _resolved = false;
     lex::Location _location;
 
   public:
