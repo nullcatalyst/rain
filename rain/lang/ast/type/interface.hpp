@@ -8,7 +8,6 @@
 #include "rain/lang/ast/expr/function_declaration.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/serial/expression.hpp"
-#include "rain/util/maybe_owned_ptr.hpp"
 
 namespace rain::lang::ast {
 

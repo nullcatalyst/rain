@@ -8,7 +8,6 @@
 #include "rain/lang/lex/location.hpp"
 #include "rain/lang/options.hpp"
 #include "rain/lang/serial/kind.hpp"
-#include "rain/util/maybe_owned_ptr.hpp"
 #include "rain/util/result.hpp"
 
 namespace rain::lang::ast {

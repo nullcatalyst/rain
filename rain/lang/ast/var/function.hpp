@@ -8,7 +8,6 @@
 #include "llvm/IR/Value.h"
 #include "rain/lang/ast/type/function.hpp"
 #include "rain/lang/ast/var/variable.hpp"
-#include "rain/util/maybe_owned_ptr.hpp"
 
 namespace rain::lang::code {
 

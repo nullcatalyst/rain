@@ -5,7 +5,6 @@ cc_library(
         "colors.hpp",
         "console.hpp",
         "defer.hpp",
-        "maybe_owned_ptr.hpp",
         "result.hpp",
         "string.hpp",
         "unreachable.hpp",
