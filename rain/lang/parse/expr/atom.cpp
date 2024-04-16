@@ -9,12 +9,12 @@
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/if.hpp"
-#include "rain/lang/ast/expr/while.hpp"
 #include "rain/lang/ast/expr/integer.hpp"
 #include "rain/lang/ast/expr/let.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/null.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/while.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
@@ -46,8 +46,9 @@ util::Result<std::unique_ptr<ast::ParenthesisExpression>> parse_parenthesis(lex:
                                                                             ast::Scope& scope);
 util::Result<std::unique_ptr<ast::BlockExpression>>       parse_block(lex::Lexer& lexer,
                                                                       ast::Scope& scope);
-util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(lex::Lexer& lexer,
-                                                                         ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionExpression>>    parse_function(
+       lex::Lexer& lexer, ast::Scope& scope, bool allow_callee_type, bool allow_self_argument,
+       absl::Nullable<ast::Type*> default_callee_type);
 util::Result<std::unique_ptr<ast::IfExpression>>     parse_if(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::WhileExpression>>  parse_while(lex::Lexer& lexer,
                                                                  ast::Scope& scope);
@@ -105,7 +106,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_standalone_atom(lex::Lexer&
             return parse_while(lexer, scope);
 
         case lex::TokenKind::Fn:
-            return parse_function(lexer, scope);
+            return parse_function(lexer, scope, true, true, nullptr);
 
         case lex::TokenKind::Hash:
             return parse_compile_time(lexer, scope);

@@ -35,6 +35,7 @@ class FunctionType : public Type {
     [[nodiscard]] constexpr auto        callee_type() const noexcept { return _callee_type; }
     [[nodiscard]] constexpr const auto& argument_types() const noexcept { return _argument_types; }
     [[nodiscard]] constexpr auto        return_type() const noexcept { return _return_type; }
+    [[nodiscard]] constexpr bool has_self_argument() const noexcept { return _self_argument; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

@@ -5,6 +5,7 @@
 #include "absl/base/nullability.h"
 #include "llvm/ADT/SmallVector.h"
 #include "rain/lang/ast/expr/expression.hpp"
+#include "rain/lang/ast/scope/block.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/serial/expression.hpp"
 #include "rain/util/maybe_owned_ptr.hpp"
@@ -32,16 +33,25 @@ class FunctionDeclarationExpression : public Expression {
      */
     absl::Nonnull<FunctionType*> _type;
 
+    /** The scope which owns the argument variables. */
+    BlockScope _scope;
+
     /** The location of the declaration. */
     lex::Location _declaration_location;
     lex::Location _return_type_location;
 
+    FunctionDeclarationExpression(FunctionDeclarationExpression&&);
+
   public:
-    FunctionDeclarationExpression(absl::Nullable<FunctionVariable*> variable,
-                                  ArgumentList                      arguments,
-                                  absl::Nonnull<FunctionType*>      function_type,
-                                  lex::Location                     declaration_location,
-                                  lex::Location                     return_type_location);
+    FunctionDeclarationExpression(Scope& parent, absl::Nullable<FunctionVariable*> variable,
+                                  ArgumentList                 arguments,
+                                  absl::Nonnull<FunctionType*> function_type,
+                                  lex::Location                declaration_location,
+                                  lex::Location                return_type_location);
+    FunctionDeclarationExpression(const FunctionDeclarationExpression&)            = delete;
+    FunctionDeclarationExpression& operator=(const FunctionDeclarationExpression&) = delete;
+    FunctionDeclarationExpression& operator=(FunctionDeclarationExpression&&)      = delete;
+    ~FunctionDeclarationExpression() override                                      = default;
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
@@ -63,13 +73,14 @@ class FunctionDeclarationExpression : public Expression {
     [[nodiscard]] std::string_view name() const noexcept {
         return _variable != nullptr ? _variable->name() : std::string_view();
     }
-
     [[nodiscard]] constexpr absl::Nonnull<FunctionType*> function_type() const noexcept {
         return _type;
     }
     [[nodiscard]] /*constexpr*/ bool has_arguments() const noexcept { return !_arguments.empty(); }
     [[nodiscard]] constexpr const ArgumentList& arguments() const noexcept { return _arguments; }
     [[nodiscard]] absl::Nullable<FunctionVariable*> variable() const noexcept { return _variable; }
+    [[nodiscard]] Scope&                            scope() noexcept { return _scope; }
+    [[nodiscard]] const Scope&                      scope() const noexcept { return _scope; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 

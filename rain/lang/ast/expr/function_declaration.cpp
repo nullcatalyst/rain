@@ -4,14 +4,23 @@
 namespace rain::lang::ast {
 
 FunctionDeclarationExpression::FunctionDeclarationExpression(
-    absl::Nullable<FunctionVariable*> variable, ArgumentList arguments,
+    Scope& parent, absl::Nullable<FunctionVariable*> variable, ArgumentList arguments,
     absl::Nonnull<FunctionType*> function_type, lex::Location declaration_location,
     lex::Location return_type_location)
     : _arguments(std::move(arguments)),
       _variable(variable),
       _type(function_type),
+      _scope(parent),
       _declaration_location(declaration_location),
       _return_type_location(return_type_location) {}
+
+FunctionDeclarationExpression::FunctionDeclarationExpression(FunctionDeclarationExpression&& other)
+    : _arguments(std::move(other._arguments)),
+      _variable(other._variable),
+      _type(other._type),
+      _scope{std::move(other._scope)},
+      _declaration_location(other._declaration_location),
+      _return_type_location(other._return_type_location) {}
 
 util::Result<void> FunctionDeclarationExpression::validate(Options& options, Scope& scope) {
     {

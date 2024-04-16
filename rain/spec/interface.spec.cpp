@@ -10,15 +10,15 @@ interface Closable {
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-// TEST(Interface, instance_definition_only) {
-//     const std::string_view code = R"(
-// interface Closable {
-//     fn close(&self)
-// }
-// )";
+TEST(Interface, instance_definition_only) {
+    const std::string_view code = R"(
+interface Closable {
+    fn close(&self)
+}
+)";
 
-//     EXPECT_COMPILE_SUCCESS(code);
-// }
+    EXPECT_COMPILE_SUCCESS(code);
+}
 
 // TEST(Interface, implementation) {
 //     const std::string_view code = R"(

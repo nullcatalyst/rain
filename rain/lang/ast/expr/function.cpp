@@ -5,15 +5,9 @@
 
 namespace rain::lang::ast {
 
-FunctionExpression::FunctionExpression(absl::Nullable<FunctionVariable*> variable,
-                                       ArgumentList                      arguments,
-                                       absl::Nonnull<FunctionType*>      function_type,
-                                       std::unique_ptr<BlockExpression>  block,
-                                       lex::Location                     declaration_location,
-                                       lex::Location                     return_type_location)
-    : FunctionDeclarationExpression(variable, std::move(arguments), function_type,
-                                    declaration_location, return_type_location),
-      _block(std::move(block)) {}
+FunctionExpression::FunctionExpression(FunctionDeclarationExpression&&  declaration,
+                                       std::unique_ptr<BlockExpression> block)
+    : FunctionDeclarationExpression(std::move(declaration)), _block(std::move(block)) {}
 
 util::Result<void> FunctionExpression::validate(Options& options, Scope& scope) {
     {

@@ -22,10 +22,7 @@ class InterfaceType : public Type {
     lex::Location _location;
 
   public:
-    InterfaceType(std::string_view                                            name,
-                  std::vector<std::unique_ptr<FunctionDeclarationExpression>> methods,
-                  lex::Location                                               location)
-        : _name(std::move(name)), _methods(std::move(methods)), _location(location) {}
+    InterfaceType(std::string_view name) : _name(std::move(name)) {}
 
     // Type
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
@@ -37,6 +34,11 @@ class InterfaceType : public Type {
     // InterfaceType
     [[nodiscard]] constexpr std::string_view name() const noexcept { return _name; }
     [[nodiscard]] constexpr const auto&      methods() const noexcept { return _methods; }
+
+    void add_method(std::unique_ptr<FunctionDeclarationExpression> method) {
+        _methods.push_back(std::move(method));
+    }
+    void set_location(lex::Location location) { _location = location; }
 
     [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
                                                              Scope&   scope) override;

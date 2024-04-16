@@ -16,8 +16,12 @@ class BlockScope : public Scope {
     ModuleScope& _module;
 
   public:
-    BlockScope(Scope& parent) : _parent(parent), _module(*parent.module()) {}
-    ~BlockScope() override = default;
+    explicit BlockScope(Scope& parent);
+    BlockScope(const BlockScope&)            = delete;
+    BlockScope& operator=(const BlockScope&) = delete;
+    explicit BlockScope(BlockScope&&);
+    BlockScope& operator=(BlockScope&&) = delete;
+    ~BlockScope() override              = default;
 
     [[nodiscard]] absl::Nullable<Scope*>       parent() const noexcept override { return &_parent; }
     [[nodiscard]] absl::Nonnull<ModuleScope*>  module() const noexcept override { return &_module; }

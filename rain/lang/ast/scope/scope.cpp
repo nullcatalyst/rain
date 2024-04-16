@@ -13,6 +13,17 @@
 
 namespace rain::lang::ast {
 
+Scope::Scope(Scope&& other)
+    : _named_types(std::move(other._named_types)),
+      _function_types(std::move(other._function_types)),
+      _meta_types(std::move(other._meta_types)),
+      _owned_types(std::move(other._owned_types)),
+      _function_variables(std::move(other._function_variables)),
+      _named_variables(std::move(other._named_variables)),
+      _owned_variables(std::move(other._owned_variables)),
+      _unresolved_types(std::move(other._unresolved_types)),
+      _unresolved_functions(std::move(other._unresolved_functions)) {}
+
 ////////////////////////////////////////////////////////////////
 // Find AST nodes
 

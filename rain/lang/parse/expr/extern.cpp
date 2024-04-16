@@ -13,7 +13,8 @@
 namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
-    lex::Lexer& lexer, ast::Scope& scope);
+    lex::Lexer& lexer, ast::Scope& scope, bool allow_callee_type, bool allow_self_argument,
+    absl::Nullable<ast::Type*> default_callee_type);
 
 util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& lexer,
                                                                   ast::Scope& scope) {
@@ -56,7 +57,8 @@ util::Result<std::unique_ptr<ast::ExternExpression>> parse_extern(lex::Lexer& le
                        "expected function declaration after extern keys");
     }
 
-    auto function_declaration_result = parse_function_declaration(lexer, scope);
+    auto function_declaration_result =
+        parse_function_declaration(lexer, scope, false, false, nullptr);
     FORWARD_ERROR(function_declaration_result);
     auto function_declaration = std::move(function_declaration_result).value();
 

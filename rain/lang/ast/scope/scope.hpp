@@ -81,7 +81,12 @@ class Scope {
     std::vector<std::unique_ptr<FunctionVariable>> _unresolved_functions;
 
   public:
-    virtual ~Scope() = default;
+    Scope()                        = default;
+    Scope(const Scope&)            = delete;
+    Scope& operator=(const Scope&) = delete;
+    explicit Scope(Scope&&);
+    Scope& operator=(Scope&&) = delete;
+    virtual ~Scope()          = default;
 
     [[nodiscard]] constexpr const auto& owned_types() const noexcept { return _owned_types; }
     [[nodiscard]] constexpr auto&       owned_types() noexcept { return _owned_types; }

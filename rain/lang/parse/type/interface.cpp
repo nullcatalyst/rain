@@ -11,7 +11,8 @@
 namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function_declaration(
-    lex::Lexer& lexer, ast::Scope& scope);
+    lex::Lexer& lexer, ast::Scope& scope, bool allow_callee_type, bool allow_self_argument,
+    absl::Nullable<ast::Type*> default_callee_type);
 
 util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer& lexer,
                                                                       ast::Scope& scope) {
@@ -35,22 +36,23 @@ util::Result<absl::Nonnull<ast::InterfaceType*>> parse_interface_type(lex::Lexer
                        "expected '{' after interface name");
     }
 
-    std::vector<std::unique_ptr<ast::FunctionDeclarationExpression>> methods;
-    auto result = parse_many(lexer, lex::TokenKind::RCurlyBracket,
-                             [&](lex::Lexer& lexer) -> util::Result<void> {
-                                 auto result = parse_function_declaration(lexer, scope);
-                                 FORWARD_ERROR(result);
-                                 methods.push_back(std::move(result).value());
-                                 return {};
-                             });
+    auto interface_type = std::make_unique<ast::InterfaceType>(interface_name);
+
+    auto result = parse_many(
+        lexer, lex::TokenKind::RCurlyBracket, [&](lex::Lexer& lexer) -> util::Result<void> {
+            auto result =
+                parse_function_declaration(lexer, scope, false, true, interface_type.get());
+            FORWARD_ERROR(result);
+            interface_type->add_method(std::move(result).value());
+            return {};
+        });
     FORWARD_ERROR(result);
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
+    interface_type->set_location(interface_token.location.merge(rbracket_token.location));
 
-    return static_cast<ast::InterfaceType*>(scope.add_named_type(
-        interface_name, std::make_unique<ast::InterfaceType>(
-                            interface_name, std::move(methods),
-                            interface_token.location.merge(rbracket_token.location))));
+    return static_cast<ast::InterfaceType*>(
+        scope.add_named_type(interface_name, std::move(interface_type)));
 }
 
 }  // namespace rain::lang::parse

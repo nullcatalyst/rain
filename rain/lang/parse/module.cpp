@@ -11,8 +11,9 @@
 namespace rain::lang::parse {
 
 // Expressions
-util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(lex::Lexer& lexer,
-                                                                      ast::Scope& scope);
+util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(
+    lex::Lexer& lexer, ast::Scope& scope, bool allow_callee_type, bool allow_self_argument,
+    absl::Nullable<ast::Type*> default_callee_type);
 
 // Types
 util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
@@ -27,7 +28,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
     auto token = lexer.peek();
     switch (token.kind) {
         case lex::TokenKind::Fn: {
-            auto result = parse_function(lexer, scope);
+            auto result = parse_function(lexer, scope, true, true, nullptr);
             FORWARD_ERROR(result);
             return std::move(result).value();
         }
