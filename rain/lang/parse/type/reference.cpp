@@ -31,7 +31,7 @@ util::Result<absl::Nonnull<ast::ReferenceType*>> parse_reference_type(lex::Lexer
                        "reference types cannot be nested inside another reference type");
     }
 
-    return &type->get_reference_type();
+    return &type->get_reference_type(scope);
 }
 
 }  // namespace rain::lang::parse

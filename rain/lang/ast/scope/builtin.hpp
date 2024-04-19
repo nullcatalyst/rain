@@ -60,8 +60,9 @@ class BuiltinScope : public Scope {
         const std::string_view name, absl::Nullable<FunctionType*> function_type,
         lex::Location location) noexcept override;
 
-    absl::Nonnull<Variable*> add_variable(const std::string_view    name,
-                                          std::unique_ptr<Variable> variable) noexcept override;
+    absl::Nonnull<Variable*> add_variable(std::unique_ptr<Variable> variable) noexcept override;
+    absl::Nonnull<FunctionVariable*> add_resolved_function(
+        std::unique_ptr<FunctionVariable> function_variable) noexcept override;
 
     void declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable);
 

@@ -8,7 +8,7 @@ class MetaType : public Type {
     absl::Nonnull<Type*> _type;
 
   public:
-    MetaType(absl::Nonnull<Type*> type) : _type(type) {}
+    MetaType(absl::Nonnull<Type*> type);
     ~MetaType() override = default;
 
     // Type
@@ -27,8 +27,9 @@ class MetaType : public Type {
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

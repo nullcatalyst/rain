@@ -68,7 +68,7 @@ util::Result<std::unique_ptr<ast::FunctionDeclarationExpression>> parse_function
             ampersand_token.kind == lex::TokenKind::Ampersand) {
             lexer.next();  // Consume the '&' token
 
-            self_type = &callee_type->get_reference_type();
+            self_type = &callee_type->get_reference_type(scope);
         }
 
         if (auto self_token = lexer.peek(); self_token.kind == lex::TokenKind::Self) {

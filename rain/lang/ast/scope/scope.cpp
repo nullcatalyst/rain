@@ -195,14 +195,27 @@ absl::Nonnull<FunctionVariable*> Scope::create_unresolved_function(
     return function_ptr;
 }
 
-absl::Nonnull<Variable*> Scope::add_variable(const std::string_view    name,
-                                             std::unique_ptr<Variable> variable) noexcept {
+absl::Nonnull<Variable*> Scope::add_variable(std::unique_ptr<Variable> variable) noexcept {
     assert(variable != nullptr);
 
     auto* variable_ptr = variable.get();
-    _named_variables.insert_or_assign(name, variable_ptr);
+    _named_variables.insert_or_assign(variable_ptr->name(), variable_ptr);
     _owned_variables.insert(std::move(variable));
     return variable_ptr;
+}
+
+absl::Nonnull<FunctionVariable*> Scope::add_resolved_function(
+    std::unique_ptr<FunctionVariable> function_variable) noexcept {
+    assert(function_variable != nullptr);
+
+    auto* function_variable_ptr = function_variable.get();
+    _function_variables.insert_or_assign(
+        std::make_tuple(function_variable->name(),
+                        function_variable->function_type()->callee_type(),
+                        function_variable->function_type()->argument_types()),
+        function_variable_ptr);
+    _owned_variables.insert(std::move(function_variable));
+    return function_variable_ptr;
 }
 
 ////////////////////////////////////////////////////////////////

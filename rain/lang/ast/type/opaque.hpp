@@ -14,7 +14,7 @@ class OpaqueType : public Type {
     std::string_view _name;
 
   public:
-    OpaqueType(std::string_view name) : _name(name) {}
+    OpaqueType(std::string_view name);
     ~OpaqueType() override = default;
 
     // Type
@@ -27,8 +27,9 @@ class OpaqueType : public Type {
         return lex::Location();
     }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

@@ -141,8 +141,9 @@ class Scope {
         const std::string_view name, absl::Nullable<FunctionType*> function_type,
         lex::Location location) noexcept;
 
-    virtual absl::Nonnull<Variable*> add_variable(const std::string_view    name,
-                                                  std::unique_ptr<Variable> variable) noexcept;
+    virtual absl::Nonnull<Variable*> add_variable(std::unique_ptr<Variable> variable) noexcept;
+    virtual absl::Nonnull<FunctionVariable*> add_resolved_function(
+        std::unique_ptr<FunctionVariable> function_variable) noexcept;
 
     ////////////////////////////////////////////////////////////////
     // Validation

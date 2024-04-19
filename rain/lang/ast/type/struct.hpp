@@ -51,8 +51,9 @@ class StructType : public Type {
         return std::nullopt;
     }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

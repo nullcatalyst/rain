@@ -34,8 +34,9 @@ class UnresolvedType : public Type {
 
     [[nodiscard]] constexpr std::string_view name() const noexcept { return _name; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

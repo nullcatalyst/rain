@@ -31,7 +31,7 @@ util::Result<absl::Nonnull<ast::OptionalType*>> parse_optional_type(lex::Lexer& 
                        "optional types cannot be nested inside another optional type");
     }
 
-    return &type->get_optional_type();
+    return &type->get_optional_type(scope);
 }
 
 }  // namespace rain::lang::parse

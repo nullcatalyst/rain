@@ -40,8 +40,9 @@ class InterfaceType : public Type {
     }
     void set_location(lex::Location location) { _location = location; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

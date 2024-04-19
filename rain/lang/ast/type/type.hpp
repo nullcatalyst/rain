@@ -26,6 +26,7 @@ class Type {
     absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>> _array_types;
 
     std::vector<absl::Nonnull<Type*>> _interface_implementations;
+    absl::Nullable<Type*>             _resolves_to = nullptr;
 
   public:
     static Type& unwrap(Type& type) noexcept;
@@ -36,9 +37,9 @@ class Type {
     [[nodiscard]] virtual std::string      display_name() const noexcept { return "<error_type>"; }
     [[nodiscard]] virtual lex::Location    location() const noexcept { return lex::Location(); }
 
-    [[nodiscard]] ArrayType&     get_array_type(size_t length);
-    [[nodiscard]] OptionalType&  get_optional_type();
-    [[nodiscard]] ReferenceType& get_reference_type();
+    [[nodiscard]] virtual ArrayType&     get_array_type(Scope& scope, size_t length);
+    [[nodiscard]] virtual OptionalType&  get_optional_type(Scope& scope);
+    [[nodiscard]] virtual ReferenceType& get_reference_type(Scope& scope);
 
     [[nodiscard]] constexpr const auto& array_types() const noexcept { return _array_types; }
 
@@ -49,8 +50,11 @@ class Type {
      * The instance used to call this method is no longer valid after calling this method. If the
      * instance was being stored, then it should be replaced with the returned value.
      */
-    [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                                     Scope&   scope) = 0;
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options, Scope& scope);
+
+  protected:
+    [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                                      Scope&   scope) = 0;
 };
 
 class ArrayType : public Type {
@@ -74,8 +78,9 @@ class ArrayType : public Type {
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 class OptionalType : public Type {
@@ -97,8 +102,9 @@ class OptionalType : public Type {
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 class ReferenceType : public Type {
@@ -120,8 +126,9 @@ class ReferenceType : public Type {
     [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
     [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
 
-    [[nodiscard]] util::Result<absl::Nonnull<Type*>> resolve(Options& options,
-                                                             Scope&   scope) override;
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
 };
 
 }  // namespace rain::lang::ast

@@ -38,7 +38,7 @@ util::Result<absl::Nonnull<ast::ArrayType*>> parse_array_type(lex::Lexer& lexer,
     auto element_type = std::move(element_type_result).value();
 
     // auto location = lsquare_token.location.merge(element_type->location());
-    return &element_type->get_array_type(std::move(length).value());
+    return &element_type->get_array_type(scope, std::move(length).value());
 }
 
 }  // namespace rain::lang::parse

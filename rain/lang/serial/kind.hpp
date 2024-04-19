@@ -95,6 +95,10 @@ enum class BinaryOperatorKind {
     LeftShift,
     RightShift,
 
+    // Other
+    ArrayIndex,
+    As,
+
     Count,
 };
 

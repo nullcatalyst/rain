@@ -4,7 +4,9 @@
 
 namespace rain::lang::ast {
 
-util::Result<absl::Nonnull<Type*>> OpaqueType::resolve(Options& options, Scope& scope) {
+OpaqueType::OpaqueType(std::string_view name) : _name(std::move(name)) { _resolves_to = this; }
+
+util::Result<absl::Nonnull<Type*>> OpaqueType::_resolve(Options& options, Scope& scope) {
     return this;
 }
 

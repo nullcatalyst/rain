@@ -27,3 +27,24 @@ export fn array_of_structs() -> [2]Vec2 {
 
     EXPECT_COMPILE_SUCCESS(code);
 }
+
+TEST(Array, indexing) {
+    const std::string_view code = R"(
+export fn array_indexing(index: i32) -> i32 {
+    let array = [4]i32{ 1, 2, 3, 4 }
+    array[index]
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
+TEST(Array, length) {
+    const std::string_view code = R"(
+export fn array_length() -> i32 {
+    [4]i32{ 1, 2, 3, 4 }.length()
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}

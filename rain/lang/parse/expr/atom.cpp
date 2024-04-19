@@ -1,4 +1,5 @@
 #include "absl/strings/str_cat.h"
+#include "rain/lang/ast/expr/binary_operator.hpp"
 #include "rain/lang/ast/expr/block.hpp"
 #include "rain/lang/ast/expr/boolean.hpp"
 #include "rain/lang/ast/expr/call.hpp"
@@ -21,6 +22,9 @@
 #include "rain/util/result.hpp"
 
 namespace rain::lang::parse {
+
+util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
+                                                                    ast::Scope& scope);
 
 util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexer& lexer,
                                                                        ast::Scope& scope);
@@ -141,7 +145,8 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
 
     auto next_token = lexer.peek();
     while (next_token.kind == lex::TokenKind::Period ||
-           next_token.kind == lex::TokenKind::LRoundBracket) {
+           next_token.kind == lex::TokenKind::LRoundBracket ||
+           next_token.kind == lex::TokenKind::LSquareBracket) {
         if (next_token.kind == lex::TokenKind::Period) {
             auto result = parse_member(lexer, scope, std::move(expression));
             FORWARD_ERROR(result);
@@ -156,6 +161,26 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             FORWARD_ERROR(result);
 
             expression = std::move(result).value();
+            next_token = lexer.peek();
+            continue;
+        }
+
+        if (next_token.kind == lex::TokenKind::LSquareBracket) {
+            lexer.next();  // Consume the `[` token
+
+            auto result = parse_any_expression(lexer, scope);
+            FORWARD_ERROR(result);
+            auto index_expression = std::move(result).value();
+
+            if (const auto rsquare_token = lexer.next();
+                rsquare_token.kind != lex::TokenKind::RSquareBracket) {
+                return ERR_PTR(err::SyntaxError, index_expression->location().empty_string_after(),
+                               "expected ']' after array index expression");
+            }
+
+            expression = std::make_unique<ast::BinaryOperatorExpression>(
+                std::move(expression), std::move(index_expression),
+                serial::BinaryOperatorKind::ArrayIndex);
             next_token = lexer.peek();
             continue;
         }

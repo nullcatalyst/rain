@@ -46,8 +46,9 @@ util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::S
             return parse_named_type(lexer, scope);
 
         default:
-            return ERR_PTR(err::SyntaxError, token.location,
-                           absl::StrCat("unexpected token: ", token.text()));
+            return ERR_PTR(
+                err::SyntaxError, token.location,
+                absl::StrCat("while trying to parse type, found unexpected token: ", token.text()));
     }
 
     util::unreachable();

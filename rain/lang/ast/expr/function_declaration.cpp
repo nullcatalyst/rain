@@ -21,7 +21,7 @@ FunctionDeclarationExpression::FunctionDeclarationExpression(
         // with a null pointer dereference, since the value has already been moved out of the smart
         // pointer just before the name method is called).
         const auto argument_name = argument->name();
-        _arguments.emplace_back(_scope->add_variable(argument_name, std::move(argument)));
+        _arguments.emplace_back(_scope->add_variable(std::move(argument)));
     }
 }
 

@@ -8,7 +8,7 @@
 
 namespace rain::lang::ast {
 
-util::Result<absl::Nonnull<Type*>> UnresolvedType::resolve(Options& options, Scope& scope) {
+util::Result<absl::Nonnull<Type*>> UnresolvedType::_resolve(Options& options, Scope& scope) {
     auto resolved_type = scope.find_named_type(_name);
     if (resolved_type == nullptr) {
         return ERR_PTR(err::SyntaxError, _location,

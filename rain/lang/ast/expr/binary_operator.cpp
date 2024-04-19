@@ -36,6 +36,8 @@ std::optional<std::string_view> get_operator_method_name(serial::BinaryOperatorK
             return "__gt__";
         case serial::BinaryOperatorKind::GreaterEqual:
             return "__ge__";
+        case serial::BinaryOperatorKind::ArrayIndex:
+            return "__getitem__";
         default:
             return std::nullopt;
     }

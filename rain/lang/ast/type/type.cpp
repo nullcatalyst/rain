@@ -1,5 +1,10 @@
 #include "rain/lang/ast/type/type.hpp"
 
+#include "rain/lang/ast/scope/builtin.hpp"
+#include "rain/lang/ast/scope/scope.hpp"
+#include "rain/lang/ast/var/builtin_function.hpp"
+#include "rain/lang/code/context.hpp"
+
 namespace rain::lang::ast {
 
 Type& Type::unwrap(Type& type) noexcept {
@@ -26,12 +31,7 @@ Type& Type::unwrap(Type& type) noexcept {
     }
 }
 
-// absl::Nonnull<Type*> _unwrap_type(absl::Nonnull<Type*> type) {
-//     return const_cast<absl::Nonnull<Type*>>(
-//         _unwrap_type(const_cast<absl::Nonnull<const Type*>>(type)));
-// }
-
-OptionalType& Type::get_optional_type() {
+OptionalType& Type::get_optional_type(Scope& scope) {
     if (_optional_type != nullptr) {
         return *_optional_type;
     }
@@ -39,7 +39,7 @@ OptionalType& Type::get_optional_type() {
     return *_optional_type;
 }
 
-ReferenceType& Type::get_reference_type() {
+ReferenceType& Type::get_reference_type(Scope& scope) {
     if (_reference_type != nullptr) {
         return *_reference_type;
     }
@@ -47,16 +47,64 @@ ReferenceType& Type::get_reference_type() {
     return *_reference_type;
 }
 
-ArrayType& Type::get_array_type(size_t length) {
+ArrayType& Type::get_array_type(Scope& scope, size_t length) {
     auto it = _array_types.find(length);
     if (it != _array_types.end()) {
         return *it->second;
     }
 
-    auto  array_type = std::make_unique<ArrayType>(this, length);
-    auto& ref        = *array_type;
-    _array_types.emplace(length, std::move(array_type));
-    return ref;
+    auto* array_type =
+        _array_types.emplace(length, std::make_unique<ArrayType>(this, length)).first->second.get();
+    if (_resolves_to != this) {
+        return *array_type;
+    }
+
+    {
+        // Add builtin functions for array types.
+
+        {  // Array indexing.
+            auto* index_type     = scope.builtin()->i32_type();
+            auto* reference_type = &get_reference_type(scope);
+
+            auto  binop_args = Scope::TypeList{array_type, index_type};
+            auto* function_type =
+                scope.get_resolved_function_type(array_type, binop_args, reference_type);
+            auto method = make_builtin_function_variable(
+                "__getitem__", function_type, [](auto& ctx, auto& arguments) {
+                    return ctx.llvm_builder().CreateGEP(arguments[0]->getType(), arguments[0],
+                                                        {arguments[1]});
+                });
+            scope.add_resolved_function(std::move(method));
+        }
+
+        {  // Array length.
+            auto* index_type = scope.builtin()->i32_type();
+
+            auto  binop_args = Scope::TypeList{};
+            auto* function_type =
+                scope.get_resolved_function_type(array_type, binop_args, index_type);
+            auto method = make_builtin_function_variable(
+                "length", function_type, [array_type](auto& ctx, auto& arguments) {
+                    return llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.llvm_context()),
+                                                  static_cast<uint64_t>(array_type->length()));
+                });
+            scope.add_resolved_function(std::move(method));
+        }
+    }
+
+    return *array_type;
+}
+
+util::Result<absl::Nonnull<Type*>> Type::resolve(Options& options, Scope& scope) {
+    if (_resolves_to != nullptr) {
+        return _resolves_to;
+    }
+
+    auto result = _resolve(options, scope);
+    FORWARD_ERROR(result);
+
+    _resolves_to = std::move(result).value();
+    return _resolves_to;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -71,7 +119,7 @@ std::string ArrayType::display_name() const noexcept {
     return absl::StrCat("[", _length, "]", _type->display_name());
 }
 
-util::Result<absl::Nonnull<Type*>> ArrayType::resolve(Options& options, Scope& scope) {
+util::Result<absl::Nonnull<Type*>> ArrayType::_resolve(Options& options, Scope& scope) {
     {
         auto result = _type->resolve(options, scope);
         FORWARD_ERROR(result);
@@ -79,7 +127,7 @@ util::Result<absl::Nonnull<Type*>> ArrayType::resolve(Options& options, Scope& s
         _type = std::move(result).value();
     }
 
-    return &_type->get_array_type(_length);
+    return &_type->get_array_type(scope, _length);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -94,7 +142,7 @@ std::string OptionalType::display_name() const noexcept {
     return absl::StrCat("?", _type->display_name());
 }
 
-util::Result<absl::Nonnull<Type*>> OptionalType::resolve(Options& options, Scope& scope) {
+util::Result<absl::Nonnull<Type*>> OptionalType::_resolve(Options& options, Scope& scope) {
     {
         auto result = _type->resolve(options, scope);
         FORWARD_ERROR(result);
@@ -102,7 +150,7 @@ util::Result<absl::Nonnull<Type*>> OptionalType::resolve(Options& options, Scope
         _type = std::move(result).value();
     }
 
-    return &_type->get_optional_type();
+    return &_type->get_optional_type(scope);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -117,7 +165,7 @@ std::string ReferenceType::display_name() const noexcept {
     return absl::StrCat("&", _type->display_name());
 }
 
-util::Result<absl::Nonnull<Type*>> ReferenceType::resolve(Options& options, Scope& scope) {
+util::Result<absl::Nonnull<Type*>> ReferenceType::_resolve(Options& options, Scope& scope) {
     {
         auto result = _type->resolve(options, scope);
         FORWARD_ERROR(result);
@@ -125,7 +173,7 @@ util::Result<absl::Nonnull<Type*>> ReferenceType::resolve(Options& options, Scop
         _type = std::move(result).value();
     }
 
-    return &_type->get_reference_type();
+    return &_type->get_reference_type(scope);
 }
 
 }  // namespace rain::lang::ast

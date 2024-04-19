@@ -67,8 +67,10 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
         }
 
         default:
-            return ERR_PTR(err::SyntaxError, token.location,
-                           absl::StrCat("unexpected token: ", token.text()));
+            return ERR_PTR(
+                err::SyntaxError, token.location,
+                absl::StrCat("while trying to parse top-level expression, found unexpected token: ",
+                             token.text()));
     }
 
     return {};

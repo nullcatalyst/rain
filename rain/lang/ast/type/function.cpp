@@ -34,7 +34,7 @@ std::string FunctionType::display_name() const noexcept {
     }
 }
 
-util::Result<absl::Nonnull<Type*>> FunctionType::resolve(Options& options, Scope& scope) {
+util::Result<absl::Nonnull<Type*>> FunctionType::_resolve(Options& options, Scope& scope) {
     absl::Nullable<Type*> resolved_callee_type = nullptr;
     if (_callee_type != nullptr) {
         auto callee_type = _callee_type->resolve(options, scope);

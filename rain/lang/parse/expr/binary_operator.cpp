@@ -15,35 +15,39 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
 
 namespace {
 
-enum Precendence : int {
+enum Precedence : int {
     Unknown        = 0,
-    Assignment     = 10,  // Assign
-    Logical        = 20,  // And, Or
-    Comparative    = 30,  // Eq, Ne, Lt, Gt, Le, Ge
-    Bitwise        = 40,  // Xor, Shl, Shr
-    Additive       = 50,  // Add, Sub
-    Multiplicative = 60,  // Mul, Div, Mod
+    Subscript      = 10,  // ArrayIndex
+    Cast           = 20,  // As
+    Assignment     = 20,  // Assign
+    Logical        = 30,  // And, Or
+    Comparative    = 40,  // Eq, Ne, Lt, Gt, Le, Ge
+    Bitwise        = 50,  // Xor, Shl, Shr
+    Additive       = 60,  // Add, Sub
+    Multiplicative = 70,  // Mul, Div, Mod
 };
 
-constexpr std::array<int, 18> BINARY_OPERATOR_PRECEDENCE{
-    Precendence::Unknown,         // Unknown,
-    Precendence::Assignment,      // Assign,
-    Precendence::Additive,        // Add,
-    Precendence::Additive,        // Sub,
-    Precendence::Multiplicative,  // Mul,
-    Precendence::Multiplicative,  // Div,
-    Precendence::Multiplicative,  // Mod,
-    Precendence::Logical,         // And,
-    Precendence::Logical,         // Or,
-    Precendence::Bitwise,         // Xor,
-    Precendence::Bitwise,         // Shl,
-    Precendence::Bitwise,         // Shr,
-    Precendence::Comparative,     // Eq,
-    Precendence::Comparative,     // Ne,
-    Precendence::Comparative,     // Lt,
-    Precendence::Comparative,     // Gt,
-    Precendence::Comparative,     // Le,
-    Precendence::Comparative,     // Ge,
+constexpr std::array<int, 20> BINARY_OPERATOR_PRECEDENCE{
+    Precedence::Unknown,         // Unknown,
+    Precedence::Assignment,      // Assign,
+    Precedence::Additive,        // Add,
+    Precedence::Additive,        // Sub,
+    Precedence::Multiplicative,  // Mul,
+    Precedence::Multiplicative,  // Div,
+    Precedence::Multiplicative,  // Mod,
+    Precedence::Logical,         // And,
+    Precedence::Logical,         // Or,
+    Precedence::Bitwise,         // Xor,
+    Precedence::Bitwise,         // Shl,
+    Precedence::Bitwise,         // Shr,
+    Precedence::Comparative,     // Eq,
+    Precedence::Comparative,     // Ne,
+    Precedence::Comparative,     // Lt,
+    Precedence::Comparative,     // Gt,
+    Precedence::Comparative,     // Le,
+    Precedence::Comparative,     // Ge,
+    Precedence::Subscript,       // ArrayIndex,
+    Precedence::Cast,            // As,
 };
 
 serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
@@ -82,6 +86,8 @@ serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
             return serial::BinaryOperatorKind::LessEqual;
         case lex::TokenKind::GreaterEqual:
             return serial::BinaryOperatorKind::GreaterEqual;
+        case lex::TokenKind::As:
+            return serial::BinaryOperatorKind::As;
         default:
             return serial::BinaryOperatorKind::Unknown;
     }
@@ -129,7 +135,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
 
 util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
     lex::Lexer& lexer, ast::Scope& scope, std::unique_ptr<ast::Expression> lhs_expression) {
-    return parse_rhs(lexer, scope, std::move(lhs_expression), Precendence::Unknown);
+    return parse_rhs(lexer, scope, std::move(lhs_expression), Precedence::Unknown);
 }
 
 }  // namespace rain::lang::parse

@@ -59,9 +59,13 @@ absl::Nonnull<FunctionVariable*> BuiltinScope::create_unresolved_function(
     util::panic("the builtin scope is immutable and cannot have custom functions added to it");
 }
 
-absl::Nonnull<Variable*> BuiltinScope::add_variable(const std::string_view    name,
-                                                    std::unique_ptr<Variable> variable) noexcept {
+absl::Nonnull<Variable*> BuiltinScope::add_variable(std::unique_ptr<Variable> variable) noexcept {
     util::panic("the builtin scope is immutable and cannot have custom variables added to it");
+}
+
+absl::Nonnull<FunctionVariable*> BuiltinScope::add_resolved_function(
+        std::unique_ptr<FunctionVariable> function_variable) noexcept {
+    util::panic("the builtin scope is immutable and cannot have custom functions added to it");
 }
 
 void BuiltinScope::declare_external_function(std::unique_ptr<ExternalFunctionVariable> variable) {
