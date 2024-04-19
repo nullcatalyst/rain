@@ -48,3 +48,15 @@ export fn array_length() -> i32 {
 
     EXPECT_COMPILE_SUCCESS(code);
 }
+
+TEST(Array, assignment) {
+    const std::string_view code = R"(
+export fn array_assignment() -> i32 {
+    let array = [4]i32{ 1, 2, 3, 4 }
+    array[2] = 42
+    array[2]
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}

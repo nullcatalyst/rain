@@ -40,8 +40,14 @@ llvm::Value* get_element_pointer(Context& ctx, ast::Expression& expression) {
                                                       member_index);
         }
 
-        default:
-            return nullptr;
+        default: {
+            if (expression.type()->kind() != serial::TypeKind::Reference) {
+                // Error: cannot take the address of a temporary value.
+                return nullptr;
+            }
+
+            return compile_any_expression(ctx, expression);
+        }
     }
 }
 
