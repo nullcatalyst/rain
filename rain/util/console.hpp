@@ -61,7 +61,8 @@ void console_error(Args&&... args) {
 
 template <typename... Args>
 [[noreturn]] void panic(Args&&... args) {
-    std::cerr << absl::StrCat(std::forward<Args>(args)...) << '\n';
+    // Use std::endl to ensure that the message is flushed before aborting.
+    std::cerr << absl::StrCat(std::forward<Args>(args)...) << std::endl;
     std::abort();
 }
 
