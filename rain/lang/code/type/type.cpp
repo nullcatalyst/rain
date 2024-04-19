@@ -15,11 +15,10 @@ llvm::Type* get_or_compile_type(Context& ctx, ast::Type& type) {
     }
 
     llvm_type = compile_type(ctx, type);
-    if (llvm_type != nullptr) {
-        return llvm_type;
+    if (llvm_type == nullptr && type.kind() != serial::TypeKind::Meta) {
+        util::panic("failed to compile type: ", type.display_name());
     }
-
-    util::panic("failed to compile type: ", type.display_name());
+    return llvm_type;
 }
 
 llvm::Type* compile_type(Context& ctx, ast::Type& type) {

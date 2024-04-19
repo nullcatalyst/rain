@@ -3,6 +3,7 @@
 #include "rain/lang/ast/expr/export.hpp"
 #include "rain/lang/ast/expr/function.hpp"
 #include "rain/lang/ast/expr/interface_implementation.hpp"
+#include "rain/lang/ast/expr/let.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/type/interface.hpp"
 #include "rain/lang/ast/type/struct.hpp"
@@ -17,6 +18,8 @@ util::Result<std::unique_ptr<ast::FunctionExpression>> parse_function(
     absl::Nullable<ast::Type*> default_callee_type);
 util::Result<std::unique_ptr<ast::InterfaceImplementationExpression>>
 parse_interface_implementation(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope,
+                                                            bool global);
 
 // Types
 util::Result<absl::Nonnull<ast::StructType*>>    parse_struct_type(lex::Lexer& lexer,
@@ -31,9 +34,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
     auto token = lexer.peek();
     switch (token.kind) {
         case lex::TokenKind::Fn: {
-            auto result = parse_function(lexer, scope, true, true, nullptr);
-            FORWARD_ERROR(result);
-            return std::move(result).value();
+            return parse_function(lexer, scope, true, true, nullptr);
         }
 
         case lex::TokenKind::Struct: {
@@ -49,9 +50,11 @@ util::Result<std::unique_ptr<ast::Expression>> parse_top_level_expression(lex::L
         }
 
         case lex::TokenKind::Impl: {
-            auto result = parse_interface_implementation(lexer, scope);
-            FORWARD_ERROR(result);
-            return std::move(result).value();
+            return parse_interface_implementation(lexer, scope);
+        }
+
+        case lex::TokenKind::Let: {
+            return parse_let(lexer, scope, true);
         }
 
         case lex::TokenKind::Export: {

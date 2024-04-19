@@ -3,6 +3,7 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/ast/scope/builtin.hpp"
 #include "rain/lang/ast/var/block.hpp"
+#include "rain/lang/ast/var/global.hpp"
 #include "rain/lang/ast/var/variable.hpp"
 #include "rain/lang/err/syntax.hpp"
 
@@ -19,7 +20,13 @@ util::Result<void> LetExpression::validate(Options& options, Scope& scope) {
                        "let variable declaration initial value must have a type");
     }
 
-    _variable = scope.add_variable(_name, std::make_unique<BlockVariable>(_name, type(), true));
+    std::unique_ptr<Variable> variable;
+    if (_global) {
+        variable = std::make_unique<GlobalVariable>(_name, type(), true);
+    } else {
+        variable = std::make_unique<BlockVariable>(_name, type(), false);
+    }
+    _variable = scope.add_variable(_name, std::move(variable));
     return {};
 }
 

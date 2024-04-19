@@ -30,7 +30,8 @@ util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::L
                                                                           ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>           parse_struct_literal(lex::Lexer& lexer,
                                                                               ast::Scope& scope);
-util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope);
+util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope,
+                                                            bool global);
 util::Result<std::unique_ptr<ast::Expression>>    parse_atom(lex::Lexer& lexer, ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>    parse_unary_operator(lex::Lexer& lexer,
                                                                        ast::Scope& scope);
@@ -91,7 +92,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_standalone_atom(lex::Lexer&
         }
 
         case lex::TokenKind::Let:
-            return parse_let(lexer, scope);
+            return parse_let(lexer, scope, false);
 
         case lex::TokenKind::LRoundBracket:
             return parse_parenthesis(lexer, scope);

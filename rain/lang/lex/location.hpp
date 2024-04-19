@@ -128,13 +128,34 @@ struct Location {
     }
 
     /**
+     * Return the empty string before the location.
+     *
+     * This is useful for error messages where we want to say that a specific token needs to
+     * follow the previous token, or when encountering the end of the file.
+     */
+    [[nodiscard]] Location empty_string_before() const {
+        return Location(file_name, source, begin, begin, line, column);
+    }
+
+    /**
      * Return the empty string after the location.
      *
      * This is useful for error messages where we want to say that a specific token needs to
      * follow the previous token, or when encountering the end of the file.
      */
     [[nodiscard]] Location empty_string_after() const {
-        return Location(file_name, source, end, end, line, column + 1);
+        auto line   = this->line;
+        auto column = this->column;
+        for (const char* it = begin; it < end; ++it) {
+            if (*it == '\n') {
+                ++line;
+                column = 1;
+                continue;
+            }
+
+            ++column;
+        }
+        return Location(file_name, source, end, end, line, column);
     }
 
     //   private:

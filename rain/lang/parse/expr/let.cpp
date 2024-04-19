@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "rain/lang/ast/expr/compile_time.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/lex/lexer.hpp"
@@ -12,7 +13,8 @@ namespace rain::lang::parse {
 util::Result<std::unique_ptr<ast::Expression>> parse_any_expression(lex::Lexer& lexer,
                                                                     ast::Scope& scope);
 
-util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope) {
+util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, ast::Scope& scope,
+                                                            bool global) {
     const auto let_token = lexer.next();
     IF_DEBUG {
         if (let_token.kind != lex::TokenKind::Let) {
@@ -32,10 +34,18 @@ util::Result<std::unique_ptr<ast::LetExpression>> parse_let(lex::Lexer& lexer, a
                        "expected '=' between variable name and initial value");
     }
 
-    auto value = parse_any_expression(lexer, scope);
-    FORWARD_ERROR(value);
+    auto value_result = parse_any_expression(lexer, scope);
+    FORWARD_ERROR(value_result);
 
-    return std::make_unique<ast::LetExpression>(name_token.text(), std::move(value).value(),
+    auto value = std::move(value_result).value();
+    if (global && value->kind() != serial::ExpressionKind::CompileTime) {
+        // All global variables must be compile-time constants. That way no initialization function
+        // needs to be called to set their initial value.
+        const lex::Location location = value->location().empty_string_before();
+        value = std::make_unique<ast::CompileTimeExpression>(std::move(value), location);
+    }
+
+    return std::make_unique<ast::LetExpression>(name_token.text(), std::move(value), global,
                                                 let_token.location, name_token.location);
 }
 

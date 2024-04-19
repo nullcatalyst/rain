@@ -15,15 +15,17 @@ class LetExpression : public Expression {
 
     std::unique_ptr<Expression> _value;
     absl::Nullable<Variable*>   _variable = nullptr;
+    bool                        _global   = false;
 
     lex::Location _let_location;
     lex::Location _variable_location;
 
   public:
-    LetExpression(std::string_view name, std::unique_ptr<Expression> value,
+    LetExpression(std::string_view name, std::unique_ptr<Expression> value, bool global,
                   lex::Location let_location, lex::Location variable_location)
         : _name(name),
           _value(std::move(value)),
+          _global(global),
           _let_location(let_location),
           _variable_location(variable_location) {}
     ~LetExpression() override = default;
@@ -46,6 +48,7 @@ class LetExpression : public Expression {
     [[nodiscard]] constexpr absl::Nullable<Variable*> variable() const noexcept {
         return _variable;
     }
+    [[nodiscard]] constexpr bool          global() const noexcept { return _global; }
     [[nodiscard]] constexpr lex::Location let_location() const noexcept { return _let_location; }
     [[nodiscard]] constexpr lex::Location variable_location() const noexcept {
         return _variable_location;

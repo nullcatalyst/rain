@@ -2,12 +2,14 @@
 
 #include "llvm/IR/Type.h"
 #include "rain/lang/code/expr/any.hpp"
+#include "rain/lang/code/type/all.hpp"
 
 namespace rain::lang::code {
 
 llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& array_literal) {
     ast::ArrayType&  array_type = static_cast<ast::ArrayType&>(*array_literal.type());
-    llvm::ArrayType* llvm_type  = static_cast<llvm::ArrayType*>(ctx.llvm_type(&array_type));
+    llvm::ArrayType* llvm_type =
+        static_cast<llvm::ArrayType*>(get_or_compile_type(ctx, array_type));
 
     std::vector<llvm::Value*> llvm_element_values;
     llvm_element_values.resize(array_literal.elements().size(), nullptr);
@@ -36,7 +38,7 @@ llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& ar
 
     auto& llvm_ir = ctx.llvm_builder();
 
-    // // Create a runtime array.
+    // Create a runtime array.
     llvm::Value* llvm_array = llvm_ir.CreateAlloca(llvm_type, nullptr, "array");
     for (int i = 0, end = llvm_element_values.size(); i < end; ++i) {
         std::array<llvm::Value*, 2> indices{

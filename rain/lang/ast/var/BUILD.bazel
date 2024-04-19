@@ -5,6 +5,7 @@ cc_library(
         "builtin_function.cpp",
         "external_function.cpp",
         "function.cpp",
+        "global.cpp",
         "variable.cpp",
     ],
     visibility = [
@@ -31,6 +32,7 @@ cc_library(
         "builtin_function.hpp",
         "external_function.hpp",
         "function.hpp",
+        "global.hpp",
         "variable.hpp",
     ],
     visibility = [

@@ -124,9 +124,9 @@ enum class TypeKind {
 enum class VariableKind {
     Unknown,
 
+    Global,
     Local,
     Function,
-    Export,
 
     Count,
 };
