@@ -7,6 +7,10 @@ namespace rain::lang::code {
 
 llvm::Value* get_element_pointer(Context& ctx, ast::Expression& expression);
 
+llvm::Value* compile_call_method(Context& ctx, ast::Expression& callee,
+                                 ast::FunctionVariable&           method,
+                                 llvm::ArrayRef<ast::Expression*> arguments);
+
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator) {
     if (binary_operator.op() == serial::BinaryOperatorKind::Assign) {
         llvm::Value* llvm_value_ptr = get_element_pointer(ctx, binary_operator.lhs());
@@ -19,12 +23,8 @@ llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression
         return llvm_value;
     }
 
-    auto*                               method = binary_operator.method();
-    llvm::SmallVector<llvm::Value*, 4U> llvm_values{
-        compile_any_expression(ctx, binary_operator.lhs()),
-        compile_any_expression(ctx, binary_operator.rhs()),
-    };
-    return method->build_call(ctx, llvm_values);
+    return compile_call_method(ctx, binary_operator.lhs(), *binary_operator.method(),
+                               {&binary_operator.rhs()});
 }
 
 }  // namespace rain::lang::code

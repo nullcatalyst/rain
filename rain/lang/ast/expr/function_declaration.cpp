@@ -15,12 +15,6 @@ FunctionDeclarationExpression::FunctionDeclarationExpression(
       _return_type_location(return_type_location) {
     for (auto& argument : arguments) {
         assert(argument != nullptr && "argument is null");
-
-        // Get the argument name _BEFORE_ moving the argument into the _arguments vector. THe order
-        // of evaluaation of the arguments is not guaranteed (as seen by this crashing on windows
-        // with a null pointer dereference, since the value has already been moved out of the smart
-        // pointer just before the name method is called).
-        const auto argument_name = argument->name();
         _arguments.emplace_back(_scope->add_variable(std::move(argument)));
     }
 }

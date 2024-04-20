@@ -21,25 +21,13 @@ bool CallExpression::compile_time_capable() const noexcept {
 }
 
 util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
-    const auto validate_arguments =
-        [&](absl::Nullable<Type*> callee_type) -> util::Result<Scope::TypeList> {
-        Scope::TypeList argument_types;
-        argument_types.reserve(_arguments.size() + 1);
-
-        // Assumw that the function takes self as the first argument.
-        if (callee_type != nullptr) {
-            argument_types.push_back(callee_type);
-        }
-
-        for (auto& argument : _arguments) {
-            auto result = argument->validate(options, scope);
-            FORWARD_ERROR(result);
-
-            argument_types.push_back(argument->type());
-        }
-
-        return argument_types;
-    };
+    Scope::TypeList argument_types;
+    argument_types.reserve(_arguments.size() + 1);
+    for (auto& argument : _arguments) {
+        auto result = argument->validate(options, scope);
+        FORWARD_ERROR(result);
+        argument_types.emplace_back(argument->type());
+    }
 
     // Specially handle the callee expression, in order to support function overloading.
     switch (_callee->kind()) {
@@ -49,33 +37,19 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
             FORWARD_ERROR(result);
 
             auto* callee_type = member.lhs().type();
-            bool  try_self    = true;
 
             // If the variable is a meta variable (a type), then we can try to search for a method
             // on that type that doesn't take self as a parameter.
             if (callee_type->kind() == serial::TypeKind::Meta) {
                 auto* meta_type = reinterpret_cast<MetaType*>(callee_type);
                 callee_type     = &meta_type->type();
-                try_self        = false;
             }
 
-            auto argument_types_result = validate_arguments(try_self ? callee_type : nullptr);
-            FORWARD_ERROR(argument_types_result);
-            auto argument_types = std::move(argument_types_result).value();
-
-            auto* function = scope.find_function(member.name(), callee_type, argument_types);
+            auto* function = scope.find_method(member.name(), callee_type, argument_types);
             if (function == nullptr) {
-                if (try_self) {
-                    // Remove the self argument from the list.
-                    argument_types.erase(argument_types.begin());
-                    function = scope.find_function(member.name(), callee_type, argument_types);
-                }
-
-                if (function == nullptr) {
-                    return ERR_PTR(err::SyntaxError, member.member_location(),
-                                   absl::StrCat("no method .", member.name(), " found on type ",
-                                                callee_type->display_name()));
-                }
+                return ERR_PTR(err::SyntaxError, member.member_location(),
+                               absl::StrCat("no method \"", member.name(), "\" found on type \"",
+                                            callee_type->display_name(), "\""));
             }
 
             _function = function;
@@ -85,10 +59,6 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
 
         case serial::ExpressionKind::Variable: {
             auto& identifier = static_cast<IdentifierExpression&>(*_callee.get());
-
-            auto argument_types_result = validate_arguments(nullptr);
-            FORWARD_ERROR(argument_types_result);
-            auto argument_types = std::move(argument_types_result).value();
 
             FunctionVariable* function =
                 scope.find_function(identifier.name(), nullptr, argument_types);

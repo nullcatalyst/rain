@@ -33,6 +33,7 @@ class BinaryOperatorExpression : public Expression {
     [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
         return _lhs->location().merge(_rhs->location());
     }
+    [[nodiscard]] bool compile_time_capable() const noexcept override;
 
     // BinaryOperatorExpression
     [[nodiscard]] /*constexpr*/ const ast::Expression&        lhs() const { return *_lhs; }
@@ -45,7 +46,6 @@ class BinaryOperatorExpression : public Expression {
     }
     [[nodiscard]] constexpr lex::Location op_location() const noexcept { return _op_location; }
 
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
     util::Result<void> validate(Options& options, Scope& scope) override;
 };
 

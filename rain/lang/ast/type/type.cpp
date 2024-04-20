@@ -4,6 +4,7 @@
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/ast/var/builtin_function.hpp"
 #include "rain/lang/code/context.hpp"
+#include "rain/lang/code/type/all.hpp"
 
 namespace rain::lang::ast {
 
@@ -35,8 +36,51 @@ OptionalType& Type::get_optional_type(Scope& scope) {
     if (_optional_type != nullptr) {
         return *_optional_type;
     }
-    _optional_type = std::make_unique<OptionalType>(this);
-    return *_optional_type;
+    _optional_type      = std::make_unique<OptionalType>(this);
+    auto* optional_type = _optional_type.get();
+    if (_resolves_to != this) {
+        return *optional_type;
+    }
+
+    ast::Type* optional_reference_type = nullptr;
+    if (optional_type->type().kind() == serial::TypeKind::Reference) {
+        optional_reference_type = optional_type;
+    } else {
+        optional_reference_type = &optional_type->get_reference_type(scope);
+    }
+
+    {      // Add builtin functions for optional types.
+        {  // Null check.
+            auto* bool_type = scope.builtin()->bool_type();
+
+            auto  unop_args = Scope::TypeList{optional_reference_type};
+            auto* function_type =
+                scope.get_resolved_function_type(optional_type, unop_args, bool_type);
+            auto method = make_builtin_function_variable(
+                "__hasvalue__", function_type, [optional_type](auto& ctx, auto& arguments) {
+                    auto& llvm_ir = ctx.llvm_builder();
+
+                    llvm::Type* llvm_type = arguments[0]->getType();
+                    if (optional_type->kind() == serial::TypeKind::Reference) {
+                        // If the type is a pointer, then a null check is sufficient.
+                        return llvm_ir.CreateICmpNE(arguments[0],
+                                                    llvm::Constant::getNullValue(llvm_type));
+                    }
+
+                    // Otherwise load the tag and compare it to null.
+                    auto* llvm_i1_type      = llvm::Type::getInt1Ty(ctx.llvm_context());
+                    auto* llvm_optional_ref = get_or_compile_type(ctx, *optional_type);
+                    return llvm_ir.CreateICmpNE(
+                        llvm_ir.CreateLoad(llvm_i1_type,
+                                           llvm_ir.CreateConstInBoundsGEP2_32(llvm_optional_ref,
+                                                                              arguments[0], 0, 1)),
+                        llvm::Constant::getNullValue(llvm_i1_type));
+                });
+            scope.add_resolved_function(std::move(method));
+        }
+    }
+
+    return *optional_type;
 }
 
 ReferenceType& Type::get_reference_type(Scope& scope) {
@@ -59,16 +103,13 @@ ArrayType& Type::get_array_type(Scope& scope, size_t length) {
         return *array_type;
     }
 
-    {
-        // Add builtin functions for array types.
-
+    {      // Add builtin functions for array types.
         {  // Array indexing.
             auto* index_type     = scope.builtin()->i32_type();
             auto* reference_type = &get_reference_type(scope);
 
-            auto  binop_args = Scope::TypeList{array_type, index_type};
-            auto* function_type =
-                scope.get_resolved_function_type(array_type, binop_args, reference_type);
+            auto* function_type = scope.get_resolved_function_type(
+                array_type, {array_type, index_type}, reference_type);
             auto method = make_builtin_function_variable(
                 "__getitem__", function_type, [](auto& ctx, auto& arguments) {
                     return ctx.llvm_builder().CreateGEP(arguments[0]->getType(), arguments[0],
@@ -80,13 +121,11 @@ ArrayType& Type::get_array_type(Scope& scope, size_t length) {
         {  // Array length.
             auto* index_type = scope.builtin()->i32_type();
 
-            auto  binop_args = Scope::TypeList{};
-            auto* function_type =
-                scope.get_resolved_function_type(array_type, binop_args, index_type);
-            auto method = make_builtin_function_variable(
+            auto* function_type = scope.get_resolved_function_type(array_type, {}, index_type);
+            auto  method        = make_builtin_function_variable(
                 "length", function_type, [array_type](auto& ctx, auto& arguments) {
                     return llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.llvm_context()),
-                                                  static_cast<uint64_t>(array_type->length()));
+                                                          static_cast<uint64_t>(array_type->length()));
                 });
             scope.add_resolved_function(std::move(method));
         }

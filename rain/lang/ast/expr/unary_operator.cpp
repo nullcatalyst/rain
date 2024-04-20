@@ -18,6 +18,8 @@ std::optional<std::string_view> get_operator_method_name(serial::UnaryOperatorKi
             return "__neg__";
         case serial::UnaryOperatorKind::Positive:
             return "__pos__";
+        case serial::UnaryOperatorKind::NullCheck:
+            return "__hasvalue__";
         default:
             return std::nullopt;
     }
@@ -39,22 +41,14 @@ util::Result<void> UnaryOperatorExpression::validate(Options& options, Scope& sc
         }
     }
 
-    {
-        // First check if there is a method that takes self exactly.
-        const Scope::TypeList argument_types{_expression->type()};
-
-        _method = scope.find_function(method_name.value(), _expression->type(), argument_types);
-        if (_method == nullptr) {
-            return ERR_PTR(
-                err::UnaryOperatorError, _expression->location(), _op_location,
-                absl::StrCat("no matching unary operator method found, looking for method named \"",
-                             method_name.value(), "\" on type \"",
-                             _expression->type()->display_name(), "\""));
-        }
-    }
-
-    {
-        // TODO: Check if the method can be called with a reference.
+    const Scope::TypeList argument_types{};
+    _method = scope.find_method(method_name.value(), _expression->type(), argument_types);
+    if (_method == nullptr) {
+        return ERR_PTR(
+            err::UnaryOperatorError, _expression->location(), _op_location,
+            absl::StrCat("no matching unary operator method found, looking for method named \"",
+                         method_name.value(), "\" on type \"", _expression->type()->display_name(),
+                         "\""));
     }
 
     _type = _method->function_type()->return_type();

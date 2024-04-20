@@ -76,22 +76,13 @@ util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& s
         }
     }
 
-    {
-        // First check if there is a method that takes self exactly.
-        const Scope::TypeList argument_types{_lhs->type(), _rhs->type()};
-
-        _method = scope.find_function(method_name.value(), _lhs->type(), argument_types);
-        if (_method == nullptr) {
-            return ERR_PTR(
-                err::BinaryOperatorError, _lhs->location(), _rhs->location(), _op_location,
-                absl::StrCat(
-                    "no matching binary operator method found, looking for method named \"",
-                    method_name.value(), "\" on type \"", _lhs->type()->display_name(), "\""));
-        }
-    }
-
-    {
-        // TODO: Check if the method can be called with a reference?
+    const Scope::TypeList argument_types{_rhs->type()};
+    _method = scope.find_method(method_name.value(), _lhs->type(), argument_types);
+    if (_method == nullptr) {
+        return ERR_PTR(
+            err::BinaryOperatorError, _lhs->location(), _rhs->location(), _op_location,
+            absl::StrCat("no matching binary operator method found, looking for method named \"",
+                         method_name.value(), "\" on type \"", _lhs->type()->display_name(), "\""));
     }
 
     _type = _method->function_type()->return_type();

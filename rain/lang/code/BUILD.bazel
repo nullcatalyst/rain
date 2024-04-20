@@ -41,7 +41,7 @@ cc_library(
     deps = [
         ":context",
         "//rain/lang:options",
-        "//rain/lang/ast",
+        "//rain/lang/ast:hdrs",
         "//rain/lang/target/wasm",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/strings",

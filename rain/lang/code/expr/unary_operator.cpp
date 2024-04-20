@@ -5,14 +5,12 @@
 
 namespace rain::lang::code {
 
+llvm::Value* compile_call_method(Context& ctx, ast::Expression& callee,
+                                 ast::FunctionVariable&           method,
+                                 llvm::ArrayRef<ast::Expression*> arguments);
+
 llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& unary_operator) {
-    auto* method = unary_operator.method();
-
-    llvm::SmallVector<llvm::Value*, 4U> llvm_values{
-        compile_any_expression(ctx, unary_operator.expression()),
-    };
-
-    return method->build_call(ctx, llvm_values);
+    return compile_call_method(ctx, unary_operator.expression(), *unary_operator.method(), {});
 }
 
 }  // namespace rain::lang::code

@@ -30,6 +30,7 @@ class BlockExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+    [[nodiscard]] bool                    compile_time_capable() const noexcept override;
 
     // BlockExpression
     [[nodiscard]] constexpr const llvm::SmallVector<std::unique_ptr<Expression>, 8>& expressions()
@@ -44,7 +45,6 @@ class BlockExpression : public Expression {
 
     void set_location(const lex::Location location) noexcept { _location = location; }
 
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
     util::Result<void> validate(Options& options, Scope& scope) override;
 };
 

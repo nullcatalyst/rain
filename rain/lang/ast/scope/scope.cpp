@@ -128,16 +128,60 @@ absl::Nonnull<FunctionType*> Scope::get_resolved_function_type(
     util::panic("no scope found to own the function type; this is an internal error");
 }
 
+absl::Nullable<FunctionVariable*> Scope::find_function_in_scope(
+    const std::string_view name, absl::Nullable<Type*> callee_type,
+    TypeList argument_types) const noexcept {
+    const auto key = std::make_tuple(name, callee_type, argument_types);
+    if (const auto it = _function_variables.find(key); it != _function_variables.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
 absl::Nullable<FunctionVariable*> Scope::find_function(const std::string_view name,
                                                        absl::Nullable<Type*>  callee_type,
                                                        TypeList argument_types) const noexcept {
-    const auto key = std::make_tuple(name, callee_type, argument_types);
-
     const Scope* scope = this;
     do {
-        if (const auto it = scope->_function_variables.find(key);
-            it != scope->_function_variables.end()) {
-            return it->second;
+        auto* function_variable = scope->find_function_in_scope(name, callee_type, argument_types);
+        if (function_variable != nullptr) {
+            return function_variable;
+        }
+
+        scope = scope->parent();
+    } while (scope != nullptr);
+
+    return nullptr;
+}
+
+absl::Nullable<FunctionVariable*> Scope::find_method(const std::string_view name,
+                                                     absl::Nonnull<Type*>   callee_type,
+                                                     TypeList argument_types) const noexcept {
+    Scope* scope = const_cast<Scope*>(this);
+
+    do {
+        {  // First check if there is a method that takes self exactly.
+            argument_types.insert(argument_types.begin(), callee_type);
+            auto function = scope->find_function_in_scope(name, callee_type, argument_types);
+            if (function != nullptr) {
+                return function;
+            }
+        }
+
+        {  // Look for a method that takes a reference to self as the first argument.
+            argument_types[0] = &callee_type->get_reference_type(*scope);
+            auto function     = scope->find_function_in_scope(name, callee_type, argument_types);
+            if (function != nullptr) {
+                return function;
+            }
+        }
+
+        {  // Look for a method that takes no self argument.
+            argument_types.erase(argument_types.begin());
+            auto function = find_function_in_scope(name, callee_type, argument_types);
+            if (function != nullptr) {
+                return function;
+            }
         }
 
         scope = scope->parent();

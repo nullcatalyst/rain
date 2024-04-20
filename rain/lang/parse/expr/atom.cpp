@@ -15,6 +15,7 @@
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/null.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/unary_operator.hpp"
 #include "rain/lang/ast/expr/while.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/err/syntax.hpp"
@@ -144,9 +145,19 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
     }
 
     auto next_token = lexer.peek();
-    while (next_token.kind == lex::TokenKind::Period ||
+    while (next_token.kind == lex::TokenKind::Question ||
+           next_token.kind == lex::TokenKind::Period ||
            next_token.kind == lex::TokenKind::LRoundBracket ||
            next_token.kind == lex::TokenKind::LSquareBracket) {
+        if (next_token.kind == lex::TokenKind::Question) {
+            lexer.next();  // Consume the `?` token
+
+            expression = std::make_unique<ast::UnaryOperatorExpression>(
+                std::move(expression), serial::UnaryOperatorKind::NullCheck, next_token.location);
+            next_token = lexer.peek();
+            continue;
+        }
+
         if (next_token.kind == lex::TokenKind::Period) {
             auto result = parse_member(lexer, scope, std::move(expression));
             FORWARD_ERROR(result);

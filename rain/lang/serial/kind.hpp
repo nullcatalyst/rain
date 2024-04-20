@@ -57,6 +57,9 @@ enum class UnaryOperatorKind {
     // Bitwise
     BitwiseNot,
 
+    // Other
+    NullCheck,
+
     Count,
 };
 

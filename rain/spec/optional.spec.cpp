@@ -15,3 +15,13 @@ export fn pass_int(value: ?i32) -> ?i32 {
 
     EXPECT_COMPILE_SUCCESS(code);
 }
+
+TEST(Optional, check_has_value) {
+    const std::string_view code = R"(
+export fn has_value(value: ?i32) -> bool {
+    value?
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}

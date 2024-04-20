@@ -121,6 +121,17 @@ class Scope {
         const std::string_view name, absl::Nullable<Type*> callee_type,
         TypeList argument_types) const noexcept;
 
+    /**
+     * Try to find the method of a type following a standard lookup pattern:
+     *  1. Look for a method that takes a copy of self as the first argument.
+     *  2. Look for a method that takes a reference to self as the first argument.
+     *  3. Look for a method that takes no self argument.
+     *  4. Check the parent scope (if one exists), starting back at step 1.
+     */
+    [[nodiscard]] absl::Nullable<FunctionVariable*> find_method(
+        const std::string_view name, absl::Nonnull<Type*> callee_type,
+        TypeList argument_types) const noexcept;
+
     [[nodiscard]] absl::Nullable<Variable*> find_variable(
         const std::string_view name) const noexcept;
 
@@ -150,6 +161,11 @@ class Scope {
 
     virtual util::Result<void> validate(Options& options);
     virtual util::Result<void> cleanup();
+
+  protected:
+    absl::Nullable<FunctionVariable*> find_function_in_scope(
+        const std::string_view name, absl::Nullable<Type*> callee_type,
+        TypeList argument_types) const noexcept;
 };
 
 }  // namespace rain::lang::ast
