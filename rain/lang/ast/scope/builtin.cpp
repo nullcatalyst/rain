@@ -3,8 +3,10 @@
 #include <array>
 #include <vector>
 
+#include "rain/lang/ast/type/meta.hpp"
 #include "rain/lang/ast/type/opaque.hpp"
 #include "rain/lang/ast/type/struct.hpp"
+#include "rain/lang/ast/var/block.hpp"
 #include "rain/lang/ast/var/builtin_function.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/code/context.hpp"
@@ -64,7 +66,7 @@ absl::Nonnull<Variable*> BuiltinScope::add_variable(std::unique_ptr<Variable> va
 }
 
 absl::Nonnull<FunctionVariable*> BuiltinScope::add_resolved_function(
-        std::unique_ptr<FunctionVariable> function_variable) noexcept {
+    std::unique_ptr<FunctionVariable> function_variable) noexcept {
     util::panic("the builtin scope is immutable and cannot have custom functions added to it");
 }
 
@@ -80,6 +82,16 @@ absl::Nonnull<Type*> BuiltinScope::_add_builtin_type(const std::string_view name
     auto* const type_ptr = type.get();
     _named_types.emplace(name, type_ptr);
     _owned_types.insert(std::move(type));
+
+    auto  meta_type     = std::make_unique<MetaType>(type_ptr);
+    auto* meta_type_ptr = meta_type.get();
+    _meta_types.insert_or_assign(type_ptr, meta_type.get());
+    _owned_types.insert(std::move(meta_type));
+
+    auto variable = std::make_unique<BlockVariable>(name, meta_type_ptr, false);
+    _named_variables.insert_or_assign(name, variable.get());
+    _owned_variables.insert(std::move(variable));
+
     return type_ptr;
 }
 

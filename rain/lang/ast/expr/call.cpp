@@ -37,15 +37,7 @@ util::Result<void> CallExpression::validate(Options& options, Scope& scope) {
             FORWARD_ERROR(result);
 
             auto* callee_type = member.lhs().type();
-
-            // If the variable is a meta variable (a type), then we can try to search for a method
-            // on that type that doesn't take self as a parameter.
-            if (callee_type->kind() == serial::TypeKind::Meta) {
-                auto* meta_type = reinterpret_cast<MetaType*>(callee_type);
-                callee_type     = &meta_type->type();
-            }
-
-            auto* function = scope.find_method(member.name(), callee_type, argument_types);
+            auto* function    = scope.find_method(member.name(), callee_type, argument_types);
             if (function == nullptr) {
                 return ERR_PTR(err::SyntaxError, member.member_location(),
                                absl::StrCat("no method \"", member.name(), "\" found on type \"",

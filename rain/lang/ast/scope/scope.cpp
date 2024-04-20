@@ -159,6 +159,22 @@ absl::Nullable<FunctionVariable*> Scope::find_method(const std::string_view name
                                                      TypeList argument_types) const noexcept {
     Scope* scope = const_cast<Scope*>(this);
 
+    if (callee_type->kind() == serial::TypeKind::Meta) {
+        auto* meta_type = static_cast<MetaType*>(callee_type);
+        callee_type     = &meta_type->type();
+
+        do {
+            auto function = scope->find_function_in_scope(name, callee_type, argument_types);
+            if (function != nullptr) {
+                return function;
+            }
+
+            scope = scope->parent();
+        } while (scope != nullptr);
+
+        return nullptr;
+    }
+
     do {
         {  // First check if there is a method that takes self exactly.
             argument_types.insert(argument_types.begin(), callee_type);

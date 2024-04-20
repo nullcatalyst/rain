@@ -52,6 +52,25 @@ export fn double_four() -> i32 {
     EXPECT_COMPILE_SUCCESS(code);
 }
 
+TEST(Function, call_static_method) {
+    const std::string_view code = R"(
+fn f32x4.zero() -> f32x4 {
+    f32x4 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+        w: 0.0,
+    }
+}
+
+export fn call_static_method() -> f32 {
+    f32x4.zero().y
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
 TEST(Function, if_else) {
     const std::string_view code = R"(
 export fn conditional() -> i32 {
