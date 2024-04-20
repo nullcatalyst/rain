@@ -41,6 +41,12 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
     llvm_ir.SetInsertPoint(llvm_merge_block);
 
     if (if_.has_else() && !ctx.returned()) {
+        // TODO: This is a temporary hack to avoid properly having to support the case where the if
+        // expression shuold return an optional value.
+        if (llvm_then_result == nullptr || llvm_else_result == nullptr) {
+            return nullptr;
+        }
+
         llvm::Type* const llvm_type   = llvm_then_result->getType();
         llvm::PHINode*    llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
         llvm_result->addIncoming(llvm_then_result, llvm_then_block);
