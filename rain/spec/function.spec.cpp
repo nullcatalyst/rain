@@ -51,3 +51,33 @@ export fn double_four() -> i32 {
 
     EXPECT_COMPILE_SUCCESS(code);
 }
+
+TEST(Function, if_else) {
+    const std::string_view code = R"(
+export fn conditional() -> i32 {
+    if true {
+        2 * 4
+    } else {
+        2 * 5
+    }
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
+TEST(Function, if_else_if) {
+    const std::string_view code = R"(
+export fn conditional() -> i32 {
+    if false {
+        2 * 4
+    } else if true {
+        2 * 5
+    } else {
+        2 * 6
+    }
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}

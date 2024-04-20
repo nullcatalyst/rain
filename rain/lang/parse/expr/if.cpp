@@ -37,8 +37,26 @@ util::Result<std::unique_ptr<ast::IfExpression>> parse_if(lex::Lexer& lexer, ast
     if (else_token.kind == lex::TokenKind::Else) {
         lexer.next();  // Consume the `else` token
 
-        if (auto token = lexer.peek(); token.kind != lex::TokenKind::LCurlyBracket) {
-            return ERR_PTR(err::SyntaxError, token.location, "expected '{' after if else");
+        auto if_or_lbracket_token = lexer.peek();
+        if (if_or_lbracket_token.kind != lex::TokenKind::If &&
+            if_or_lbracket_token.kind != lex::TokenKind::LCurlyBracket) {
+            return ERR_PTR(err::SyntaxError, if_or_lbracket_token.location,
+                           "expected 'if' or '{' after else");
+        }
+
+        if (if_or_lbracket_token.kind == lex::TokenKind::If) {
+            auto else_implicit_block = std::make_unique<ast::BlockExpression>(scope);
+
+            auto else_if_result = parse_if(lexer, else_implicit_block->scope());
+            FORWARD_ERROR(else_if_result);
+
+            auto else_if = std::move(else_if_result).value();
+            else_implicit_block->set_location(else_if->location());
+            else_implicit_block->add_expression(std::move(else_if));
+
+            return std::make_unique<ast::IfExpression>(
+                std::move(condition).value(), std::move(then).value(),
+                std::move(else_implicit_block), if_token.location, else_token.location);
         }
 
         auto else_ = parse_block(lexer, scope);
