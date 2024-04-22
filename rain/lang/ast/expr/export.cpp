@@ -7,11 +7,6 @@
 namespace rain::lang::ast {
 
 util::Result<void> ExportExpression::validate(Options& options, Scope& scope) {
-    {
-        auto result = _expression->validate(options, scope);
-        FORWARD_ERROR(result);
-    }
-
     // if (_expression->kind() == serial::ExpressionKind::Method) {
     //     auto method = static_cast<MethodExpression*>(_expression.get());
     //     if (method->has_self_argument()) {
@@ -20,7 +15,8 @@ util::Result<void> ExportExpression::validate(Options& options, Scope& scope) {
     //     }
     // } else
     if (_expression->kind() != serial::ExpressionKind::Function) {
-        return ERR_PTR(err::SyntaxError, _expression->location(), "only functions can be exported");
+        return ERR_PTR(err::SyntaxError, _expression->location(),
+                       "only functions can (currently) be exported");
     }
 
     return _expression->validate(options, scope);

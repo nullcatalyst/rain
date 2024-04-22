@@ -24,7 +24,7 @@ util::Result<void> LetExpression::validate(Options& options, Scope& scope) {
     if (_global) {
         variable = std::make_unique<GlobalVariable>(_name, type(), true);
     } else {
-        variable = std::make_unique<BlockVariable>(_name, type(), false);
+        variable = std::make_unique<BlockVariable>(_name, type(), true);
     }
     _variable = scope.add_variable(std::move(variable));
     return {};

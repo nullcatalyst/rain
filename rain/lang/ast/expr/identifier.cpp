@@ -7,6 +7,10 @@
 
 namespace rain::lang::ast {
 
+bool IdentifierExpression::is_assignable() const noexcept {
+    return _variable != nullptr && _variable->mutable_();
+}
+
 util::Result<void> IdentifierExpression::validate(Options& options, Scope& scope) {
     _variable = scope.find_variable(_name);
     if (_variable == nullptr) {

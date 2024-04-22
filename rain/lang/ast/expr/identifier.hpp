@@ -30,9 +30,7 @@ class IdentifierExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] constexpr bool          is_assignable() const noexcept override {
-        return _variable != nullptr && _variable->mutable_();
-    }
+    [[nodiscard]] bool                    is_assignable() const noexcept override;
 
     // IdentifierExpression
     [[nodiscard]] constexpr std::string_view          name() const noexcept { return _name; }

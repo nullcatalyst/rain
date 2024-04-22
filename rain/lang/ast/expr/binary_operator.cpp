@@ -60,8 +60,10 @@ util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& s
     }
 
     if (_op == serial::BinaryOperatorKind::Assign) {
-        if (!(_lhs->type() != nullptr && _lhs->type()->kind() == serial::TypeKind::Reference) &&
-            !_lhs->is_assignable()) {
+        const auto is_reference =
+            _lhs->type() != nullptr && _lhs->type()->kind() == serial::TypeKind::Reference;
+        const auto is_assignable = _lhs->is_assignable();
+        if (!(is_reference || is_assignable)) {
             return ERR_PTR(err::SyntaxError, _lhs->location(),
                            "left-hand side of assignment must be an assignable expression");
         }
