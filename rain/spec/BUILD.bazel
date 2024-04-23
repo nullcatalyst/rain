@@ -6,6 +6,7 @@ cc_test(
         "array.spec.cpp",
         "function.spec.cpp",
         "global.spec.cpp",
+        "integration.spec.cpp",
         "interface.spec.cpp",
         "optional.spec.cpp",
         "reference.spec.cpp",

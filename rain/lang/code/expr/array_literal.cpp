@@ -22,6 +22,8 @@ llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& ar
         llvm_element_values[i] = compile_any_expression(ctx, *array_literal.elements()[i]);
     }
 
+    const auto name = absl::StrCat("const.", array_type.display_name());
+
     // Check if all fields are constant.
     // This is an optimization, as LLVM allows us to create a constant struct if all fields are also
     // constants. Otherwise, we have to create a struct at runtime with non-constant values.
@@ -33,23 +35,25 @@ llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& ar
         llvm::ArrayRef<llvm::Constant*> llvm_constants(
             reinterpret_cast<llvm::Constant**>(llvm_element_values.data()),
             llvm_element_values.size());
-        return llvm::ConstantArray::get(llvm_type, llvm_constants);
+        llvm::GlobalVariable* llvm_global = new llvm::GlobalVariable(
+            ctx.llvm_module(), llvm_type, true, llvm::GlobalValue::InternalLinkage,
+            llvm::ConstantArray::get(llvm_type, llvm_constants), name);
+        return llvm_global;
     }
 
     auto& llvm_ir = ctx.llvm_builder();
 
     // Create a runtime array.
-    llvm::Value* llvm_array = llvm_ir.CreateAlloca(llvm_type, nullptr, "array");
+    llvm::Value* llvm_alloca = llvm_ir.CreateAlloca(llvm_type, nullptr, name);
     for (int i = 0, end = llvm_element_values.size(); i < end; ++i) {
         std::array<llvm::Value*, 2> indices{
             llvm::ConstantInt::get(ctx.llvm_context(), llvm::APInt(32, 0)),
             llvm::ConstantInt::get(ctx.llvm_context(), llvm::APInt(32, i)),
         };
         llvm_ir.CreateStore(llvm_element_values[i],
-                            llvm_ir.CreateInBoundsGEP(llvm_type, llvm_array, indices));
+                            llvm_ir.CreateInBoundsGEP(llvm_type, llvm_alloca, indices));
     }
-
-    return llvm_ir.CreateLoad(llvm_type, llvm_array);
+    return llvm_alloca;
 }
 
 }  // namespace rain::lang::code

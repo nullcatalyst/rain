@@ -111,9 +111,14 @@ ArrayType& Type::get_array_type(Scope& scope, size_t length) {
             auto* function_type = scope.get_resolved_function_type(
                 array_type, {array_type, index_type}, reference_type);
             auto method = make_builtin_function_variable(
-                "__getitem__", function_type, [](auto& ctx, auto& arguments) {
-                    return ctx.llvm_builder().CreateGEP(arguments[0]->getType(), arguments[0],
-                                                        {arguments[1]});
+                "__getitem__", function_type, [array_type](auto& ctx, auto& arguments) {
+                    auto& llvm_ir         = ctx.llvm_builder();
+                    auto* llvm_array_type = ctx.llvm_type(array_type);
+                    assert(llvm_array_type != nullptr && "llvm array type is null");
+                    auto* llvm_element_type = ctx.llvm_type(&array_type->type());
+                    assert(llvm_element_type != nullptr && "llvm element type is null");
+                    return llvm_ir.CreateGEP(llvm_array_type, arguments[0],
+                                             {llvm_ir.getInt32(0), arguments[1]});
                 });
             scope.add_resolved_function(std::move(method));
         }

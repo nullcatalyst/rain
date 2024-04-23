@@ -31,7 +31,8 @@ llvm::Value* compile_call_method(Context& ctx, ast::Expression& callee,
         llvm_arguments.emplace_back(compile_any_expression(ctx, *argument));
     }
 
-    if (method_argument_count > 0 && method.function_type()->argument_types()[0] != callee.type()) {
+    if (arguments.size() != method_argument_count && method_argument_count > 0 &&
+        method.function_type()->argument_types()[0] != callee.type()) {
         auto* llvm_self_pointer = get_element_pointer(ctx, callee);
         if (llvm_self_pointer == nullptr) {
             llvm_self_pointer = llvm_ir.CreateAlloca(get_or_compile_type(ctx, *callee.type()));

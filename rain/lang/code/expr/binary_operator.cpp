@@ -12,6 +12,8 @@ llvm::Value* compile_call_method(Context& ctx, ast::Expression& callee,
                                  llvm::ArrayRef<ast::Expression*> arguments);
 
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator) {
+    auto& llvm_ir = ctx.llvm_builder();
+
     if (binary_operator.op() == serial::BinaryOperatorKind::Assign) {
         llvm::Value* llvm_value_ptr = get_element_pointer(ctx, binary_operator.lhs());
         if (llvm_value_ptr == nullptr) {
@@ -19,7 +21,18 @@ llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression
         }
 
         llvm::Value* llvm_value = compile_any_expression(ctx, binary_operator.rhs());
-        ctx.llvm_builder().CreateStore(llvm_value, llvm_value_ptr);
+        if (binary_operator.rhs().type()->kind() == serial::TypeKind::Array) {
+            auto& llvm_data_layout  = ctx.llvm_engine().getDataLayout();
+            auto* llvm_element_type = llvm_value->getType()->getArrayElementType();
+            auto  llvm_alignment    = llvm_data_layout.getABITypeAlign(llvm_element_type);
+            auto  llvm_sizeof =
+                llvm_ir.getInt64(llvm_data_layout.getTypeAllocSize(llvm_element_type));
+
+            llvm_ir.CreateMemCpy(llvm_value_ptr, llvm_alignment, llvm_value, llvm_alignment,
+                                 llvm_sizeof);
+        } else {
+            llvm_ir.CreateStore(llvm_value, llvm_value_ptr);
+        }
         return llvm_value;
     }
 
