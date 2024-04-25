@@ -194,7 +194,7 @@ absl::Nullable<FunctionVariable*> Scope::find_method(const std::string_view name
 
         {  // Look for a method that takes no self argument.
             argument_types.erase(argument_types.begin());
-            auto function = find_function_in_scope(name, callee_type, argument_types);
+            auto function = scope->find_function_in_scope(name, callee_type, argument_types);
             if (function != nullptr) {
                 return function;
             }
