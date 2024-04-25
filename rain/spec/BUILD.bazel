@@ -8,6 +8,7 @@ cc_test(
         "global.spec.cpp",
         "integration.spec.cpp",
         "interface.spec.cpp",
+        "operators.spec.cpp",
         "optional.spec.cpp",
         "reference.spec.cpp",
         "struct.spec.cpp",

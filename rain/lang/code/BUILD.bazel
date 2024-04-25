@@ -8,6 +8,7 @@ cc_library(
         "expr/binary_operator.cpp",
         "expr/block.cpp",
         "expr/call.cpp",
+        "expr/cast.cpp",
         "expr/compile_time.cpp",
         "expr/element_pointer.cpp",
         "expr/export.cpp",

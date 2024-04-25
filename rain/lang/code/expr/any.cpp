@@ -45,6 +45,9 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Call:
             return compile_call(ctx, static_cast<ast::CallExpression&>(expression));
 
+        case serial::ExpressionKind::Cast:
+            return compile_cast(ctx, static_cast<ast::CastExpression&>(expression));
+
         case serial::ExpressionKind::CompileTime:
             return compile_compile_time(ctx, static_cast<ast::CompileTimeExpression&>(expression));
 

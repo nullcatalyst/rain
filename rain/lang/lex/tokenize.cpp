@@ -61,27 +61,28 @@ namespace rain::lang::lex {
 }
 
 [[nodiscard]] TokenKind find_keyword(std::string_view word) {
-    constexpr std::array<std::tuple<std::string_view, TokenKind>, 18> KEYWORDS{
+    constexpr std::array<std::tuple<std::string_view, TokenKind>, 19> KEYWORDS{
         // clang-format off
         // <keep_sorted>
-        std::make_tuple("break", TokenKind::Break),
-        std::make_tuple("continue", TokenKind::Continue),
-        std::make_tuple("defer", TokenKind::Defer),
-        std::make_tuple("else", TokenKind::Else),
-        std::make_tuple("export", TokenKind::Export),
-        std::make_tuple("extern", TokenKind::Extern),
-        std::make_tuple("false", TokenKind::False),
-        std::make_tuple("fn", TokenKind::Fn),
-        std::make_tuple("if", TokenKind::If),
-        std::make_tuple("impl", TokenKind::Impl),
-        std::make_tuple("interface", TokenKind::Interface),
-        std::make_tuple("let", TokenKind::Let),
-        std::make_tuple("null", TokenKind::Null),
-        std::make_tuple("return", TokenKind::Return),
-        std::make_tuple("self", TokenKind::Self),
-        std::make_tuple("struct", TokenKind::Struct),
-        std::make_tuple("true", TokenKind::True),
-        std::make_tuple("while", TokenKind::While),
+        std::tuple{"as", TokenKind::As},
+        std::tuple{"break", TokenKind::Break},
+        std::tuple{"continue", TokenKind::Continue},
+        std::tuple{"defer", TokenKind::Defer},
+        std::tuple{"else", TokenKind::Else},
+        std::tuple{"export", TokenKind::Export},
+        std::tuple{"extern", TokenKind::Extern},
+        std::tuple{"false", TokenKind::False},
+        std::tuple{"fn", TokenKind::Fn},
+        std::tuple{"if", TokenKind::If},
+        std::tuple{"impl", TokenKind::Impl},
+        std::tuple{"interface", TokenKind::Interface},
+        std::tuple{"let", TokenKind::Let},
+        std::tuple{"null", TokenKind::Null},
+        std::tuple{"return", TokenKind::Return},
+        std::tuple{"self", TokenKind::Self},
+        std::tuple{"struct", TokenKind::Struct},
+        std::tuple{"true", TokenKind::True},
+        std::tuple{"while", TokenKind::While},
         // </keep_sorted>
         // clang-format on
     };

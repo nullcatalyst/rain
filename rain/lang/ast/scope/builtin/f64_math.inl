@@ -37,8 +37,8 @@
 
     {
         auto  cast_args = Scope::TypeList{_i32_type};
-        auto* cmp_type  = get_resolved_function_type(type, cast_args, type);
-        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cmp_type, binop_args, {
+        auto* cast_type = get_resolved_function_type(type, cast_args, type);
+        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cast_type, cast_args, {
             auto& llvm_ir = ctx.llvm_builder();
             return llvm_ir.CreateSIToFP(arguments[0], llvm_ir.getDoubleTy());
         });
@@ -46,8 +46,8 @@
 
     {
         auto  cast_args = Scope::TypeList{_i64_type};
-        auto* cmp_type  = get_resolved_function_type(type, cast_args, type);
-        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cmp_type, binop_args, {
+        auto* cast_type = get_resolved_function_type(type, cast_args, type);
+        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cast_type, cast_args, {
             auto& llvm_ir = ctx.llvm_builder();
             return llvm_ir.CreateSIToFP(arguments[0], llvm_ir.getDoubleTy());
         });
@@ -55,8 +55,8 @@
 
     {
         auto  cast_args = Scope::TypeList{_f32_type};
-        auto* cmp_type  = get_resolved_function_type(type, cast_args, type);
-        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cmp_type, binop_args, {
+        auto* cast_type = get_resolved_function_type(type, cast_args, type);
+        ADD_BUILTIN_METHOD(OperatorNames::CastFrom, type, cast_type, cast_args, {
             auto& llvm_ir = ctx.llvm_builder();
             return llvm_ir.CreateFPExt(arguments[0], llvm_ir.getDoubleTy());
         });

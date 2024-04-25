@@ -24,6 +24,7 @@ enum class ExpressionKind {
     UnaryOperator,
     BinaryOperator,
     Parenthesis,
+    Cast,
 
     // Control flow
     Block,

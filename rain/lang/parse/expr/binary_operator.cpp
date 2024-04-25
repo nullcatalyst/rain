@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 
+#include "rain/lang/ast/expr/cast.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
 #include "rain/lang/lex/lexer.hpp"
 #include "rain/lang/serial/kind.hpp"
@@ -13,41 +14,50 @@ namespace rain::lang::parse {
 
 util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast::Scope& scope);
 
+util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::Scope& scope);
+
 namespace {
 
 enum Precedence : int {
     Unknown        = 0,
-    Subscript      = 10,  // ArrayIndex
-    Cast           = 20,  // As
-    Assignment     = 20,  // Assign
-    Logical        = 30,  // And, Or
-    Comparative    = 40,  // Eq, Ne, Lt, Gt, Le, Ge
-    Bitwise        = 50,  // Xor, Shl, Shr
-    Additive       = 60,  // Add, Sub
-    Multiplicative = 70,  // Mul, Div, Mod
+    Assignment     = 10,  // Assign
+    Logical        = 20,  // And, Or, Xor
+    Comparative    = 30,  // Eq, Ne, Lt, Gt, Le, Ge
+    Bitwise        = 40,  // Shl, Shr, Rotl, Rotr
+    Additive       = 50,  // Add, Sub
+    Multiplicative = 60,  // Mul, Div, Rem
+    Cast           = 70,  // As
+    Subscript      = 80,  // ArrayIndex
 };
 
-constexpr std::array<int, 20> BINARY_OPERATOR_PRECEDENCE{
-    Precedence::Unknown,         // Unknown,
-    Precedence::Assignment,      // Assign,
+static constexpr const std::array<int, 22> BINARY_OPERATOR_PRECEDENCE{
+    Precedence::Unknown,  // Unknown,
+    // Assignment
+    Precedence::Assignment,  // Assign,
+    // Arithmetic
     Precedence::Additive,        // Add,
-    Precedence::Additive,        // Sub,
-    Precedence::Multiplicative,  // Mul,
-    Precedence::Multiplicative,  // Div,
-    Precedence::Multiplicative,  // Mod,
-    Precedence::Logical,         // And,
-    Precedence::Logical,         // Or,
-    Precedence::Bitwise,         // Xor,
-    Precedence::Bitwise,         // Shl,
-    Precedence::Bitwise,         // Shr,
-    Precedence::Comparative,     // Eq,
-    Precedence::Comparative,     // Ne,
-    Precedence::Comparative,     // Lt,
-    Precedence::Comparative,     // Gt,
-    Precedence::Comparative,     // Le,
-    Precedence::Comparative,     // Ge,
-    Precedence::Subscript,       // ArrayIndex,
-    Precedence::Cast,            // As,
+    Precedence::Additive,        // Subtract,
+    Precedence::Multiplicative,  // Multiply,
+    Precedence::Multiplicative,  // Divide,
+    Precedence::Multiplicative,  // Remainder,
+    // Comparison
+    Precedence::Comparative,  // Equal,
+    Precedence::Comparative,  // NotEqual,
+    Precedence::Comparative,  // Less,
+    Precedence::Comparative,  // Greater,
+    Precedence::Comparative,  // LessEqual,
+    Precedence::Comparative,  // GreaterEqual,
+    // Bitwise
+    Precedence::Logical,  // And,
+    Precedence::Logical,  // Or,
+    Precedence::Bitwise,  // Xor,
+    Precedence::Bitwise,  // ShiftLeft,
+    Precedence::Bitwise,  // ShiftRight,
+    Precedence::Bitwise,  // RotateLeft,
+    Precedence::Bitwise,  // RotateRight,
+    // Conversion
+    Precedence::Subscript,  // ArrayIndex,
+    Precedence::Cast,       // As,
 };
 
 serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
@@ -108,6 +118,18 @@ util::Result<std::unique_ptr<ast::Expression>> parse_rhs(
             return lhs_expression;
         }
         lexer.next();  // Consume the operator
+
+        if (binop == serial::BinaryOperatorKind::CastFrom) {
+            auto cast_type_result = parse_any_type(lexer, scope);
+            FORWARD_ERROR(cast_type_result);
+
+            auto cast_type     = std::move(cast_type_result).value();
+            auto type_location = cast_type->location();
+            lhs_expression     = std::make_unique<ast::CastExpression>(
+                std::move(lhs_expression), std::move(cast_type), binop_token.location,
+                type_location);
+            continue;
+        }
 
         auto rhs_expression = parse_atom(lexer, scope);
         FORWARD_ERROR(rhs_expression);
