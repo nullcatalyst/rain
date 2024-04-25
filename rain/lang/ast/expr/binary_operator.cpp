@@ -6,44 +6,10 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/err/binary_operator.hpp"
 #include "rain/lang/err/syntax.hpp"
+#include "rain/lang/serial/operator_names.hpp"
 #include "rain/util/assert.hpp"
 
 namespace rain::lang::ast {
-
-namespace {
-
-std::optional<std::string_view> get_operator_method_name(serial::BinaryOperatorKind op) {
-    switch (op) {
-        case serial::BinaryOperatorKind::Add:
-            return "__add__";
-        case serial::BinaryOperatorKind::Subtract:
-            return "__sub__";
-        case serial::BinaryOperatorKind::Multiply:
-            return "__mul__";
-        case serial::BinaryOperatorKind::Divide:
-            return "__div__";
-        case serial::BinaryOperatorKind::Modulo:
-            return "__rem__";
-        case serial::BinaryOperatorKind::Equal:
-            return "__eq__";
-        case serial::BinaryOperatorKind::NotEqual:
-            return "__ne__";
-        case serial::BinaryOperatorKind::Less:
-            return "__lt__";
-        case serial::BinaryOperatorKind::LessEqual:
-            return "__le__";
-        case serial::BinaryOperatorKind::Greater:
-            return "__gt__";
-        case serial::BinaryOperatorKind::GreaterEqual:
-            return "__ge__";
-        case serial::BinaryOperatorKind::ArrayIndex:
-            return "__getitem__";
-        default:
-            return std::nullopt;
-    }
-}
-
-}  // namespace
 
 bool BinaryOperatorExpression::compile_time_capable() const noexcept {
     return _lhs->compile_time_capable() && _rhs->compile_time_capable();
@@ -70,7 +36,7 @@ util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& s
         return {};
     }
 
-    const auto method_name = get_operator_method_name(_op);
+    const auto method_name = get_binary_operator_name(_op);
     IF_DEBUG {
         if (!method_name.has_value()) {
             return ERR_PTR(err::SyntaxError, _op_location,

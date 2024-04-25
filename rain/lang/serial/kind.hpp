@@ -54,11 +54,9 @@ enum class UnaryOperatorKind {
     // Logical
     Not,
 
-    // Bitwise
-    BitwiseNot,
-
     // Other
-    NullCheck,
+    Reference,
+    HasValue,
 
     Count,
 };
@@ -74,7 +72,7 @@ enum class BinaryOperatorKind {
     Subtract,
     Multiply,
     Divide,
-    Modulo,
+    Remainder,
 
     // Comparison
     Equal,
@@ -84,23 +82,18 @@ enum class BinaryOperatorKind {
     LessEqual,
     GreaterEqual,
 
-    // Logical
+    // Bitwise
     And,
     Or,
-    Not,
     Xor,
+    ShiftLeft,
+    ShiftRight,
+    RotateLeft,
+    RotateRight,
 
-    // Bitwise
-    BitwiseAnd,
-    BitwiseOr,
-    BitwiseXor,
-    BitwiseNot,
-    LeftShift,
-    RightShift,
-
-    // Other
+    // Conversion
+    CastFrom,
     ArrayIndex,
-    As,
 
     Count,
 };

@@ -6,26 +6,10 @@
 #include "absl/strings/str_cat.h"
 #include "rain/lang/err/syntax.hpp"
 #include "rain/lang/err/unary_operator.hpp"
+#include "rain/lang/serial/operator_names.hpp"
 #include "rain/util/assert.hpp"
 
 namespace rain::lang::ast {
-
-namespace {
-
-std::optional<std::string_view> get_operator_method_name(serial::UnaryOperatorKind op) {
-    switch (op) {
-        case serial::UnaryOperatorKind::Negative:
-            return "__neg__";
-        case serial::UnaryOperatorKind::Positive:
-            return "__pos__";
-        case serial::UnaryOperatorKind::NullCheck:
-            return "__hasvalue__";
-        default:
-            return std::nullopt;
-    }
-}
-
-}  // namespace
 
 util::Result<void> UnaryOperatorExpression::validate(Options& options, Scope& scope) {
     {
@@ -33,7 +17,7 @@ util::Result<void> UnaryOperatorExpression::validate(Options& options, Scope& sc
         FORWARD_ERROR(result);
     }
 
-    const auto method_name = get_operator_method_name(_op);
+    const auto method_name = get_unary_operator_name(_op);
     IF_DEBUG {
         if (!method_name.has_value()) {
             return ERR_PTR(err::SyntaxError, _op_location,

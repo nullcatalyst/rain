@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "builder.cpp",
         "module.cpp",
+        "operator_names.cpp",
     ],
     hdrs = [
         "builder.hpp",
@@ -11,6 +12,7 @@ cc_library(
         "header_v0.hpp",
         "kind.hpp",
         "module.hpp",
+        "operator_names.hpp",
         "packed.hpp",
         "type.hpp",
         "variable.hpp",

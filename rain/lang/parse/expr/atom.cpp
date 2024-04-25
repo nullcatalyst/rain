@@ -153,7 +153,7 @@ util::Result<std::unique_ptr<ast::Expression>> parse_atom(lex::Lexer& lexer, ast
             lexer.next();  // Consume the `?` token
 
             expression = std::make_unique<ast::UnaryOperatorExpression>(
-                std::move(expression), serial::UnaryOperatorKind::NullCheck, next_token.location);
+                std::move(expression), serial::UnaryOperatorKind::HasValue, next_token.location);
             next_token = lexer.peek();
             continue;
         }

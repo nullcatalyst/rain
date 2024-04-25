@@ -63,7 +63,7 @@ serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
         case lex::TokenKind::Slash:
             return serial::BinaryOperatorKind::Divide;
         case lex::TokenKind::Percent:
-            return serial::BinaryOperatorKind::Modulo;
+            return serial::BinaryOperatorKind::Remainder;
         case lex::TokenKind::Ampersand:
             return serial::BinaryOperatorKind::And;
         case lex::TokenKind::Pipe:
@@ -71,9 +71,9 @@ serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
         case lex::TokenKind::Caret:
             return serial::BinaryOperatorKind::Xor;
         case lex::TokenKind::LessLess:
-            return serial::BinaryOperatorKind::LeftShift;
+            return serial::BinaryOperatorKind::ShiftLeft;
         case lex::TokenKind::GreaterGreater:
-            return serial::BinaryOperatorKind::RightShift;
+            return serial::BinaryOperatorKind::ShiftRight;
         case lex::TokenKind::EqualEqual:
             return serial::BinaryOperatorKind::Equal;
         case lex::TokenKind::ExclaimEqual:
@@ -87,7 +87,7 @@ serial::BinaryOperatorKind get_operator_for_token(lex::Token token) {
         case lex::TokenKind::GreaterEqual:
             return serial::BinaryOperatorKind::GreaterEqual;
         case lex::TokenKind::As:
-            return serial::BinaryOperatorKind::As;
+            return serial::BinaryOperatorKind::CastFrom;
         default:
             return serial::BinaryOperatorKind::Unknown;
     }

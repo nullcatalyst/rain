@@ -5,6 +5,7 @@
 #include "rain/lang/ast/var/builtin_function.hpp"
 #include "rain/lang/code/context.hpp"
 #include "rain/lang/code/type/all.hpp"
+#include "rain/lang/serial/operator_names.hpp"
 
 namespace rain::lang::ast {
 
@@ -57,7 +58,8 @@ OptionalType& Type::get_optional_type(Scope& scope) {
             auto* function_type =
                 scope.get_resolved_function_type(optional_type, unop_args, bool_type);
             auto method = make_builtin_function_variable(
-                "__hasvalue__", function_type, [optional_type](auto& ctx, auto& arguments) {
+                serial::OperatorNames::HasValue, function_type,
+                [optional_type](auto& ctx, auto& arguments) {
                     auto& llvm_ir = ctx.llvm_builder();
 
                     llvm::Type* llvm_type = arguments[0]->getType();
@@ -111,7 +113,8 @@ ArrayType& Type::get_array_type(Scope& scope, size_t length) {
             auto* function_type = scope.get_resolved_function_type(
                 array_type, {array_type, index_type}, reference_type);
             auto method = make_builtin_function_variable(
-                "__getitem__", function_type, [array_type](auto& ctx, auto& arguments) {
+                serial::OperatorNames::ArrayIndex, function_type,
+                [array_type](auto& ctx, auto& arguments) {
                     auto& llvm_ir         = ctx.llvm_builder();
                     auto* llvm_array_type = ctx.llvm_type(array_type);
                     assert(llvm_array_type != nullptr && "llvm array type is null");
