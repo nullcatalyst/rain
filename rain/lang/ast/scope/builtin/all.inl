@@ -7,6 +7,9 @@
         _owned_variables.insert(std::move(method));                                              \
     } while (0)
 
+// In order to use the OperatorNames namespace.
+using namespace ::rain::lang::serial;
+
 #include "rain/lang/ast/scope/builtin/f32_math.inl"
 #include "rain/lang/ast/scope/builtin/f32x4_math.inl"
 #include "rain/lang/ast/scope/builtin/f32x4_shuffle.inl"

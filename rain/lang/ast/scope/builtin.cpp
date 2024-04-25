@@ -10,6 +10,7 @@
 #include "rain/lang/ast/var/builtin_function.hpp"
 #include "rain/lang/ast/var/function.hpp"
 #include "rain/lang/code/context.hpp"
+#include "rain/lang/serial/operator_names.hpp"
 
 namespace rain::lang::ast {
 
