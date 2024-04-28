@@ -41,7 +41,7 @@ util::Result<std::unique_ptr<ast::FloatExpression>> parse_float(lex::Lexer& lexe
 
     // Parse the fractional part of the float
     double multiplier = 0.1;
-    for (const char c : std::string_view{it + 1, end}) {
+    for (const char c : std::string_view{it, end}) {
         value += static_cast<double>(c - '0') * multiplier;
         multiplier *= 0.1;
     }
