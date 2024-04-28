@@ -13,6 +13,26 @@ ArrayLiteralExpression::ArrayLiteralExpression(absl::Nonnull<Type*>             
                                                lex::Location                            location)
     : _type(type), _elements(std::move(elements)), _location(location) {}
 
+bool ArrayLiteralExpression::is_compile_time_capable() const noexcept {
+    for (const auto& element : _elements) {
+        if (!element->is_compile_time_capable()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool ArrayLiteralExpression::is_constant() const noexcept {
+    for (const auto& element : _elements) {
+        if (!element->is_constant()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& scope) {
     IF_DEBUG {
         // Check if the type is an array.

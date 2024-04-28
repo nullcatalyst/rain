@@ -9,7 +9,6 @@
 
 namespace rain {
 
-util::Result<lang::code::Module> compile(const std::string_view source);
 util::Result<lang::code::Module> compile(const std::string_view source, lang::Options& options);
 
 }  // namespace rain

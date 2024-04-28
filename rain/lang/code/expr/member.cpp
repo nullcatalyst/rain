@@ -26,6 +26,8 @@ llvm::Value* compile_member(Context& ctx, ast::MemberExpression& member) {
         return llvm_ir.CreateExtractValue(llvm_owner, static_cast<unsigned int>(member_index));
     }
 
+    llvm_ptr = llvm_ir.CreateStructGEP(ctx.llvm_type(&struct_type), llvm_ptr, member_index);
+
     auto* llvm_member_type = ctx.llvm_type(struct_type.fields()[member_index].type);
     assert(llvm_member_type != nullptr && "member type is null");
     return llvm_ir.CreateLoad(llvm_member_type, llvm_ptr);

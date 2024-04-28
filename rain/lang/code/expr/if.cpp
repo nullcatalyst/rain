@@ -38,6 +38,9 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
 
     ctx.set_returned(then_returned && ctx.returned());
 
+    // We can't assume that the saved else block is the one that actually got us to the merge block.
+    // For example, an if expression within the original else block results in a new else block.
+    auto* llvm_found_else_block = llvm_ir.GetInsertBlock();
     llvm_ir.SetInsertPoint(llvm_merge_block);
 
     if (if_.has_else() && !ctx.returned()) {
@@ -50,7 +53,7 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
         llvm::Type* const llvm_type   = llvm_then_result->getType();
         llvm::PHINode*    llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
         llvm_result->addIncoming(llvm_then_result, llvm_then_block);
-        llvm_result->addIncoming(llvm_else_result, llvm_else_block);
+        llvm_result->addIncoming(llvm_else_result, llvm_found_else_block);
         return llvm_result;
     }
 

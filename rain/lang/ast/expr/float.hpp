@@ -9,6 +9,10 @@
 namespace rain::lang::ast {
 
 class FloatExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::Float;
+
+  private:
     double _value;
 
     absl::Nullable<Type*> _type = nullptr;
@@ -19,12 +23,12 @@ class FloatExpression : public Expression {
     ~FloatExpression() override = default;
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::Float;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
+    [[nodiscard]] constexpr bool is_constant() const noexcept override { return true; }
 
     // FloatExpression
     [[nodiscard]] constexpr double value() const noexcept { return _value; }

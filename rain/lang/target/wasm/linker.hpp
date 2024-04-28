@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include "lld/Common/CommonLinkerContext.h"
@@ -18,13 +22,17 @@ namespace rain::lang::wasm {
  * are files, which simply does not work in a wasm environment, so this tweaked copy is required.
  */
 class Linker {
-    uint32_t                 _stack_size = 0;
+    std::optional<uint32_t>  _stack_size;
+    std::string_view         _memory_export_name;
     std::vector<std::string> _force_export_symbols;
 
     std::vector<std::unique_ptr<llvm::MemoryBuffer>> _files;
 
   public:
     void set_stack_size(const uint32_t stack_size) noexcept { _stack_size = stack_size; }
+    void set_memory_export_name(std::string_view memory_export_name) noexcept {
+        _memory_export_name = memory_export_name;
+    }
     void force_export_symbol(const char* function_name) noexcept {
         _force_export_symbols.emplace_back(function_name);
     }

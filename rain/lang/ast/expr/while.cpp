@@ -7,9 +7,9 @@
 
 namespace rain::lang::ast {
 
-bool WhileExpression::compile_time_capable() const noexcept {
-    return _condition->compile_time_capable() && _loop->compile_time_capable() &&
-           (!_else.has_value() || _else.value()->compile_time_capable());
+bool WhileExpression::is_compile_time_capable() const noexcept {
+    return _condition->is_compile_time_capable() && _loop->is_compile_time_capable() &&
+           (!_else.has_value() || _else.value()->is_compile_time_capable());
 }
 
 util::Result<void> WhileExpression::validate(Options& options, Scope& scope) {

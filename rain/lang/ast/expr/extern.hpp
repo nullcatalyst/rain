@@ -35,7 +35,8 @@ class ExternExpression : public Expression {
         return _declaration->type();
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] constexpr bool          compile_time_capable() const noexcept override {
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override {
         return _compile_time_capable;
     }
 

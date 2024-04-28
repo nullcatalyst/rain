@@ -18,6 +18,12 @@ class Options {
   public:
     virtual ~Options() = default;
 
+    [[nodiscard]] virtual bool             optimize() const noexcept { return true; }
+    [[nodiscard]] virtual uint32_t         stack_size() const noexcept { return 0; }
+    [[nodiscard]] virtual std::string_view memory_export_name() const noexcept {
+        return std::string_view();
+    }
+
     [[nodiscard]] virtual std::unique_ptr<llvm::TargetMachine>   create_target_machine() = 0;
     [[nodiscard]] virtual std::unique_ptr<llvm::ExecutionEngine> create_engine(
         std::unique_ptr<llvm::Module>        llvm_module,

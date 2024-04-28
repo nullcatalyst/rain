@@ -26,7 +26,8 @@ class StringExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
 
     // StringExpression
     [[nodiscard]] constexpr std::string_view value() const noexcept { return _value; }

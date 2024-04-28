@@ -17,6 +17,7 @@ class BuiltinScope : public Scope {
     // Primitive types. These are stored separately for easy access (so that they don't need to be
     // looked up by name for every literal).
     absl::Nonnull<Type*> _bool_type;
+    absl::Nonnull<Type*> _u8_type;
     absl::Nonnull<Type*> _i32_type;
     absl::Nonnull<Type*> _i64_type;
     absl::Nonnull<Type*> _f32_type;
@@ -40,6 +41,7 @@ class BuiltinScope : public Scope {
     }
 
     [[nodiscard]] absl::Nonnull<Type*> bool_type() const noexcept { return _bool_type; }
+    [[nodiscard]] absl::Nonnull<Type*> u8_type() const noexcept { return _u8_type; }
     [[nodiscard]] absl::Nonnull<Type*> i32_type() const noexcept { return _i32_type; }
     [[nodiscard]] absl::Nonnull<Type*> i64_type() const noexcept { return _i64_type; }
     [[nodiscard]] absl::Nonnull<Type*> f32_type() const noexcept { return _f32_type; }

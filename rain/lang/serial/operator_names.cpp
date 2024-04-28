@@ -13,8 +13,8 @@ namespace rain::lang::serial {
 std::optional<std::string_view> get_unary_operator_name(UnaryOperatorKind op) {
     static constexpr const std::array<std::string_view, 5> unary_operators{
         // Arithmetic
-        OperatorNames::Negative,
         OperatorNames::Positive,
+        OperatorNames::Negative,
         // Bitwise
         OperatorNames::Not,
         // Other
@@ -73,8 +73,8 @@ std::optional<std::string_view> get_binary_operator_name(BinaryOperatorKind op) 
         OperatorNames::Equal,
         OperatorNames::NotEqual,
         OperatorNames::Less,
-        OperatorNames::LessEqual,
         OperatorNames::Greater,
+        OperatorNames::LessEqual,
         OperatorNames::GreaterEqual,
         // Bitwise
         OperatorNames::And,
@@ -106,27 +106,27 @@ std::optional<BinaryOperatorKind> get_binary_operator_kind(const std::string_vie
     // The sorting is used to allow for a binary search to find the operator name.
 #define BINARY_OPERATOR(name) std::tuple{OperatorNames::name, BinaryOperatorKind::name}
             // clang-format off
-            /* __add__ */ BINARY_OPERATOR(Add),
-            /* __and__ */ BINARY_OPERATOR(And),
+            /* __add__    */ BINARY_OPERATOR(Add),
+            /* __and__    */ BINARY_OPERATOR(And),
             /* __assign__ */ BINARY_OPERATOR(Assign),
-            /* __div__ */ BINARY_OPERATOR(Divide),
-            /* __eq__ */ BINARY_OPERATOR(Equal),
-            /* __from__ */ BINARY_OPERATOR(CastFrom),
-            /* __ge__ */ BINARY_OPERATOR(GreaterEqual),
-            /* __get__ */ BINARY_OPERATOR(ArrayIndex),
-            /* __gt__ */ BINARY_OPERATOR(Greater),
-            /* __le__ */ BINARY_OPERATOR(LessEqual),
-            /* __lt__ */ BINARY_OPERATOR(Less),
-            /* __mul__ */ BINARY_OPERATOR(Multiply),
-            /* __ne__ */ BINARY_OPERATOR(NotEqual),
-            /* __or__ */ BINARY_OPERATOR(Or),
-            /* __rem__ */ BINARY_OPERATOR(Remainder),
-            /* __rotl__ */ BINARY_OPERATOR(RotateLeft),
-            /* __rotr__ */ BINARY_OPERATOR(RotateRight),
-            /* __shl__ */ BINARY_OPERATOR(ShiftLeft),
-            /* __shr__ */ BINARY_OPERATOR(ShiftRight),
-            /* __sub__ */ BINARY_OPERATOR(Subtract),
-            /* __xor__ */ BINARY_OPERATOR(Xor),
+            /* __div__    */ BINARY_OPERATOR(Divide),
+            /* __eq__     */ BINARY_OPERATOR(Equal),
+            /* __from__   */ BINARY_OPERATOR(CastFrom),
+            /* __ge__     */ BINARY_OPERATOR(GreaterEqual),
+            /* __get__    */ BINARY_OPERATOR(ArrayIndex),
+            /* __gt__     */ BINARY_OPERATOR(Greater),
+            /* __le__     */ BINARY_OPERATOR(LessEqual),
+            /* __lt__     */ BINARY_OPERATOR(Less),
+            /* __mul__    */ BINARY_OPERATOR(Multiply),
+            /* __ne__     */ BINARY_OPERATOR(NotEqual),
+            /* __or__     */ BINARY_OPERATOR(Or),
+            /* __rem__    */ BINARY_OPERATOR(Remainder),
+            /* __rotl__   */ BINARY_OPERATOR(RotateLeft),
+            /* __rotr__   */ BINARY_OPERATOR(RotateRight),
+            /* __shl__    */ BINARY_OPERATOR(ShiftLeft),
+            /* __shr__    */ BINARY_OPERATOR(ShiftRight),
+            /* __sub__    */ BINARY_OPERATOR(Subtract),
+            /* __xor__    */ BINARY_OPERATOR(Xor),
     // clang-format on
 #undef BINARY_OPERATOR
         };

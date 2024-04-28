@@ -118,8 +118,6 @@ ArrayType& Type::get_array_type(Scope& scope, size_t length) {
                     auto& llvm_ir         = ctx.llvm_builder();
                     auto* llvm_array_type = ctx.llvm_type(array_type);
                     assert(llvm_array_type != nullptr && "llvm array type is null");
-                    auto* llvm_element_type = ctx.llvm_type(&array_type->type());
-                    assert(llvm_element_type != nullptr && "llvm element type is null");
                     return llvm_ir.CreateGEP(llvm_array_type, arguments[0],
                                              {llvm_ir.getInt32(0), arguments[1]});
                 });

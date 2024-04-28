@@ -26,7 +26,8 @@ class TypeExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return nullptr; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] constexpr bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
 
     // TypeExpression
     [[nodiscard]] constexpr const Type& declare_type() const noexcept { return *_declare_type; }

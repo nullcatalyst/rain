@@ -13,7 +13,11 @@ class CompileTimeExpression : public Expression {
 
   public:
     CompileTimeExpression(std::unique_ptr<Expression> expression, lex::Location location)
-        : _expression(std::move(expression)), _location(location) {}
+        : _expression(std::move(expression)), _location(location) {
+        assert(_expression != nullptr && "CompileTimeExpression cannot contain a nullptr");
+        assert(_expression->kind() != serial::ExpressionKind::CompileTime &&
+               "CompileTimeExpression cannot contain another CompileTimeExpression");
+    }
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
@@ -23,7 +27,10 @@ class CompileTimeExpression : public Expression {
         return _expression->type();
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool                    compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override {
+        return _expression->is_compile_time_capable();
+    }
 
     // CompileTimeExpression
     [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }

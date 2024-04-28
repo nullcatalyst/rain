@@ -7,10 +7,15 @@
 
 namespace rain::lang::ast {
 
-bool IfExpression::compile_time_capable() const noexcept {
-    return _condition->compile_time_capable() && _then->compile_time_capable() &&
-           (!_else.has_value() || _else.value()->compile_time_capable());
+bool IfExpression::is_compile_time_capable() const noexcept {
+    return _condition->is_compile_time_capable() && _then->is_compile_time_capable() &&
+           (!_else.has_value() || _else.value()->is_compile_time_capable());
 }
+
+// bool IfExpression::is_constant() const noexcept {
+//     return _condition->constant() && _then->constant() &&
+//            (!_else.has_value() || _else.value()->constant());
+// }
 
 util::Result<void> IfExpression::validate(Options& options, Scope& scope) {
     {

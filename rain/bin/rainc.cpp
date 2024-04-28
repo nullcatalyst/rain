@@ -1,7 +1,15 @@
+#include <string>
+
 #include "rain/bin/common.hpp"
 #include "rain/lang/target/wasm/options.hpp"
 #include "rain/rain.hpp"
 #include "rain/util/console.hpp"
+
+namespace {
+
+rain::lang::wasm::Options _options;
+
+}  // namespace
 
 WASM_EXPORT("init")
 void initialize() {
@@ -12,6 +20,14 @@ void initialize() {
     rain::lang::wasm::initialize_llvm();
 }
 
+WASM_EXPORT("set_memory_export")
+void export_memory(const char* memory_name_start, const char* memory_name_end) {
+    _options.set_memory_export_name(std::string{memory_name_start, memory_name_end});
+}
+
+WASM_EXPORT("set_stack_size")
+void set_stack_size(uint32_t stack_size) { _options.set_stack_size(stack_size); }
+
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end, bool optimize) {
     using namespace rain;
@@ -20,8 +36,7 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
     prev_result.clear();
 
     // Compile the source code.
-    lang::wasm::Options options;
-    auto compile_result = rain::compile(std::string_view{source_start, source_end}, options);
+    auto compile_result = rain::compile(std::string_view{source_start, source_end}, _options);
     if (!compile_result.has_value()) {
         const auto msg = compile_result.error()->message();
         callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());
@@ -44,7 +59,7 @@ void compile(const char* source_start, const char* source_end, bool optimize) {
     callback(rain::Action::CompileRain, ir.c_str(), ir.c_str() + ir.size());
 
     // Link the module into WebAssembly.
-    auto link_result = rain::link(rain_module);
+    auto link_result = rain::link(rain_module, _options);
     if (!link_result.has_value()) {
         const auto msg = link_result.error()->message();
         callback(rain::Action::Error, msg.c_str(), msg.c_str() + msg.size());
@@ -95,7 +110,7 @@ int main(const int argc, const char* const argv[]) {
         rain::util::panic(msg, result.error()->message()); \
     }
 
-    auto compile_result = rain::compile(source);
+    auto compile_result = rain::compile(source, _options);
     ABORT_ON_ERROR(compile_result, "Failed to compile: ");
     auto rain_mod = std::move(compile_result).value();
 
@@ -106,7 +121,7 @@ int main(const int argc, const char* const argv[]) {
     auto ir_bytes = std::move(ir).value();
     rain::util::console_log(ANSI_CYAN, "LLVM_IR:\n", ANSI_RESET, ir_bytes, "\n");
 
-    auto wasm_result = rain::link(rain_mod);
+    auto wasm_result = rain::link(rain_mod, _options);
     ABORT_ON_ERROR(wasm_result, "Failed to link: ");
     auto wasm_bytes = std::move(wasm_result).value();
 

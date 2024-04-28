@@ -6,9 +6,9 @@
 
 namespace rain::lang::ast {
 
-bool CastExpression::compile_time_capable() const noexcept {
+bool CastExpression::is_compile_time_capable() const noexcept {
     // TODO: Check the operator function as well to determine if is it compile-time capable.
-    return _expression->compile_time_capable();
+    return _expression->is_compile_time_capable();
 }
 
 util::Result<void> CastExpression::validate(Options& options, Scope& scope) {

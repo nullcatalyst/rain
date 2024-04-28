@@ -9,6 +9,10 @@
 namespace rain::lang::ast {
 
 class IntegerExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::Integer;
+
+  private:
     uint64_t _value;
 
     absl::Nullable<Type*> _type = nullptr;
@@ -21,12 +25,12 @@ class IntegerExpression : public Expression {
     ~IntegerExpression() override = default;
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::Integer;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
+    [[nodiscard]] constexpr bool is_constant() const noexcept override { return true; }
 
     // IntegerExpression
     [[nodiscard]] constexpr uint64_t value() const noexcept { return _value; }

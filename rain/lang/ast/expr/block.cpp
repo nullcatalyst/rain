@@ -4,9 +4,10 @@
 
 namespace rain::lang::ast {
 
-bool BlockExpression::compile_time_capable() const noexcept {
-    return std::all_of(_expressions.begin(), _expressions.end(),
-                       [](const auto& expression) { return expression->compile_time_capable(); });
+bool BlockExpression::is_compile_time_capable() const noexcept {
+    return std::all_of(_expressions.begin(), _expressions.end(), [](const auto& expression) {
+        return expression->is_compile_time_capable();
+    });
 }
 
 util::Result<void> BlockExpression::validate(Options& options, Scope& scope) {

@@ -16,6 +16,7 @@ namespace rain::lang::ast {
 
 BuiltinScope::BuiltinScope() {
     _bool_type = _add_builtin_type("bool", std::make_unique<OpaqueType>("bool"));
+    _u8_type   = _add_builtin_type("u8", std::make_unique<OpaqueType>("u8"));
     _i32_type  = _add_builtin_type("i32", std::make_unique<OpaqueType>("i32"));
     _i64_type  = _add_builtin_type("i64", std::make_unique<OpaqueType>("i64"));
     _f32_type  = _add_builtin_type("f32", std::make_unique<OpaqueType>("f32"));

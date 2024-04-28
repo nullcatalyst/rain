@@ -7,8 +7,7 @@ enum class ExpressionKind {
 
     // Literals
     Null,
-    True,
-    False,
+    Boolean,
     Integer,
     Float,
     String,

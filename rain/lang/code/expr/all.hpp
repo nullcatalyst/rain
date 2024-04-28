@@ -7,6 +7,7 @@
 #include "rain/lang/ast/expr/array_literal.hpp"
 #include "rain/lang/ast/expr/binary_operator.hpp"
 #include "rain/lang/ast/expr/block.hpp"
+#include "rain/lang/ast/expr/boolean.hpp"
 #include "rain/lang/ast/expr/call.hpp"
 #include "rain/lang/ast/expr/cast.hpp"
 #include "rain/lang/ast/expr/compile_time.hpp"
@@ -33,6 +34,7 @@ namespace rain::lang::code {
 void compile_module(Context& ctx, ast::Module& module);
 
 // Expressions
+llvm::Value* compile_boolean(Context& ctx, ast::BooleanExpression& boolean);
 llvm::Value* compile_integer(Context& ctx, ast::IntegerExpression& integer);
 llvm::Value* compile_float(Context& ctx, ast::FloatExpression& float_);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);

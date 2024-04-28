@@ -7,6 +7,7 @@ cc_library(
         "expr/array_literal.cpp",
         "expr/binary_operator.cpp",
         "expr/block.cpp",
+        "expr/boolean.cpp",
         "expr/call.cpp",
         "expr/cast.cpp",
         "expr/compile_time.cpp",

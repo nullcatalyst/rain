@@ -8,6 +8,10 @@
 namespace rain::lang::ast {
 
 class CallExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::Call;
+
+  private:
     std::unique_ptr<Expression>                       _callee;
     llvm::SmallVector<std::unique_ptr<Expression>, 4> _arguments;
 
@@ -26,14 +30,13 @@ class CallExpression : public Expression {
     ~CallExpression() override = default;
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::Call;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
+    [[nodiscard]] /*constexpr*/ lex::Location      location() const noexcept override {
         return _callee->location().merge(_arguments_location);
     }
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override;
 
     // CallExpression
     [[nodiscard]] /*constexpr*/ Expression&       callee() { return *_callee; }

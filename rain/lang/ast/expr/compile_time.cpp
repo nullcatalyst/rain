@@ -5,16 +5,6 @@
 
 namespace rain::lang::ast {
 
-bool CompileTimeExpression::compile_time_capable() const noexcept {
-    if (_expression->kind() == serial::ExpressionKind::CompileTime) {
-        // There is no need to try to evaluate nested compile-time expressions at compile-time,
-        // as the innermost one will be evaluated at compile-time, all the outer ones will be
-        // too automatically.
-        return false;
-    }
-    return _expression->compile_time_capable();
-}
-
 util::Result<void> CompileTimeExpression::validate(Options& options, Scope& scope) {
     return _expression->validate(options, scope);
 }

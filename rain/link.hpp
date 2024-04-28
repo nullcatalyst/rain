@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "llvm/IR/Module.h"
@@ -12,10 +13,7 @@
 
 namespace rain {
 
-util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module);
-util::Result<std::unique_ptr<Buffer>> link(llvm::Module&        llvm_module,
-                                           llvm::TargetMachine& llvm_target_machine);
-util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir,
-                                           llvm::TargetMachine&   llvm_target_machine);
+util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module, lang::Options& options);
+util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir, lang::Options& options);
 
 }  // namespace rain

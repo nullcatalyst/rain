@@ -30,38 +30,30 @@ class LlvmBuffer : public Buffer {
 
 }  // namespace
 
-util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module) {
+util::Result<std::unique_ptr<Buffer>> link(lang::code::Module& module, lang::Options& options) {
     // TODO: Support more targets.
     lang::wasm::Linker linker;
+    linker.set_stack_size(options.stack_size());
+    linker.set_memory_export_name(options.memory_export_name());
     linker.add(module.llvm_module(), module.llvm_target_machine());
     auto result = linker.link();
     FORWARD_ERROR(result);
     return std::make_unique<LlvmBuffer>(std::move(result).value());
 }
 
-util::Result<std::unique_ptr<Buffer>> link(llvm::Module&        llvm_module,
-                                           llvm::TargetMachine& llvm_target_machine) {
-    // TODO: Support more targets.
-    lang::wasm::Linker linker;
-    linker.add(llvm_module, llvm_target_machine);
-    auto result = linker.link();
-    FORWARD_ERROR(result);
-    return std::make_unique<LlvmBuffer>(std::move(result).value());
-}
+// util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir, lang::Options&
+// options) {
+//     // NOTE: Make sure that the LLVMContext lives as long as the Module.
+//     std::shared_ptr<llvm::LLVMContext> llvm_ctx = std::make_shared<llvm::LLVMContext>();
 
-util::Result<std::unique_ptr<Buffer>> link(const std::string_view llvm_ir,
-                                           llvm::TargetMachine&   llvm_target_machine) {
-    // NOTE: Make sure that the LLVMContext lives as long as the Module.
-    std::shared_ptr<llvm::LLVMContext> llvm_ctx = std::make_shared<llvm::LLVMContext>();
+//     llvm::SMDiagnostic            llvm_err;
+//     auto                          llvm_buffer = llvm::MemoryBuffer::getMemBufferCopy(llvm_ir);
+//     std::unique_ptr<llvm::Module> llvm_module = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
+//     if (llvm_module == nullptr) {
+//         return ERR_PTR(lang::err::SimpleError, llvm_err.getMessage().str());
+//     }
 
-    llvm::SMDiagnostic            llvm_err;
-    auto                          llvm_buffer = llvm::MemoryBuffer::getMemBufferCopy(llvm_ir);
-    std::unique_ptr<llvm::Module> llvm_module = llvm::parseIR(*llvm_buffer, llvm_err, *llvm_ctx);
-    if (llvm_module == nullptr) {
-        return ERR_PTR(lang::err::SimpleError, llvm_err.getMessage().str());
-    }
-
-    return link(*llvm_module, llvm_target_machine);
-}
+//     return link(*llvm_module, llvm_target_machine);
+// }
 
 }  // namespace rain

@@ -45,7 +45,8 @@ class WhileExpression : public Expression {
         return has_else() ? _while_location.merge(_else.value()->location())
                                   : _while_location.merge(_loop->location());
     }
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override;
 
     // WhileExpression
     [[nodiscard]] /*constexpr*/ const Expression& condition() const noexcept { return *_condition; }

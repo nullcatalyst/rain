@@ -21,7 +21,9 @@ class NullExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return nullptr; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
+    [[nodiscard]] constexpr bool is_constant() const noexcept override { return true; }
 
     util::Result<void> validate(Options& options, Scope& scope) override;
 };

@@ -8,6 +8,10 @@
 namespace rain::lang::ast {
 
 class BinaryOperatorExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::BinaryOperator;
+
+  private:
     std::unique_ptr<ast::Expression> _lhs;
     std::unique_ptr<ast::Expression> _rhs;
     serial::BinaryOperatorKind       _op;
@@ -26,14 +30,14 @@ class BinaryOperatorExpression : public Expression {
         : _lhs(std::move(lhs)), _rhs(std::move(rhs)), _op(op), _op_location(op_location) {}
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::BinaryOperator;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] /*constexpr*/ lex::Location     location() const noexcept override {
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
+    [[nodiscard]] /*constexpr*/ lex::Location      location() const noexcept override {
         return _lhs->location().merge(_rhs->location());
     }
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool           is_compile_time_capable() const noexcept override;
+    [[nodiscard]] constexpr bool is_constant() const noexcept override { return true; }
 
     // BinaryOperatorExpression
     [[nodiscard]] /*constexpr*/ const ast::Expression&        lhs() const { return *_lhs; }

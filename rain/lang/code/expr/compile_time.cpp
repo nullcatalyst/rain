@@ -5,6 +5,9 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Type.h"
+#include "llvm/Passes/PassBuilder.h"
+// #include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/Reg2Mem.h"
 #include "rain/lang/code/context.hpp"
 #include "rain/lang/code/expr/any.hpp"
 #include "rain/lang/code/type/all.hpp"
@@ -108,10 +111,14 @@ llvm::Constant* create_constant(llvm::IRBuilder<>& llvm_ir, const llvm::DataLayo
 }  // namespace
 
 llvm::Value* compile_compile_time(Context& ctx, ast::CompileTimeExpression& compile_time) {
-    if (!compile_time.compile_time_capable()) {
+    if (!compile_time.is_compile_time_capable()) {
         // TODO: Emit warning instead of error.
         // Unfortunately, this more than one diagnostic being emitted is not yet supported.
         util::console_log("WARNING: expression is not compile-time capable");
+        return compile_any_expression(ctx, compile_time.expression());
+    }
+
+    if (!compile_time.expression().is_constant()) {
         return compile_any_expression(ctx, compile_time.expression());
     }
 
@@ -171,6 +178,17 @@ llvm::Value* compile_compile_time(Context& ctx, ast::CompileTimeExpression& comp
         llvm_ir.CreateStore(llvm_value, llvm_function->arg_begin());
     }
     llvm_ir.CreateRetVoid();
+
+    // Convert register values (like structs and vectors) that the LLVM Interpreter doesn't
+    // support, to stack based memory.
+    llvm::FunctionAnalysisManager fam;
+    llvm::FunctionPassManager     fpm;
+    fpm.addPass(llvm::RegToMemPass());
+
+    {
+        llvm::PassBuilder pb;
+        pb.registerFunctionAnalyses(fam);
+    }
 
     llvm::GenericValue llvm_generic_ptr;
     llvm_generic_ptr.PointerVal = ptr;

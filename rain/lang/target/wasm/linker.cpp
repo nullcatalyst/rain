@@ -374,7 +374,7 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     lld::CommonLinkerContext _ctx;
     auto                     _config = std::make_unique<lld::wasm::Configuration>();
     auto                     _symtab = std::make_unique<lld::wasm::SymbolTable>();
-    assert(_symtab->symbols().empty() && "SzymbolTable should be empty");
+    assert(_symtab->symbols().empty() && "SymbolTable should be empty");
     assert(_symtab->find("__stack_pointer") == nullptr && "stack_pointer should not exist");
     lld::wasm::config = _config.get();
     lld::wasm::symtab = _symtab.get();
@@ -385,11 +385,15 @@ util::Result<std::unique_ptr<llvm::MemoryBuffer>> Linker::link() {
     init_config();
     // ctx.reset();
 
+    lld::wasm::config->zStackSize =
+        _stack_size.has_value() ? _stack_size.value() : DEFAULT_STACK_SIZE;
+    if (!_memory_export_name.empty()) {
+        lld::wasm::config->memoryExport = _memory_export_name;
+    }
+
     createSyntheticSymbols();
 
     {
-        lld::wasm::config->zStackSize = _stack_size != 0 ? _stack_size : DEFAULT_STACK_SIZE;
-
         for (auto& file : _files) {
             lld::wasm::symtab->addFile(lld::wasm::createObjectFile(*file));
         }

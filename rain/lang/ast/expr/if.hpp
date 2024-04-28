@@ -11,6 +11,10 @@
 namespace rain::lang::ast {
 
 class IfExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::If;
+
+  private:
     std::unique_ptr<Expression>                     _condition;
     std::unique_ptr<BlockExpression>                _then;
     std::optional<std::unique_ptr<BlockExpression>> _else;
@@ -31,15 +35,15 @@ class IfExpression : public Expression {
     ~IfExpression() override = default;
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::If;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
-    [[nodiscard]] constexpr lex::Location         location() const noexcept override {
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr lex::Location          location() const noexcept override {
         return has_else() ? _if_location.merge(_else.value()->location())
-                                  : _if_location.merge(_then->location());
+                                   : _if_location.merge(_then->location());
     }
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override;
+    // [[nodiscard]] bool is_constant() const noexcept override;
 
     // IfExpression
     [[nodiscard]] /*constexpr*/ const Expression& condition() const noexcept { return *_condition; }

@@ -8,6 +8,16 @@
 
 namespace rain::lang::ast {
 
+bool StructLiteralExpression::is_compile_time_capable() const noexcept {
+    for (const auto& field : _fields) {
+        if (!field.value->is_compile_time_capable()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 util::Result<void> StructLiteralExpression::validate(Options& options, Scope& scope) {
     auto type = _type->resolve(options, scope);
     FORWARD_ERROR(type);

@@ -58,10 +58,16 @@ llvm::Value* compile_struct_literal(Context& ctx, ast::StructLiteralExpression& 
                                                 : llvm::Constant::getNullValue(llvm_type);
     if (llvm_type->isVectorTy()) {
         for (size_t i = 0, end = llvm_field_values.size(); i < end; ++i) {
+            if (llvm_field_values[i] == nullptr) {
+                continue;
+            }
             llvm_value = llvm_ir.CreateInsertElement(llvm_value, llvm_field_values[i], i);
         }
     } else {
         for (size_t i = 0, end = llvm_field_values.size(); i < end; ++i) {
+            if (llvm_field_values[i] == nullptr) {
+                continue;
+            }
             llvm_value = llvm_ir.CreateInsertValue(llvm_value, llvm_field_values[i], i);
         }
     }

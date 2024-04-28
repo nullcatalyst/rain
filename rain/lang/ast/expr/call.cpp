@@ -9,15 +9,17 @@
 
 namespace rain::lang::ast {
 
-bool CallExpression::compile_time_capable() const noexcept {
+bool CallExpression::is_compile_time_capable() const noexcept {
     // TODO: Check the function as well to determine if is it compile-time capable.
     if (_function == nullptr) {
-        return (_callee == nullptr || _callee->compile_time_capable()) &&
-               std::all_of(_arguments.begin(), _arguments.end(),
-                           [](const auto& argument) { return argument->compile_time_capable(); });
+        return (_callee == nullptr || _callee->is_compile_time_capable()) &&
+               std::all_of(_arguments.begin(), _arguments.end(), [](const auto& argument) {
+                   return argument->is_compile_time_capable();
+               });
     } else {
-        return std::all_of(_arguments.begin(), _arguments.end(),
-                           [](const auto& argument) { return argument->compile_time_capable(); });
+        return std::all_of(_arguments.begin(), _arguments.end(), [](const auto& argument) {
+            return argument->is_compile_time_capable();
+        });
     }
 }
 

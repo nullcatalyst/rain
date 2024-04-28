@@ -24,9 +24,11 @@ class ParenthesisExpression : public Expression {
         return _expression->type();
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool                    compile_time_capable() const noexcept override {
-        return _expression->compile_time_capable();
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override {
+        return _expression->is_compile_time_capable();
     }
+    [[nodiscard]] bool is_constant() const noexcept override { return _expression->is_constant(); }
 
     // ParenthesisExpression
     [[nodiscard]] /*constexpr*/ const ast::Expression& expression() const { return *_expression; }

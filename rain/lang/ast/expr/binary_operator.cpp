@@ -11,8 +11,8 @@
 
 namespace rain::lang::ast {
 
-bool BinaryOperatorExpression::compile_time_capable() const noexcept {
-    return _lhs->compile_time_capable() && _rhs->compile_time_capable();
+bool BinaryOperatorExpression::is_compile_time_capable() const noexcept {
+    return _lhs->is_compile_time_capable() && _rhs->is_compile_time_capable();
 }
 
 util::Result<void> BinaryOperatorExpression::validate(Options& options, Scope& scope) {

@@ -5,6 +5,9 @@ namespace rain::lang::code {
 
 llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
     switch (expression.kind()) {
+        case serial::ExpressionKind::Boolean:
+            return compile_boolean(ctx, static_cast<ast::BooleanExpression&>(expression));
+
         case serial::ExpressionKind::Integer:
             return compile_integer(ctx, static_cast<ast::IntegerExpression&>(expression));
 

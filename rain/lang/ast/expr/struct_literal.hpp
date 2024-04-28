@@ -31,15 +31,8 @@ class StructLiteralExpression : public Expression {
     }
     [[nodiscard]] constexpr absl::Nonnull<Type*> type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
-    [[nodiscard]] bool                    compile_time_capable() const noexcept override {
-        for (const auto& field : _fields) {
-            if (!field.value->compile_time_capable()) {
-                return false;
-            }
-        }
 
-        return true;
-    }
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override;
 
     // StructLiteralExpression
     [[nodiscard]] constexpr const std::vector<StructLiteralField>& fields() const {

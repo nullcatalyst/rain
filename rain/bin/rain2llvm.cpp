@@ -12,6 +12,10 @@ void initialize() {
     // load_external_functions_into_llvm();
 }
 
+uint32_t stack_size = 0;
+WASM_EXPORT("set_stack_size")
+void set_stack_size(const int32_t size) { rain::lang::code::set_stack_size(size); }
+
 WASM_EXPORT("compile")
 void compile(const char* source_start, const char* source_end) {
     static std::string prev_result;

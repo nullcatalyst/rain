@@ -1,5 +1,52 @@
 #include "rain/spec/util.hpp"
 
+#define DO_PRINT 1
+#define DO_OPTIMIZE 0
+
+TEST(Operator, negative_literal) {
+    const std::string_view code = R"(
+export fn neg_i32() -> i32 {
+    -1
+}
+
+export fn neg_i64() -> i64 {
+    -(2 as i64)
+}
+
+export fn neg_f32() -> f32 {
+    -3.0
+}
+
+export fn neg_f64() -> f64 {
+    -(4.0 as f64)
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
+TEST(Operator, negative) {
+    const std::string_view code = R"(
+export fn neg_i32(value: i32) -> i32 {
+    -value
+}
+
+export fn neg_i64(value: i64) -> i64 {
+    -value
+}
+
+export fn neg_f32(value: f32) -> f32 {
+    -value
+}
+
+export fn neg_f64(value: f64) -> f64 {
+    -value
+}
+)";
+
+    EXPECT_COMPILE_SUCCESS(code);
+}
+
 TEST(Operator, precedence) {
     const std::string_view code = R"(
 export fn a_plus_b_mul_c(a: f32, b: f32, c: f32) -> f32 {

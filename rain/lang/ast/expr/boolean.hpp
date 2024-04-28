@@ -9,6 +9,10 @@
 namespace rain::lang::ast {
 
 class BooleanExpression : public Expression {
+  public:
+    static constexpr auto Kind = serial::ExpressionKind::Boolean;
+
+  private:
     bool                  _value;
     absl::Nullable<Type*> _type = nullptr;
     lex::Location         _location;
@@ -18,16 +22,16 @@ class BooleanExpression : public Expression {
     ~BooleanExpression() override = default;
 
     // Expression
-    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override {
-        return serial::ExpressionKind::Integer;
-    }
-    [[nodiscard]] constexpr absl::Nullable<Type*> type() const noexcept override { return _type; }
+    [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
+    [[nodiscard]] constexpr absl::Nullable<Type*>  type() const noexcept override { return _type; }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override { return true; }
+    [[nodiscard]] constexpr bool is_constant() const noexcept override { return true; }
 
     // BooleanExpression
     [[nodiscard]] constexpr bool value() const noexcept { return _value; }
 
-    [[nodiscard]] bool compile_time_capable() const noexcept override { return true; }
     util::Result<void> validate(Options& options, Scope& scope) override;
 };
 

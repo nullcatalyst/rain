@@ -21,8 +21,9 @@ class Expression {
     [[nodiscard]] virtual absl::Nullable<Type*>  type() const noexcept     = 0;
     [[nodiscard]] virtual lex::Location          location() const noexcept = 0;
 
-    [[nodiscard]] virtual bool compile_time_capable() const noexcept { return false; }
-    [[nodiscard]] virtual bool is_assignable() const noexcept { return false; }
+    [[nodiscard]] virtual constexpr bool is_assignable() const noexcept { return false; }
+    [[nodiscard]] virtual constexpr bool is_compile_time_capable() const noexcept { return false; }
+    [[nodiscard]] virtual constexpr bool is_constant() const noexcept { return false; }
 
     [[nodiscard]] virtual util::Result<void> validate(Options& options, Scope& scope) = 0;
 };

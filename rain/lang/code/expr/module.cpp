@@ -11,6 +11,7 @@ void compile_module(Context& ctx, ast::Module& module) {
         auto* llvm_f32_type = llvm::Type::getFloatTy(ctx.llvm_context());
 
         ctx.set_llvm_type(builtin.bool_type(), llvm::Type::getInt1Ty(ctx.llvm_context()));
+        ctx.set_llvm_type(builtin.u8_type(), llvm::Type::getInt8Ty(ctx.llvm_context()));
         ctx.set_llvm_type(builtin.i32_type(), llvm::Type::getInt32Ty(ctx.llvm_context()));
         ctx.set_llvm_type(builtin.i64_type(), llvm::Type::getInt64Ty(ctx.llvm_context()));
         ctx.set_llvm_type(builtin.f32_type(), llvm_f32_type);

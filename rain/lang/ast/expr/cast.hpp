@@ -32,7 +32,8 @@ class CastExpression : public Expression {
     [[nodiscard]] constexpr lex::Location         location() const noexcept override {
         return _expression->location().merge(_type_location);
     }
-    [[nodiscard]] bool compile_time_capable() const noexcept override;
+
+    [[nodiscard]] bool is_compile_time_capable() const noexcept override;
 
     // CastExpression
     [[nodiscard]] /*constexpr*/ const ast::Expression&  expression() const { return *_expression; }

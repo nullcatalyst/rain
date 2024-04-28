@@ -30,7 +30,7 @@ class FunctionExpression : public FunctionDeclarationExpression {
         return _declaration_location.merge(_block->location());
     }
 
-    [[nodiscard]] bool compile_time_capable() const noexcept override {
+    [[nodiscard]] constexpr bool is_compile_time_capable() const noexcept override {
         // TODO: Should this always return true?
         // Sure, we can always compile the function, but the function could access global mutable
         // variables. We should probably check for that.
