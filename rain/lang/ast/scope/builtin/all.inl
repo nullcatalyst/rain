@@ -10,11 +10,13 @@
 // In order to use the OperatorNames namespace.
 using namespace ::rain::lang::serial;
 
+#include "rain/lang/ast/scope/builtin/bool_logic.inl"
 #include "rain/lang/ast/scope/builtin/f32_math.inl"
 #include "rain/lang/ast/scope/builtin/f32x4_math.inl"
-// #include "rain/lang/ast/scope/builtin/f32x4_shuffle.inl"
+#include "rain/lang/ast/scope/builtin/f32x4_shuffle.inl"
 #include "rain/lang/ast/scope/builtin/f64_math.inl"
 #include "rain/lang/ast/scope/builtin/i32_math.inl"
 #include "rain/lang/ast/scope/builtin/i64_math.inl"
+#include "rain/lang/ast/scope/builtin/u8_math.inl"
 
 #undef ADD_BUILTIN_METHOD
