@@ -6,7 +6,6 @@ cc_library(
         "console.hpp",
         "defer.hpp",
         "result.hpp",
-        "string.hpp",
         "unreachable.hpp",
         "wasm.hpp",
     ],
@@ -16,20 +15,5 @@ cc_library(
     deps = [
         "//third_party/tl_expected",
         "@abseil-cpp//absl/strings",
-    ],
-)
-
-cc_test(
-    name = "test",
-    srcs = [
-        "twine.hpp",
-        "twine.test.cpp",
-    ],
-    visibility = [
-        "//rain:__subpackages__",
-    ],
-    deps = [
-        ":util",
-        "@googletest//:gtest_main",
     ],
 )
