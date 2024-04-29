@@ -45,6 +45,9 @@ llvm::Type* compile_type(Context& ctx, ast::Type& type) {
         case serial::TypeKind::Reference:
             return compile_reference_type(ctx, static_cast<ast::ReferenceType&>(type));
 
+        case serial::TypeKind::Slice:
+            return compile_slice_type(ctx, static_cast<ast::SliceType&>(type));
+
         case serial::TypeKind::Meta:
             return nullptr;
 

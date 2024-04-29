@@ -28,6 +28,10 @@ llvm::Value* compile_any_expression(Context& ctx, ast::Expression& expression) {
             return compile_array_literal(ctx,
                                          static_cast<ast::ArrayLiteralExpression&>(expression));
 
+        case serial::ExpressionKind::SliceLiteral:
+            return compile_slice_literal(ctx,
+                                         static_cast<ast::SliceLiteralExpression&>(expression));
+
         case serial::ExpressionKind::Let:
             return compile_let(ctx, static_cast<ast::LetExpression&>(expression));
 

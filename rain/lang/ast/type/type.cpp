@@ -9,6 +9,8 @@
 
 namespace rain::lang::ast {
 
+// MARK: Base Type
+
 Type& Type::unwrap(Type& type) noexcept {
     auto* unwrapped = &type;
     for (;;) {
@@ -25,6 +27,10 @@ Type& Type::unwrap(Type& type) noexcept {
 
             case serial::TypeKind::Reference:
                 unwrapped = &static_cast<ReferenceType&>(*unwrapped).type();
+                break;
+
+            case serial::TypeKind::Slice:
+                unwrapped = &static_cast<SliceType&>(*unwrapped).type();
                 break;
 
             default:
@@ -93,6 +99,59 @@ ReferenceType& Type::get_reference_type(Scope& scope) {
     return *_reference_type;
 }
 
+SliceType& Type::get_slice_type(Scope& scope) {
+    if (_slice_type != nullptr) {
+        return *_slice_type;
+    }
+
+    _slice_type = std::make_unique<SliceType>(this);
+    if (_resolves_to != this) {
+        return *_slice_type;
+    }
+
+    auto* slice_type = _slice_type.get();
+    {      // Add builtin functions for array types.
+        {  // Array indexing.
+            auto* index_type     = scope.builtin()->i32_type();
+            auto* reference_type = &get_reference_type(scope);
+
+            auto* function_type = scope.get_resolved_function_type(
+                slice_type, {slice_type, index_type}, reference_type);
+            auto method = make_builtin_function_variable(
+                serial::OperatorNames::ArrayIndex, function_type,
+                [slice_type](auto& ctx, auto& arguments) {
+                    auto& llvm_ir           = ctx.llvm_builder();
+                    auto* llvm_element_type = ctx.llvm_type(&slice_type->type());
+                    assert(llvm_element_type != nullptr && "llvm slice element type is null");
+                    auto* llvm_begin_ptr = llvm_ir.CreateExtractValue(arguments[0], 0);
+                    return llvm_ir.CreateGEP(llvm_element_type, llvm_begin_ptr, {arguments[1]});
+                });
+            scope.add_resolved_function(std::move(method));
+        }
+
+        {  // Array length.
+            auto* index_type = scope.builtin()->i32_type();
+
+            auto* function_type = scope.get_resolved_function_type(slice_type, {slice_type}, index_type);
+            auto  method        = make_builtin_function_variable(
+                "length", function_type, [slice_type](auto& ctx, auto& arguments) {
+                    auto& llvm_ir           = ctx.llvm_builder();
+                    auto* llvm_element_type = ctx.llvm_type(&slice_type->type());
+                    assert(llvm_element_type != nullptr && "llvm slice element type is null");
+                    auto* llvm_begin_ptr = llvm_ir.CreateExtractValue(arguments[0], 0);
+                    auto* llvm_end_ptr   = llvm_ir.CreateExtractValue(arguments[0], 1);
+                    auto* llvm_ptr_diff =
+                        llvm_ir.CreatePtrDiff(llvm_element_type, llvm_end_ptr, llvm_begin_ptr);
+                    return llvm_ir.CreateTrunc(llvm_ptr_diff,
+                                                       llvm::Type::getInt32Ty(ctx.llvm_context()));
+                });
+            scope.add_resolved_function(std::move(method));
+        }
+    }
+
+    return *_slice_type;
+}
+
 ArrayType& Type::get_array_type(Scope& scope, size_t length) {
     auto it = _array_types.find(length);
     if (it != _array_types.end()) {
@@ -152,8 +211,7 @@ util::Result<absl::Nonnull<Type*>> Type::resolve(Options& options, Scope& scope)
     return _resolves_to;
 }
 
-////////////////////////////////////////////////////////////////
-// ArrayType
+// MARK: ArrayType
 
 ArrayType::ArrayType(absl::Nonnull<Type*> type, size_t length) : _type(type), _length(length) {}
 
@@ -175,8 +233,7 @@ util::Result<absl::Nonnull<Type*>> ArrayType::_resolve(Options& options, Scope& 
     return &_type->get_array_type(scope, _length);
 }
 
-////////////////////////////////////////////////////////////////
-// OptionalType
+// MARK: OptionalType
 
 OptionalType::OptionalType(absl::Nonnull<Type*> type) : _type(type) {}
 
@@ -198,8 +255,7 @@ util::Result<absl::Nonnull<Type*>> OptionalType::_resolve(Options& options, Scop
     return &_type->get_optional_type(scope);
 }
 
-////////////////////////////////////////////////////////////////
-// ReferenceType
+// MARK: ReferenceType
 
 ReferenceType::ReferenceType(absl::Nonnull<Type*> type) : _type(type) {}
 
@@ -219,6 +275,28 @@ util::Result<absl::Nonnull<Type*>> ReferenceType::_resolve(Options& options, Sco
     }
 
     return &_type->get_reference_type(scope);
+}
+
+// MARK: SliceType
+
+SliceType::SliceType(absl::Nonnull<Type*> type) : _type(type) {}
+
+SliceType::SliceType(absl::Nonnull<Type*> type, lex::Location location)
+    : _type(type), _location(location) {}
+
+std::string SliceType::display_name() const noexcept {
+    return absl::StrCat("[]", _type->display_name());
+}
+
+util::Result<absl::Nonnull<Type*>> SliceType::_resolve(Options& options, Scope& scope) {
+    {
+        auto result = _type->resolve(options, scope);
+        FORWARD_ERROR(result);
+
+        _type = std::move(result).value();
+    }
+
+    return &_type->get_slice_type(scope);
 }
 
 }  // namespace rain::lang::ast

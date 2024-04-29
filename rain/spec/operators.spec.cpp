@@ -1,8 +1,5 @@
 #include "rain/spec/util.hpp"
 
-#define DO_PRINT 1
-#define DO_OPTIMIZE 0
-
 TEST(Operator, negative_literal) {
     const std::string_view code = R"(
 export fn neg_i32() -> i32 {

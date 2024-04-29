@@ -1,4 +1,4 @@
-#include "rain/lang/ast/expr/array_literal.hpp"
+#include "rain/lang/ast/expr/slice_literal.hpp"
 
 #include <optional>
 #include <string_view>
@@ -8,12 +8,12 @@
 
 namespace rain::lang::ast {
 
-ArrayLiteralExpression::ArrayLiteralExpression(absl::Nonnull<Type*>                     type,
+SliceLiteralExpression::SliceLiteralExpression(absl::Nonnull<Type*>                     type,
                                                std::vector<std::unique_ptr<Expression>> elements,
                                                lex::Location                            location)
     : _type(type), _elements(std::move(elements)), _location(location) {}
 
-bool ArrayLiteralExpression::is_compile_time_capable() const noexcept {
+bool SliceLiteralExpression::is_compile_time_capable() const noexcept {
     for (const auto& element : _elements) {
         if (!element->is_compile_time_capable()) {
             return false;
@@ -23,7 +23,7 @@ bool ArrayLiteralExpression::is_compile_time_capable() const noexcept {
     return true;
 }
 
-bool ArrayLiteralExpression::is_constant() const noexcept {
+bool SliceLiteralExpression::is_constant() const noexcept {
     for (const auto& element : _elements) {
         if (!element->is_constant()) {
             return false;
@@ -33,12 +33,14 @@ bool ArrayLiteralExpression::is_constant() const noexcept {
     return true;
 }
 
-util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& scope) {
+util::Result<void> SliceLiteralExpression::validate(Options& options, Scope& scope) {
     IF_DEBUG {
-        // Check if the type is an array.
-        if (_type->kind() != serial::TypeKind::Array) {
-            return ERR_PTR(err::SimpleError, absl::StrCat("type \"", _type->display_name(),
-                                                          "\" is not an array type"));
+        // Check if the type is a slice.
+        // This should never happen.
+        if (_type->kind() != serial::TypeKind::Slice) {
+            return ERR_PTR(err::SimpleError,
+                           absl::StrCat("type \"", _type->display_name(),
+                                        "\" is not an slice type; this is an internal error"));
         }
     }
 
@@ -49,7 +51,7 @@ util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& sco
         _type = std::move(result).value();
     }
 
-    ArrayType& array_type = static_cast<ArrayType&>(*_type);
+    SliceType& slice_type = static_cast<SliceType&>(*_type);
 
     // Validate each field.
     for (int i = 0, end = _elements.size(); i < end; ++i) {
@@ -59,12 +61,12 @@ util::Result<void> ArrayLiteralExpression::validate(Options& options, Scope& sco
         FORWARD_ERROR(result);
 
         // Check if the element type matches the array type.
-        if (element->type() != &array_type.type()) {
+        if (element->type() != &slice_type.type()) {
             return ERR_PTR(
                 err::SimpleError,
                 absl::StrCat("element type \"", element->type()->display_name(), "\" at index ", i,
-                             " does not match array's element type \"",
-                             array_type.type().display_name(), "\""));
+                             " does not match slice's element type \"",
+                             slice_type.type().display_name(), "\""));
         }
     }
 

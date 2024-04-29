@@ -23,6 +23,7 @@
 #include "rain/lang/ast/expr/let.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/slice_literal.hpp"
 #include "rain/lang/ast/expr/struct_literal.hpp"
 #include "rain/lang/ast/expr/type.hpp"
 #include "rain/lang/ast/expr/unary_operator.hpp"
@@ -40,6 +41,7 @@ llvm::Value* compile_float(Context& ctx, ast::FloatExpression& float_);
 llvm::Value* compile_identifier(Context& ctx, ast::IdentifierExpression& identifier);
 llvm::Value* compile_struct_literal(Context& ctx, ast::StructLiteralExpression& struct_literal);
 llvm::Value* compile_array_literal(Context& ctx, ast::ArrayLiteralExpression& array_literal);
+llvm::Value* compile_slice_literal(Context& ctx, ast::SliceLiteralExpression& slice_literal);
 llvm::Value* compile_let(Context& ctx, ast::LetExpression& let);
 llvm::Value* compile_binary_operator(Context& ctx, ast::BinaryOperatorExpression& binary_operator);
 llvm::Value* compile_unary_operator(Context& ctx, ast::UnaryOperatorExpression& unary_operator);

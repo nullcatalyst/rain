@@ -2,6 +2,7 @@
 
 #include "absl/base/nullability.h"
 #include "rain/lang/ast/expr/array_literal.hpp"
+#include "rain/lang/ast/expr/slice_literal.hpp"
 #include "rain/lang/ast/expr/struct_literal.hpp"
 #include "rain/lang/ast/type/type.hpp"
 #include "rain/lang/err/syntax.hpp"
@@ -18,7 +19,7 @@ util::Result<absl::Nonnull<ast::Type*>> parse_any_type(lex::Lexer& lexer, ast::S
 
 namespace {
 
-util::Result<std::unique_ptr<ast::ArrayLiteralExpression>> parse_array_literal(
+util::Result<std::unique_ptr<ast::Expression>> _parse_array_or_slice_literal(
     lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token, absl::Nonnull<ast::Type*> type) {
     std::vector<std::unique_ptr<ast::Expression>> elements;
     auto                                          result = parse_list(
@@ -32,17 +33,21 @@ util::Result<std::unique_ptr<ast::ArrayLiteralExpression>> parse_array_literal(
         },
         [](lex::Lexer& lexer, lex::Token token) -> util::Result<void> {
             return ERR_PTR(err::SyntaxError, token.location,
-                                                                    "expected ',' or '}' after struct field");
+                                                                    "expected ',' or '}' after array element");
         });
     FORWARD_ERROR(result);
 
     const auto rbracket_token = lexer.next();  // Consume the '}'
 
+    if (type->kind() == serial::TypeKind::Slice) {
+        return std::make_unique<ast::SliceLiteralExpression>(
+            type, std::move(elements), first_token.location.merge(rbracket_token.location));
+    }
     return std::make_unique<ast::ArrayLiteralExpression>(
         type, std::move(elements), first_token.location.merge(rbracket_token.location));
 }
 
-util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(
+util::Result<std::unique_ptr<ast::Expression>> _parse_struct_literal(
     lex::Lexer& lexer, ast::Scope& scope, lex::Token first_token, absl::Nonnull<ast::Type*> type) {
     std::vector<ast::StructLiteralField> fields;
     auto                                 result = parse_list(
@@ -102,10 +107,10 @@ util::Result<std::unique_ptr<ast::Expression>> parse_struct_literal(lex::Lexer& 
                        "expected '{' after struct type in struct literal");
     }
 
-    if (type->kind() == serial::TypeKind::Array) {
-        return parse_array_literal(lexer, scope, first_token, type);
+    if (type->kind() == serial::TypeKind::Array || type->kind() == serial::TypeKind::Slice) {
+        return _parse_array_or_slice_literal(lexer, scope, first_token, type);
     }
-    return parse_struct_literal(lexer, scope, first_token, type);
+    return _parse_struct_literal(lexer, scope, first_token, type);
 }
 
 }  // namespace rain::lang::parse

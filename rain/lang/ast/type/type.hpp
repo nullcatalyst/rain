@@ -18,13 +18,18 @@ class Expression;
 class ArrayType;
 class OptionalType;
 class ReferenceType;
+class SliceType;
+
+// MARK: Base Type
 
 class Type {
   protected:
     std::unique_ptr<OptionalType>                           _optional_type;
     std::unique_ptr<ReferenceType>                          _reference_type;
+    std::unique_ptr<SliceType>                              _slice_type;
     absl::flat_hash_map<size_t, std::unique_ptr<ArrayType>> _array_types;
 
+    bool                              _exported = false;
     std::vector<absl::Nonnull<Type*>> _interface_implementations;
     absl::Nullable<Type*>             _resolves_to = nullptr;
 
@@ -40,8 +45,12 @@ class Type {
     [[nodiscard]] virtual ArrayType&     get_array_type(Scope& scope, size_t length);
     [[nodiscard]] virtual OptionalType&  get_optional_type(Scope& scope);
     [[nodiscard]] virtual ReferenceType& get_reference_type(Scope& scope);
+    [[nodiscard]] virtual SliceType&     get_slice_type(Scope& scope);
 
     [[nodiscard]] constexpr const auto& array_types() const noexcept { return _array_types; }
+
+    [[nodiscard]] constexpr bool is_exported() const noexcept { return _exported; }
+    void set_exported(const bool exported) noexcept { _exported = exported; }
 
     /**
      * Resolve the type to a concrete (and common) type. Fully resolved types can be compared using
@@ -56,6 +65,8 @@ class Type {
     [[nodiscard]] virtual util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
                                                                       Scope&   scope) = 0;
 };
+
+// MARK: ArrayType
 
 class ArrayType : public Type {
     absl::Nonnull<Type*> _type;
@@ -83,6 +94,8 @@ class ArrayType : public Type {
                                                               Scope&   scope) override;
 };
 
+// MARK: OptionalType
+
 class OptionalType : public Type {
     absl::Nonnull<Type*> _type;
 
@@ -107,6 +120,8 @@ class OptionalType : public Type {
                                                               Scope&   scope) override;
 };
 
+// MARK: ReferenceType
+
 class ReferenceType : public Type {
     absl::Nonnull<Type*> _type;
 
@@ -119,6 +134,32 @@ class ReferenceType : public Type {
 
     [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
         return serial::TypeKind::Reference;
+    }
+    [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
+    [[nodiscard]] std::string             display_name() const noexcept override;
+
+    [[nodiscard]] constexpr const Type& type() const noexcept { return *_type; }
+    [[nodiscard]] constexpr Type&       type() noexcept { return *_type; }
+
+  protected:
+    [[nodiscard]] util::Result<absl::Nonnull<Type*>> _resolve(Options& options,
+                                                              Scope&   scope) override;
+};
+
+// MARK: SliceType
+
+class SliceType : public Type {
+    absl::Nonnull<Type*> _type;
+
+    lex::Location _location;
+
+  public:
+    SliceType(absl::Nonnull<Type*> type);
+    SliceType(absl::Nonnull<Type*> type, lex::Location location);
+    ~SliceType() override = default;
+
+    [[nodiscard]] constexpr serial::TypeKind kind() const noexcept override {
+        return serial::TypeKind::Slice;
     }
     [[nodiscard]] constexpr lex::Location location() const noexcept override { return _location; }
     [[nodiscard]] std::string             display_name() const noexcept override;

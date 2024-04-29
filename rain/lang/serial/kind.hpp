@@ -15,6 +15,7 @@ enum class ExpressionKind {
     Tuple,
     StructLiteral,
     ArrayLiteral,
+    SliceLiteral,
 
     // Operations
     Call,

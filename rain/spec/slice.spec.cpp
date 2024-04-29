@@ -1,23 +1,23 @@
 #include "rain/spec/util.hpp"
 
-TEST(Array, literal) {
+TEST(Slice, slice_of_ints) {
     const std::string_view code = R"(
-export fn int_array() -> [4]i32 {
-    [4]i32{ 1, 2, 3, 4 }
+export fn slice_of_ints() -> []i32 {
+    []i32{ 1, 2, 3, 4 }
 }
 )";
 
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-TEST(Array, array_of_struct) {
+TEST(Slice, slice_of_structs) {
     const std::string_view code = R"(
 struct Vec2 {
     x: f32,
     y: f32,
 }
 
-export fn array_of_structs() -> [2]Vec2 {
+export fn slice_of_structs() -> [2]Vec2 {
     [2]Vec2{
         Vec2{ x: 1.0, y: 2.0 },
         Vec2{ x: 3.0, y: 4.0 },
@@ -28,33 +28,33 @@ export fn array_of_structs() -> [2]Vec2 {
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-TEST(Array, indexing) {
+TEST(Slice, indexing) {
     const std::string_view code = R"(
-export fn array_indexing(index: i32) -> i32 {
-    let array = [4]i32{ 1, 2, 3, 4 }
-    array[index]
+export fn slice_indexing(index: i32) -> i32 {
+    let slice = []i32{ 1, 2, 3, 4 }
+    slice[index]
 }
 )";
 
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-TEST(Array, length) {
+TEST(Slice, length) {
     const std::string_view code = R"(
-export fn array_length() -> i32 {
-    [4]i32{ 1, 2, 3, 4 }.length()
+export fn slice_length() -> i32 {
+    []i32{ 1, 2, 3, 4 }.length()
 }
 )";
 
     EXPECT_COMPILE_SUCCESS(code);
 }
 
-TEST(Array, index_assignment) {
+TEST(Slice, index_assignment) {
     const std::string_view code = R"(
-export fn array_assignment() -> i32 {
-    let array = [4]i32{ 1, 2, 3, 4 }
-    array[2] = 42
-    array[2]
+export fn slice_indexed_assignment() -> i32 {
+    let slice = []i32{ 1, 2, 3, 4 }
+    slice[2] = 42
+    slice[2]
 }
 )";
 

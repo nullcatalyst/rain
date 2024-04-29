@@ -5,9 +5,9 @@
 
 namespace rain::lang::ast {
 
-class ArrayLiteralExpression : public Expression {
+class SliceLiteralExpression : public Expression {
   public:
-    static constexpr auto Kind = serial::ExpressionKind::ArrayLiteral;
+    static constexpr auto Kind = serial::ExpressionKind::SliceLiteral;
 
   private:
     absl::Nonnull<Type*>                     _type;
@@ -16,10 +16,10 @@ class ArrayLiteralExpression : public Expression {
     lex::Location _location;
 
   public:
-    ArrayLiteralExpression(absl::Nonnull<Type*>                     type,
+    SliceLiteralExpression(absl::Nonnull<Type*>                     type,
                            std::vector<std::unique_ptr<Expression>> elements,
                            lex::Location                            location);
-    ~ArrayLiteralExpression() override = default;
+    ~SliceLiteralExpression() override = default;
 
     // Expression
     [[nodiscard]] constexpr serial::ExpressionKind kind() const noexcept override { return Kind; }
@@ -29,7 +29,7 @@ class ArrayLiteralExpression : public Expression {
     [[nodiscard]] bool is_compile_time_capable() const noexcept override;
     [[nodiscard]] bool is_constant() const noexcept override;
 
-    // ArrayLiteralExpression
+    // SliceLiteralExpression
     [[nodiscard]] constexpr const std::vector<std::unique_ptr<Expression>>& elements() const {
         return _elements;
     }
