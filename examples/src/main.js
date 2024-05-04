@@ -38,7 +38,6 @@ async function main() {
                 }
             }
 
-            debugger;
             monaco.editor.setModelMarkers(
                 rain,
                 "compilation",

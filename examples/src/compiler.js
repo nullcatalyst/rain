@@ -52,6 +52,12 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
     });
 
     rainc.init();
+    {
+        const [ptr, len] = encodeText(rainc.memory, rainc.malloc, "memory");
+        rainc.set_memory_export(ptr, ptr + len);
+        rainc.free(ptr);
+    }
+    rainc.set_stack_size(0);
 
     return function compile(src, optimize) {
         monaco.editor.removeAllMarkers("compilation");
@@ -59,19 +65,7 @@ export async function loadCompiler(onCompile, onLink, onDecompile, onError) {
         console.log("%cCompiling source code:", CONSOLE_INFO_STYLE);
         console.log(src);
 
-        const encoded = new TextEncoder().encode(src);
-        const len = encoded.length;
-
-        const protector = 0;
-        const ptr = rainc.malloc(len + protector);
-
-        const memoryView = new Uint8Array(rainc.memory.buffer, ptr, len);
-        memoryView.set(new Uint8Array(encoded));
-
-        // Zero out the protector bytes.
-        for (let i = len; i < len + protector; ++i) {
-            memoryView[i] = 0;
-        }
+        const [ptr, len] = encodeText(rainc.memory, rainc.malloc, src);
 
         // Null-terminate the string.
         // This shouldn't be necessary, but is useful in case of off-by-one bugs in the compiler.
@@ -116,4 +110,15 @@ function memoryView(memory, start, end) {
 
 function decodeText(memory, start, end) {
     return new TextDecoder("utf8").decode(memoryView(memory, start, end));
+}
+
+function encodeText(memory, malloc, text) {
+    const encoded = new TextEncoder().encode(text);
+    const len = encoded.length;
+    const ptr = malloc(len);
+
+    const memoryView = new Uint8Array(memory.buffer, ptr, len);
+    memoryView.set(new Uint8Array(encoded));
+
+    return [ptr, len];
 }
