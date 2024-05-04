@@ -2,6 +2,7 @@
 #include "rain/lang/ast/expr/identifier.hpp"
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/type/struct.hpp"
+#include "rain/lang/ast/var/unwrapped_optional.hpp"
 #include "rain/lang/code/expr/any.hpp"
 
 namespace rain::lang::code {
@@ -11,6 +12,14 @@ llvm::Value* get_element_pointer(Context& ctx, ast::Expression& expression) {
         case serial::ExpressionKind::Variable: {
             auto& identifier = static_cast<ast::IdentifierExpression&>(expression);
             auto* variable   = identifier.variable();
+
+            if (variable->kind() == serial::VariableKind::UnwrappedOptional) {
+                auto* unwrapped_optional = static_cast<ast::UnwrappedOptionalVariable*>(variable);
+                auto* llvm_value_ptr     = ctx.llvm_value(unwrapped_optional->variable());
+                return ctx.llvm_builder().CreateStructGEP(ctx.llvm_type(unwrapped_optional->type()),
+                                                          llvm_value_ptr, 0);
+            }
+
             if (variable->mutable_() || variable->type()->kind() == serial::TypeKind::Reference) {
                 return ctx.llvm_value(variable);
             }

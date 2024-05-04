@@ -6,6 +6,7 @@ cc_library(
         "external_function.cpp",
         "function.cpp",
         "global.cpp",
+        "unwrapped_optional.cpp",
         "variable.cpp",
     ],
     visibility = [
@@ -33,6 +34,7 @@ cc_library(
         "external_function.hpp",
         "function.hpp",
         "global.hpp",
+        "unwrapped_optional.hpp",
         "variable.hpp",
     ],
     visibility = [

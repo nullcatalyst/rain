@@ -2,6 +2,7 @@ cc_library(
     name = "err",
     srcs = [
         "binary_operator.cpp",
+        "if_type_mismatch.cpp",
         "multiple_definition.cpp",
         "return_type_mismatch.cpp",
         "syntax.cpp",
@@ -11,6 +12,7 @@ cc_library(
     hdrs = [
         "all.hpp",
         "binary_operator.hpp",
+        "if_type_mismatch.hpp",
         "multiple_definition.hpp",
         "return_type_mismatch.hpp",
         "simple.hpp",

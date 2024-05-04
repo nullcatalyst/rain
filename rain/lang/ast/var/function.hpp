@@ -41,6 +41,7 @@ class FunctionVariable : public Variable {
     [[nodiscard]] lex::Location location() const noexcept override { return _location; }
 
     // FunctionVariable
+    [[nodiscard]] virtual constexpr bool is_builtin() const noexcept { return false; }
 
     [[nodiscard]] virtual llvm::Value* build_call(
         code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept;

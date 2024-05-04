@@ -129,6 +129,8 @@ enum class VariableKind {
     Local,
     Function,
 
+    UnwrappedOptional,
+
     Count,
 };
 

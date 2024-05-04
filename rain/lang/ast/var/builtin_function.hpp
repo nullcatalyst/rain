@@ -19,6 +19,8 @@ class BuiltinFunctionVariable : public FunctionVariable {
         : FunctionVariable(name, function_type, lex::Location()), _build_fn(std::move(build_fn)) {}
     ~BuiltinFunctionVariable() override = default;
 
+    constexpr bool is_builtin() const noexcept override { return true; }
+
     [[nodiscard]] llvm::Value* build_call(
         code::Context& ctx, const llvm::ArrayRef<llvm::Value*> arguments) const noexcept override {
         return _build_fn(ctx, arguments);
