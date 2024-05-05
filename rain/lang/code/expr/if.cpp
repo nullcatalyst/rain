@@ -1,12 +1,15 @@
 #include "rain/lang/code/expr/all.hpp"
+#include "rain/lang/code/type/all.hpp"
+#include "rain/lang/code/util/optional.hpp"
 
 namespace rain::lang::code {
 
 llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
     llvm::Value* llvm_condition = compile_any_expression(ctx, if_.condition());
 
-    auto& llvm_ctx = ctx.llvm_context();
-    auto& llvm_ir  = ctx.llvm_builder();
+    auto& llvm_ctx  = ctx.llvm_context();
+    auto& llvm_ir   = ctx.llvm_builder();
+    auto* llvm_type = get_or_compile_type(ctx, *if_.type());
 
     llvm::Function* const   llvm_function = llvm_ir.GetInsertBlock()->getParent();
     llvm::BasicBlock* const llvm_then_block =
@@ -20,6 +23,9 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
 
     llvm_ir.SetInsertPoint(llvm_then_block);
     llvm::Value* llvm_then_result = compile_block(ctx, if_.then());
+    if (if_.type() != if_.then().type()) {
+        llvm_then_result = util::create_optional_literal(ctx, llvm_type, llvm_then_result);
+    }
     if (!ctx.returned()) {
         llvm_ir.CreateBr(llvm_merge_block);
     }
@@ -52,6 +58,15 @@ llvm::Value* compile_if(Context& ctx, ast::IfExpression& if_) {
 
         llvm::Type* const llvm_type   = llvm_then_result->getType();
         llvm::PHINode*    llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
+        llvm_result->addIncoming(llvm_then_result, llvm_then_block);
+        llvm_result->addIncoming(llvm_else_result, llvm_found_else_block);
+        return llvm_result;
+    }
+
+    if (!if_.has_else() && !ctx.returned()) {
+        llvm_else_result = llvm::Constant::getNullValue(llvm_type);
+
+        llvm::PHINode* llvm_result = llvm_ir.CreatePHI(llvm_type, 2);
         llvm_result->addIncoming(llvm_then_result, llvm_then_block);
         llvm_result->addIncoming(llvm_else_result, llvm_found_else_block);
         return llvm_result;

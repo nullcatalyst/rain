@@ -79,11 +79,16 @@ util::Result<void> IfExpression::validate(Options& options, Scope& scope) {
             return ERR_PTR(err::IfTypeMismatchError, then_location, std::move(then_type),
                            else_location, std::move(else_type));
         }
+
         _type = _then->type();
+        return {};
+    }
+
+    if (_then->type() != nullptr) {
+        _type = &_then->type()->get_optional_type(scope);
     } else {
         _type = nullptr;
     }
-
     return {};
 }
 

@@ -38,6 +38,8 @@ cc_library(
         "type/slice.cpp",
         "type/struct.cpp",
         "type/type.cpp",
+    ] + [
+        "util/optional.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",
