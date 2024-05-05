@@ -3,6 +3,7 @@ cc_library(
     hdrs = [
         "int_value.hpp",
         "list.hpp",
+        "str_value.hpp",
     ],
     visibility = [
         "//rain:__subpackages__",

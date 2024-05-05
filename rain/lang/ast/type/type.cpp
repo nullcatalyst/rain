@@ -11,6 +11,13 @@ namespace rain::lang::ast {
 
 // MARK: Base Type
 
+std::string Type::display_name(const Type* type) noexcept {
+    if (type == nullptr) {
+        return "null";
+    }
+    return type->display_name();
+}
+
 Type& Type::unwrap(Type& type) noexcept {
     auto* unwrapped = &type;
     for (;;) {
@@ -132,8 +139,9 @@ SliceType& Type::get_slice_type(Scope& scope) {
         {  // Array length.
             auto* index_type = scope.builtin()->i32_type();
 
-            auto* function_type = scope.get_resolved_function_type(slice_type, {slice_type}, index_type);
-            auto  method        = make_builtin_function_variable(
+            auto* function_type =
+                scope.get_resolved_function_type(slice_type, {slice_type}, index_type);
+            auto method = make_builtin_function_variable(
                 "length", function_type, [slice_type](auto& ctx, auto& arguments) {
                     auto& llvm_ir           = ctx.llvm_builder();
                     auto* llvm_element_type = ctx.llvm_type(&slice_type->type());
@@ -143,7 +151,7 @@ SliceType& Type::get_slice_type(Scope& scope) {
                     auto* llvm_ptr_diff =
                         llvm_ir.CreatePtrDiff(llvm_element_type, llvm_end_ptr, llvm_begin_ptr);
                     return llvm_ir.CreateTrunc(llvm_ptr_diff,
-                                                       llvm::Type::getInt32Ty(ctx.llvm_context()));
+                                               llvm::Type::getInt32Ty(ctx.llvm_context()));
                 });
             scope.add_resolved_function(std::move(method));
         }

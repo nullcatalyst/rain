@@ -34,7 +34,8 @@ class Type {
     absl::Nullable<Type*>             _resolves_to = nullptr;
 
   public:
-    static Type& unwrap(Type& type) noexcept;
+    static std::string display_name(const Type* type) noexcept;
+    static Type&       unwrap(Type& type) noexcept;
 
     virtual ~Type() = default;
 

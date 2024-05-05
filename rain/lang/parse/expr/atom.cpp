@@ -15,6 +15,7 @@
 #include "rain/lang/ast/expr/member.hpp"
 #include "rain/lang/ast/expr/null.hpp"
 #include "rain/lang/ast/expr/parenthesis.hpp"
+#include "rain/lang/ast/expr/string.hpp"
 #include "rain/lang/ast/expr/unary_operator.hpp"
 #include "rain/lang/ast/expr/while.hpp"
 #include "rain/lang/ast/scope/scope.hpp"
@@ -31,6 +32,8 @@ util::Result<std::unique_ptr<ast::IntegerExpression>>    parse_integer(lex::Lexe
                                                                        ast::Scope& scope);
 util::Result<std::unique_ptr<ast::FloatExpression>>      parse_float(lex::Lexer& lexer,
                                                                      ast::Scope& scope);
+util::Result<std::unique_ptr<ast::StringExpression>>     parse_string(lex::Lexer& lexer,
+                                                                      ast::Scope& scope);
 util::Result<std::unique_ptr<ast::IdentifierExpression>> parse_identifier(lex::Lexer& lexer,
                                                                           ast::Scope& scope);
 util::Result<std::unique_ptr<ast::Expression>>           parse_struct_literal(lex::Lexer& lexer,
@@ -82,6 +85,9 @@ util::Result<std::unique_ptr<ast::Expression>> parse_standalone_atom(lex::Lexer&
 
         case lex::TokenKind::Float:
             return parse_float(lexer, scope);
+
+        case lex::TokenKind::String:
+            return parse_string(lexer, scope);
 
         case lex::TokenKind::Identifier:
             return parse_identifier(lexer, scope);

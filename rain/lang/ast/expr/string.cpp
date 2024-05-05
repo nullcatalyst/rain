@@ -6,7 +6,8 @@
 namespace rain::lang::ast {
 
 util::Result<void> StringExpression::validate(Options& options, Scope& scope) {
-    return ERR_PTR(err::SyntaxError, _location, "string expressions are not yet supported");
+    _type = &scope.builtin()->u8_type()->get_slice_type(scope);
+    return {};
 }
 
 }  // namespace rain::lang::ast

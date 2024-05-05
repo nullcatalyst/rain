@@ -12,6 +12,7 @@ cc_test(
         "optional.spec.cpp",
         "reference.spec.cpp",
         "slice.spec.cpp",
+        "string.spec.cpp",
         "struct.spec.cpp",
         "util.hpp",
     ],

@@ -70,7 +70,7 @@ util::Result<void> IfExpression::validate(Options& options, Scope& scope) {
                     return {block.location(), "<null>"};
                 } else {
                     return {block.expressions().back()->location(),
-                            block.expressions().back()->type()->display_name()};
+                            Type::display_name(block.expressions().back()->type())};
                 }
             };
 

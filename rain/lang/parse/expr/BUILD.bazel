@@ -20,6 +20,7 @@ cc_library(
         "list.hpp",
         "member.cpp",
         "parenthesis.cpp",
+        "string.cpp",
         "unary_operator.cpp",
         "while.cpp",
     ],

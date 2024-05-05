@@ -24,6 +24,7 @@ cc_library(
         "expr/member.cpp",
         "expr/module.cpp",
         "expr/parenthesis.cpp",
+        "expr/string.cpp",
         "expr/struct_literal.cpp",
         "expr/unary_operator.cpp",
         "expr/while.cpp",
